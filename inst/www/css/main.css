@@ -1,7 +1,9 @@
 body {
   padding-top: 50px;
 }
-.starter-template {
-  padding: 40px 15px;
-  text-align: center;
+
+#parcoords {
+  width: 100%;
+  height: 40%
+  margin-top: 20px;
 }

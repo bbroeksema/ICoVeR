@@ -8,40 +8,26 @@
 
     <!-- Bootstrap -->
     <link href="libs/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="libs/parcoords/d3.parcoords.css" rel="stylesheet">
     <link href="css/main.css" rel="stylesheet">
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Parallel Coordinates for R</a>
+          <a class="navbar-brand">Parallel Coordinates for R</a>
         </div>
-        <!--
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
       </div>
     </div>
 
-    <div class="container">
-      <div class="starter-template">
-        <h1>Bootstrap starter template</h1>
-        <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
-      </div>
+    <div id="parcoords" class="parcoords container" style="">
     </div><!-- /.container -->
 
     <script src="libs/jquery/jquery-1.11.1.js"></script>
     <script src="libs/bootstrap/js/bootstrap.js"></script>
     <script src="libs/opencpu/opencpu-0.5.js"></script>
+    <script src="libs/d3/d3.js"></script>
+    <script src="libs/parcoords/d3.parcoords.js"></script>
+    <script src="js/app.js"></script>
   </body>
 </html>
