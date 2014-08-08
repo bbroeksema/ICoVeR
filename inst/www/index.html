@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="contigBinningApp">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -20,7 +20,9 @@
       </div>
     </div>
 
-    <div id="parcoords" class="parcoords container" style="">
+    <div id="main">
+      <div id="parcoords" class="parcoords" ng-controller="ParcoordsCtrl">
+      </div>
     </div><!-- /.container -->
 
     <script src="libs/underscorejs/underscore-1.6.0.js"></script>
@@ -31,5 +33,6 @@
     <script src="libs/d3/d3.js"></script>
     <script src="libs/parcoords/d3.parcoords.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/controllers.js"></script>
   </body>
 </html>
