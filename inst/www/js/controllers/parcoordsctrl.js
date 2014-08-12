@@ -1,8 +1,7 @@
 'use strict';
 
-angular.module('contigBinningApp.controllers', [])
-
-  .controller('ParcoordsCtrl', function ($scope, $element, DataSet) {
+angular.module('contigBinningApp.controllers')
+  .controller('ParcoordsCtrl', function($scope, $element, DataSet) {
     // Trigger an initial fetch. This should be moved somewhere else, a
     // top-level controller. Putting it in the PC controller is a bit arbitrary.
     DataSet.load();
@@ -77,42 +76,4 @@ angular.module('contigBinningApp.controllers', [])
         .render()
         .updateAxes();
     });
-  })
-
-  .controller('FilterCtrl', function ($scope, $rootScope, DataSet) {
-    $scope.brushed = [];
-    $scope.$on('Data::brushed', function() {
-      $scope.brushed = DataSet.brushed;
-      $scope.$apply();
-    });
-  })
-
-  .service('DataSet', function($rootScope, $http) {
-    var dataUrl = '/ocpu/library/RParcoords/data/cstr/json?auto_unbox=true';
-
-    return {
-      data: [],
-      schema: {},
-      brushed: [],
-
-      brush: function(brushed) {
-        this.brushed = brushed;
-        $rootScope.$broadcast("Data::brushed")
-      },
-
-      load: function() {
-        var me = this;
-        var request = $http({method: 'GET', url: dataUrl});
-        request.success(function(data, status, headers, config) {
-          me.data = data.data;
-          me.schema = data.schema;
-          $rootScope.$broadcast("Data::loaded")
-        });
-        request.error(function(data, status, headers, config) {
-          console.log("Loading failed");
-          // TODO: Implement proper error handling.
-          //$rootScope.$broadcast("Data::loadingFailed");
-        });
-      }
-    };
   });
