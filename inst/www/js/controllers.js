@@ -2,11 +2,12 @@
 
 angular.module('contigBinningApp.controllers', [])
 
-  .controller('ParcoordsCtrl', ['$scope', '$element', '$http',
-    function ($scope, $element, $http) {
+  .controller('ParcoordsCtrl', function ($scope, $element, DataSet) {
+    // Trigger an initial fetch. This should be moved somewhere else, a
+    // top-level controller. Putting it in the PC controller is a bit arbitrary.
+    DataSet.load();
 
     /// private Controller vars
-    var dataUrl = '/ocpu/library/RParcoords/data/cstr/json?auto_unbox=true';
     var parcoords = d3.parcoords()($element[0])
       .mode("queue")
       .rate(250)
@@ -15,6 +16,14 @@ angular.module('contigBinningApp.controllers', [])
       .createAxes()
       .brushable()
       .reorderable();
+
+    parcoords.on("brushend", function(d) {
+      if (d.length !== $scope.data.length) {
+        DataSet.brush(d);
+      } else {
+        DataSet.brush([]);
+      }
+    });
 
     /// Private controller functions
     function convertRTypeToJSType(rtype) {
@@ -55,27 +64,55 @@ angular.module('contigBinningApp.controllers', [])
     };
 
     /// Scope extensions
-    $scope.fetch = function() {
-      $http({method: 'GET', url: dataUrl})
-        .success(function(data, status, headers, config) {
-          $scope.schema = cleanSchema(data.schema);
-          $scope.dims = getNumericDims($scope.schema);
-          parcoords
-            .dimensions($scope.dims)
-            .types($scope.schema)
-            .data(data.data)
-            .render()
-            .updateAxes();
-        })
-        .error(function(data, status, headers, config) {
-          console.log("BOOOH");
+    $scope.$on("Data::loaded", function() {
+      $scope.brushed = [];
+      $scope.data = DataSet.data;
+      var schema = cleanSchema(DataSet.schema);
+      var dims = getNumericDims(schema);
+
+      parcoords
+        .dimensions(dims)
+        .types(schema)
+        .data(DataSet.data)
+        .render()
+        .updateAxes();
+    });
+  })
+
+  .controller('FilterCtrl', function ($scope, $rootScope, DataSet) {
+    $scope.brushed = [];
+    $scope.$on('Data::brushed', function() {
+      $scope.brushed = DataSet.brushed;
+      $scope.$apply();
+    });
+  })
+
+  .service('DataSet', function($rootScope, $http) {
+    var dataUrl = '/ocpu/library/RParcoords/data/cstr/json?auto_unbox=true';
+
+    return {
+      data: [],
+      schema: {},
+      brushed: [],
+
+      brush: function(brushed) {
+        this.brushed = brushed;
+        $rootScope.$broadcast("Data::brushed")
+      },
+
+      load: function() {
+        var me = this;
+        var request = $http({method: 'GET', url: dataUrl});
+        request.success(function(data, status, headers, config) {
+          me.data = data.data;
+          me.schema = data.schema;
+          $rootScope.$broadcast("Data::loaded")
         });
+        request.error(function(data, status, headers, config) {
+          console.log("Loading failed");
+          // TODO: Implement proper error handling.
+          //$rootScope.$broadcast("Data::loadingFailed");
+        });
+      }
     };
-
-    // Trigger a first fetch of the data.
-    $scope.fetch();
-  }])
-
-  .controller('FilterCtrl', function ($scope) {
-
   });

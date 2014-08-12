@@ -23,6 +23,31 @@
     <div id="main">
       <div id="parcoords" class="parcoords" ng-controller="ParcoordsCtrl">
       </div>
+
+      <div id="controls" class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="active"><a href="#actions" role="tab" data-toggle="tab">Actions</a></li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div class="tab-pane container-fluid active" id="actions">
+              <form class="form-horizontal" role="form" ng-controller="FilterCtrl"
+                    ng-show="brushed.length > 0">
+                <div class="form-group">
+                  <label class="col-md-2 control-label">Filtering:</label>
+                  <div class="col-md-10">
+                    <button type="button" class="btn btn-sm btn-success">Keep selected</button>
+                    <button type="button" class="btn btn-sm btn-danger">Remove selected</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div><!-- /.container -->
 
     <script src="libs/underscorejs/underscore-1.6.0.js"></script>
