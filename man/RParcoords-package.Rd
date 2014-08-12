@@ -3,12 +3,10 @@
 \alias{RParcoords}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+Provides Parallel Coordinates for R Data frames.
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+Provides Parallel Coordinates for R Data frames.
 }
 \details{
 \tabular{ll}{
@@ -21,17 +19,15 @@ License: \tab What license is it under?\cr
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-Who wrote it
+Bertjan Broeksema <broeksem@lippmann.lu>
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Maintainer: Bertjan Broeksema <broeksem@lippmann.lu>
 }
-\references{
-~~ Literature or other references for background information ~~
-}
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation ~~
-~~ directory ~~
-\keyword{ package }
+\references{}
+
+\keyword{~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation ~~
+~~ directory ~~}
+
 \seealso{
 ~~ Optional links to other man pages, e.g. ~~
 ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
