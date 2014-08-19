@@ -97,7 +97,8 @@ var side_effects = d3.dispatch.apply(this,d3.keys(__))
 	  __.clusterCentroids = compute_cluster_centroids(__.bundleDimension);
   })
   .on("hideAxis", function(d) {
-	  pc.dimensions(_.without(__.dimensions, d.value));
+	  if (!__.dimensions.length) pc.detectDimensions();
+	  pc.dimensions(without(__.dimensions, d.value));
   });
 
 // expose the state of the chart
@@ -134,6 +135,10 @@ function extend(target, source) {
     target[key] = source[key];
   }
   return target;
+};
+
+function without(arr, item) {
+  return arr.filter(function(elem) { return item.indexOf(elem) === -1; })
 };
 pc.autoscale = function() {
   // yscale
@@ -281,7 +286,7 @@ pc.render = function() {
   return this;
 };
 
-pc.render.default = function() {
+pc.render['default'] = function() {
   pc.clear('foreground');
   if (__.brushed) {
     __.brushed.forEach(path_foreground);
@@ -573,6 +578,24 @@ pc.brushable = function() {
   return this;
 };
 
+pc.brushExtents = function() {
+  var extents = {};
+  __.dimensions.forEach(function(d) {
+    var brush = yscale[d].brush;
+    if (!brush.empty()) {
+      // https://github.com/mbostock/d3/wiki/SVG-Controls#brush_extent
+      // NOTE: According to the documentation, inversion is required *if* the
+      //       brush is moved by the user (on mousemove following a mousedown).
+      //       However, this gets me the wrong values, so no inversion here.
+      //       See issue: mbostock/d3 #1981
+      var extent = brush.extent();
+      extent.sort(d3.ascending);
+      extents[d] = extent;
+    }
+  });
+  return extents;
+};
+
 // Jason Davies, http://bl.ocks.org/1341281
 pc.reorderable = function() {
   if (!g) pc.createAxes();
@@ -698,6 +721,11 @@ function is_brushed(p) {
 function selected() {
   var actives = __.dimensions.filter(is_brushed),
       extents = actives.map(function(p) { return yscale[p].brush.extent(); });
+
+  // We don't want to return the full data set when there are no axes brushed.
+  // Actually, when there are no axes brushed, by definition, no items are
+  // selected. So, let's avoid the filtering and just return false.
+  if (actives.length === 0) return false;
 
   // test if within range
   var within = {
