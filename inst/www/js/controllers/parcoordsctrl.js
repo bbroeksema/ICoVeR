@@ -17,11 +17,12 @@ angular.module('contigBinningApp.controllers')
       .reorderable();
 
     parcoords.on("brushend", function(d) {
-      if (d.length !== $scope.data.length) {
-        DataSet.brush(d);
-      } else {
-        DataSet.brush([]);
-      }
+      // NOTE: the brushend event from parcoords is "outside" angular, so we
+      //       have to wrap it in $scope.$apply to make sure that other
+      //       controllers are updated appropriately.
+      $scope.$apply(function() {
+        DataSet.brush(parcoords.brushExtents());
+      });
     });
 
     /// Private controller functions
