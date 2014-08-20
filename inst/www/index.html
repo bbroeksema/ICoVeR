@@ -39,8 +39,10 @@
                 <div class="form-group">
                   <label class="col-md-2 control-label">Filtering:</label>
                   <div class="col-md-10">
-                    <button type="button" class="btn btn-sm btn-success">Keep selected</button>
-                    <button type="button" class="btn btn-sm btn-danger">Remove selected</button>
+                    <button type="button" class="btn btn-sm btn-success"
+                            ng-click="keepSelected()">Keep selected</button>
+                    <button type="button" class="btn btn-sm btn-danger"
+                            ng-click="removeSelected()">Remove selected</button>
                   </div>
                 </div>
               </form>

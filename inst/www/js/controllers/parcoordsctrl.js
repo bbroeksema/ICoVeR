@@ -73,4 +73,16 @@ angular.module('contigBinningApp.controllers')
         .render()
         .updateAxes();
     });
+
+    $scope.$on("DataSet::filtered", function(e, data) {
+      $scope.brushed = [];
+      $scope.data = data;
+
+      parcoords
+        .brushReset()
+        .data(data)
+        .autoscale()
+        .render()
+        .updateAxes();
+    })
   });

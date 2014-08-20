@@ -11,10 +11,24 @@ angular.module('contigBinningApp.services')
     }
 
     return {
+      FilterMethod: { KEEP: 'KEEP_BRUSHED', REMOVE: 'REMOVE_BRUSHED' },
 
-      brush: function(brushed) {
-        this.brushed = brushed;
-        $rootScope.$broadcast("Data::brushed")
+      filter: function(filterMethod) {
+        // TODO:
+        // 1. Currently done at the frontend. We might want to move this to the
+        //    backend.
+        // 2. Keep history.
+        switch(filterMethod) {
+          case this.FilterMethod.KEEP:
+            d.data = d.brushed;
+            break;
+          case this.FilterMethod.REMOVE:
+            d.data = _.without(d.data, d.brushed)
+            break;
+        }
+
+        $rootScope.$broadcast("DataSet::filtered", d.data);
+      },
 
       brush: function(extents) {
         d.brushExtents = extents;

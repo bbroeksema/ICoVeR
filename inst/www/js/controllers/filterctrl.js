@@ -8,5 +8,15 @@ angular.module('contigBinningApp.controllers')
     };
 
     $scope.itemsBrushed = false;
+
+    $scope.keepSelected = function() {
+      DataSet.filter(DataSet.FilterMethod.KEEP);
+    };
+
+    $scope.removeSelected = function() {
+      DataSet.filter(DataSet.FilterMethod.REMOVE);
+    };
+
     $scope.$on('DataSet::brushed', updateBrushed);
+    $scope.$on('DataSet::filtered', updateBrushed);
   });
