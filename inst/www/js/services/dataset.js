@@ -7,27 +7,34 @@ angular.module('contigBinningApp.services')
     var d = {
       id: undefined,
       brushExtents: [],
-      data: []
+      data: [],
+      backend: {
+        data: undefined // OpenCPU Session object
+      }
     }
 
     return {
-      FilterMethod: { KEEP: 'KEEP_BRUSHED', REMOVE: 'REMOVE_BRUSHED' },
+      FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE' },
 
       filter: function(filterMethod) {
-        // TODO:
-        // 1. Currently done at the frontend. We might want to move this to the
-        //    backend.
-        // 2. Keep history.
-        switch(filterMethod) {
-          case this.FilterMethod.KEEP:
-            d.data = d.brushed;
-            break;
-          case this.FilterMethod.REMOVE:
-            d.data = _.without(d.data, d.brushed)
-            break;
+        var args = {
+          extents: d.brushExtents,
+          method: filterMethod
+        };
+
+        if (d.backend.data !== undefined) {
+          args.data = d.backend.data;
         }
 
-        $rootScope.$broadcast("DataSet::filtered", d.data);
+        ocpu.call("filterByExtents", args, retrieveResult);
+
+        function retrieveResult(session) {
+          d.backend.data = session; // Keep track of the current state.
+          $http({method: 'GET', url: session.loc + "R/.val/json"})
+            .success(function(response) {
+              $rootScope.$broadcast("DataSet::filtered", response);
+            });
+        }
       },
 
       brush: function(extents) {
