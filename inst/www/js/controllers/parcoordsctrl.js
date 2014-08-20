@@ -61,16 +61,15 @@ angular.module('contigBinningApp.controllers')
     };
 
     /// Scope extensions
-    $scope.$on("Data::loaded", function() {
+    $scope.$on("DataSet::loaded", function(e, schema, data) {
       $scope.brushed = [];
-      $scope.data = DataSet.data;
-      var schema = cleanSchema(DataSet.schema);
+      var schema = cleanSchema(schema);
       var dims = getNumericDims(schema);
 
       parcoords
         .dimensions(dims)
         .types(schema)
-        .data(DataSet.data)
+        .data(data)
         .render()
         .updateAxes();
     });
