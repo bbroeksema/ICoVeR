@@ -15,6 +15,10 @@ angular.module('contigBinningApp.services')
       brush: function(brushed) {
         this.brushed = brushed;
         $rootScope.$broadcast("Data::brushed")
+
+      brush: function(extents) {
+        d.brushExtents = extents;
+        $rootScope.$broadcast("DataSet::brushed", d.brushExtents);
       },
 
       load: function() {
