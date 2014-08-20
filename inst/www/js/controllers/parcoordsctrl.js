@@ -2,9 +2,6 @@
 
 angular.module('contigBinningApp.controllers')
   .controller('ParcoordsCtrl', function($scope, $element, DataSet) {
-    // Trigger an initial fetch. This should be moved somewhere else, a
-    // top-level controller. Putting it in the PC controller is a bit arbitrary.
-    DataSet.load();
 
     /// private Controller vars
     var parcoords = d3.parcoords()($element[0])
