@@ -2,9 +2,11 @@
 
 angular.module('contigBinningApp.controllers')
   .controller('FilterCtrl', function ($scope, $rootScope, DataSet) {
-    $scope.brushed = [];
-    $scope.$on('Data::brushed', function() {
-      $scope.brushed = DataSet.brushed;
-      $scope.$apply();
-    });
+
+    function updateBrushed(e, extents) {
+      $scope.itemsBrushed = Object.getOwnPropertyNames(extents).length > 0;
+    };
+
+    $scope.itemsBrushed = false;
+    $scope.$on('DataSet::brushed', updateBrushed);
   });
