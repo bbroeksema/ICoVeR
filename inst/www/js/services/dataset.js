@@ -51,6 +51,7 @@ angular.module('contigBinningApp.services')
         request.success(function(response, status, headers, config) {
           d.id = response.id;
           d.data = response.data;
+          d.backend.data = undefined;
           $rootScope.$broadcast("DataSet::loaded", response.schema, response.data);
           me.brush({});
         });
