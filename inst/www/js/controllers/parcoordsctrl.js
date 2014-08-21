@@ -70,6 +70,7 @@ angular.module('contigBinningApp.controllers')
         .dimensions(dims)
         .types(schema)
         .data(data)
+        .autoscale()
         .render()
         .updateAxes();
     });

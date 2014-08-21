@@ -3,11 +3,8 @@
 angular.module('contigBinningApp.controllers')
   .controller('FilterCtrl', function ($scope, $rootScope, DataSet) {
 
-    function updateBrushed(e, extents) {
-      $scope.itemsBrushed = Object.getOwnPropertyNames(extents).length > 0;
-    };
-
     $scope.itemsBrushed = false;
+    $scope.dataFiltered = false;
 
     $scope.keepSelected = function() {
       DataSet.filter(DataSet.FilterMethod.KEEP);
@@ -17,6 +14,13 @@ angular.module('contigBinningApp.controllers')
       DataSet.filter(DataSet.FilterMethod.REMOVE);
     };
 
-    $scope.$on('DataSet::brushed', updateBrushed);
-    $scope.$on('DataSet::filtered', updateBrushed);
+    $scope.reloadData = function() {
+      DataSet.load();
+    }
+
+    $scope.$on('DataSet::loaded', function() { $scope.dataFiltered = false });
+    $scope.$on('DataSet::filtered', function() { $scope.dataFiltered = true; });
+    $scope.$on('DataSet::brushed', function(e, extents) {
+      $scope.itemsBrushed = Object.getOwnPropertyNames(extents).length > 0;
+    });
   });

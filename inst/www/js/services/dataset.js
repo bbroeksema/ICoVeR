@@ -6,7 +6,7 @@ angular.module('contigBinningApp.services')
 
     var d = {
       id: undefined,
-      brushExtents: [],
+      brushExtents: {},
       data: [],
       backend: {
         data: undefined // OpenCPU Session object
@@ -28,11 +28,13 @@ angular.module('contigBinningApp.services')
 
         ocpu.call("filterByExtents", args, retrieveResult);
 
+        var me = this;
         function retrieveResult(session) {
           d.backend.data = session; // Keep track of the current state.
           $http({method: 'GET', url: session.loc + "R/.val/json"})
             .success(function(response) {
               $rootScope.$broadcast("DataSet::filtered", response);
+              me.brush({});
             });
         }
       },
@@ -43,16 +45,14 @@ angular.module('contigBinningApp.services')
       },
 
       load: function() {
-        var request = $http({method: 'GET', url: dataUrl});
+        var request = $http({method: 'GET', url: dataUrl}),
+            me = this;
+
         request.success(function(response, status, headers, config) {
           d.id = response.id;
           d.data = response.data;
           $rootScope.$broadcast("DataSet::loaded", response.schema, response.data);
-        });
-        request.error(function(data, status, headers, config) {
-          console.log("Loading failed");
-          // TODO: Implement proper error handling.
-          //$rootScope.$broadcast("Data::loadingFailed");
+          me.brush({});
         });
       }
     };
