@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title></title>
 
-    <!-- Bootstrap -->
+    <link href="libs/fontawesome/css/font-awesome.css" rel="stylesheet">
     <link href="libs/bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="libs/parcoords/d3.parcoords.css" rel="stylesheet">
     <link href="css/main.css" rel="stylesheet">
@@ -37,16 +37,21 @@
               <form class="form-horizontal" role="form" ng-controller="FilterCtrl"
                     ng-show="itemsBrushed || dataFiltered">
                 <div class="form-group">
-                  <label class="col-md-2 control-label">Filtering:</label>
+                  <label class="col-md-2 control-label">Filter:</label>
                   <div class="col-md-10">
                     <button type="button" class="btn btn-sm btn-success"
-                            ng-show="itemsBrushed" ng-click="keepSelected()">
+                            ng-show="itemsBrushed" ng-click="keepSelected()"
+                            ng-disabled="filteringInProgress">
                       Keep selected</button>
                     <button type="button" class="btn btn-sm btn-danger"
-                            ng-show="itemsBrushed" ng-click="removeSelected()">
+                            ng-show="itemsBrushed" ng-click="removeSelected()"
+                            ng-disabled="filteringInProgress">
                       Remove selected</button>
+                    <i class="fa fa-circle-o-notch fa-spin"
+                       ng-show="filteringInProgress"></i>
                     <button type="button" class="btn btn-sm btn-default"
-                            ng-show="dataFiltered" ng-click="reloadData()">
+                            ng-show="dataFiltered" ng-click="reloadData()"
+                            ng-disabled="filteringInProgress">
                       Reload data</button>
                   </div>
                 </div>

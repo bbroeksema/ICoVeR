@@ -5,12 +5,15 @@ angular.module('contigBinningApp.controllers')
 
     $scope.itemsBrushed = false;
     $scope.dataFiltered = false;
+    $scope.filteringInProgress = false;
 
     $scope.keepSelected = function() {
+      $scope.filteringInProgress = true;
       DataSet.filter(DataSet.FilterMethod.KEEP);
     };
 
     $scope.removeSelected = function() {
+      $scope.filteringInProgress = true;
       DataSet.filter(DataSet.FilterMethod.REMOVE);
     };
 
@@ -19,7 +22,10 @@ angular.module('contigBinningApp.controllers')
     }
 
     $scope.$on('DataSet::loaded', function() { $scope.dataFiltered = false });
-    $scope.$on('DataSet::filtered', function() { $scope.dataFiltered = true; });
+    $scope.$on('DataSet::filtered', function() {
+      $scope.filteringInProgress = false;
+      $scope.dataFiltered = true;
+    });
     $scope.$on('DataSet::brushed', function(e, extents) {
       $scope.itemsBrushed = Object.getOwnPropertyNames(extents).length > 0;
     });
