@@ -35,11 +35,13 @@
           <!-- Tab panes -->
           <div class="tab-content">
             <div class="tab-pane container-fluid active" id="actions">
-              <form class="form-horizontal" role="form" ng-controller="FilterCtrl"
+
+              <form role="form" class="form-horizontal" ng-controller="FilterCtrl"
                     ng-show="itemsBrushed || dataFiltered">
                 <div class="form-group">
-                  <label class="col-md-2 control-label">Filter:</label>
-                  <div class="col-md-10">
+                  <label class="col-lg-1 control-label text-right">Filter:</label>
+
+                  <div class="col-lg-11">
                     <button type="button" class="btn btn-sm btn-success"
                             ng-show="itemsBrushed" ng-click="keepSelected()"
                             ng-disabled="filteringInProgress">
@@ -48,8 +50,7 @@
                             ng-show="itemsBrushed" ng-click="removeSelected()"
                             ng-disabled="filteringInProgress">
                       Remove selected</button>
-                    <i class="fa fa-circle-o-notch fa-spin"
-                       ng-show="filteringInProgress"></i>
+                    <i class="fa fa-circle-o-notch fa-spin" ng-show="filteringInProgress"></i>
                     <button type="button" class="btn btn-sm btn-default"
                             ng-show="dataFiltered" ng-click="reloadData()"
                             ng-disabled="filteringInProgress">
