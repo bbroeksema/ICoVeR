@@ -10,6 +10,20 @@ html, body {
   padding-top: 5px;
 }
 
+.adjusted-rigth-padding {
+   padding-right: 5px !important;
+   margin-right: 0 !important;
+}
+
+.no-left-padding {
+   padding-left: 0 !important;
+   margin-left: 0 !important;
+}
+
+.form-group {
+  margin-bottom: 5px;
+}
+
 #main {
   height: calc(100% - 50px);
   width: 100%;

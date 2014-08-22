@@ -8,6 +8,7 @@
 
     <link href="libs/fontawesome/css/font-awesome.css" rel="stylesheet">
     <link href="libs/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="libs/bootstrap/css/bootstrap-multiselect.css" rel="stylesheet">
     <link href="libs/parcoords/d3.parcoords.css" rel="stylesheet">
     <link href="css/main.css" rel="stylesheet">
   </head>
@@ -56,6 +57,37 @@
                   </div>
                 </div>
               </form>
+
+              <form role="form" class="form-horizontal" ng-controller="ClusterCtrl" ng-show="dataAvailable">
+                <div class="form-group">
+                  <label class="col-lg-1 control-label text-right">Cluster:</label>
+
+                  <div class="col-lg-2 adjusted-rigth-padding">
+                    <select class="form-control input-sm">
+                      <option>kmeans</option>
+                      <option>correlation-based</option>
+                    </select>
+                  </div>
+                  <div class="col-lg-9 no-left-padding">
+                    <button type="button" class="btn btn-default btn-sm">
+                      <span class="glyphicon glyphicon-cog"></span>
+                    </button>
+                    <select multiple class="multiselect">
+                      <option>gene_length</option>
+                      <option>M4</option>
+                      <option>M20</option>
+                      <option>M28</option>
+                      <option>M36</option>
+                      <option>M40</option>
+                      <option>M44</option>
+                      <option>M48</option>
+                      <option>gc_content</option>
+                    </select>
+                    <button type="button" class="btn btn-default btn-sm"
+                            ng-disabled="configurationInvalid">Cluster</button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -65,6 +97,7 @@
     <script src="libs/underscorejs/underscore-1.6.0.js"></script>
     <script src="libs/jquery/jquery-1.11.1.js"></script>
     <script src="libs/bootstrap/js/bootstrap.js"></script>
+    <script src="libs/bootstrap/js/bootstrap-multiselect.js"></script>
     <script src="libs/opencpu/opencpu-0.5.js"></script>
     <script src="libs/d3/d3.js"></script>
     <script src="libs/parcoords/d3.parcoords.js"></script>
@@ -74,6 +107,7 @@
     <script src="js/controllers/appctrl.js"></script>
     <script src="js/controllers/parcoordsctrl.js"></script>
     <script src="js/controllers/filterctrl.js"></script>
+    <script src="js/controllers/clusterctrl.js"></script>
     <script src="js/services/dataset.js"></script>
   </body>
 </html>
