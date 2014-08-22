@@ -35,3 +35,7 @@ html, body {
   height: 60%;
   margin: 10px auto;
 }
+
+#controls {
+  padding-left: 10px;
+}
