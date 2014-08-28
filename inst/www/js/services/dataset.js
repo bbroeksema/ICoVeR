@@ -46,7 +46,7 @@ angular.module('contigBinningApp.services')
         }
 
         var me = this;
-        OpenCPU.json("data.filter", args, function(session, data) {
+        ocpu.call("data.filter", args, function(session) {
           d.backend.data = session; // Keep track of the current state.
           $rootScope.$broadcast("DataSet::filtered", data);
           me.brush({});
