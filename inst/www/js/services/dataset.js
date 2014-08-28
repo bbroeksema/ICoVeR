@@ -23,7 +23,7 @@ angular.module('contigBinningApp.services')
     }
 
     return {
-      FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE' },
+      FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE', RESET: 'RESET' },
 
       get: function(variables, cb) {
         var args = {
@@ -32,11 +32,16 @@ angular.module('contigBinningApp.services')
         if (d.backend.data !== undefined) {
           args.data = d.backend.data;
         }
-
         OpenCPU.json("data.get", args, cb);
       },
 
       filter: function(filterMethod) {
+        if (filterMethod === this.FilterMethod.RESET) {
+          d.backend.data = undefined;
+          $rootScope.$broadcast("DataSet::filtered", filterMethod);
+          return;
+        }
+
         var args = {
           extents: d.brushExtents,
           method: filterMethod
@@ -48,7 +53,7 @@ angular.module('contigBinningApp.services')
         var me = this;
         ocpu.call("data.filter", args, function(session) {
           d.backend.data = session; // Keep track of the current state.
-          $rootScope.$broadcast("DataSet::filtered", data);
+          $rootScope.$broadcast("DataSet::filtered", filterMethod);
           me.brush({});
         });
       },
