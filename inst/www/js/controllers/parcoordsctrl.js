@@ -22,6 +22,15 @@ angular.module('contigBinningApp.controllers')
       });
     });
 
+    function render(session, data) {
+      $scope.brushed = [];
+      parcoords
+        .brushReset()
+        .data(data)
+        .autoscale()
+        .updateAxes()
+        .render();
+    };
 
     /// Scope extensions
     $scope.$on("DataSet::schemaLoaded", function(e, schema) {
@@ -49,24 +58,7 @@ angular.module('contigBinningApp.controllers')
       DataSet.get(dims, render);
     });
 
-    function render(session, data) {
-      $scope.brushed = [];
-      parcoords
-        .data(data)
-        .autoscale()
-        .render()
-        .updateAxes();
-    };
-
-    $scope.$on("DataSet::filtered", function(e, data) {
-      $scope.brushed = [];
-      $scope.data = data;
-
-      parcoords
-        .brushReset()
-        .data(data)
-        .autoscale()
-        .render()
-        .updateAxes();
+    $scope.$on("DataSet::filtered", function() {
+      DataSet.get(parcoords.dimensions(), render);
     })
   });
