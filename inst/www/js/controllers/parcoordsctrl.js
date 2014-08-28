@@ -22,18 +22,6 @@ angular.module('contigBinningApp.controllers')
       });
     });
 
-    /// Private controller functions
-    function convertRTypeToJSType(rtype) {
-      switch(rtype) {
-      case "numeric":
-      case "integer":
-        return "number";
-      case "character":
-        return "string";
-      default:
-        throw("convertRTypeToJSType: unhandled R-type: " + rtype);
-      }
-    }
 
     /// Scope extensions
     $scope.$on("DataSet::schemaLoaded", function(e, schema) {
