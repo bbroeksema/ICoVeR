@@ -1,1 +1,2 @@
 exportPattern("^data\\.[[:alpha:]]*")
+exportPattern("^cluster\\.[[:alpha:]]*")
