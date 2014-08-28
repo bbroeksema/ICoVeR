@@ -1,60 +1,61 @@
 'use strict';
 
 angular.module('contigBinningApp.services')
-  .service('DataSet', function($rootScope, $http) {
-    var dataUrl = '/ocpu/library/RParcoords/data/cstr/json?auto_unbox=true';
+  .service('DataSet', function($rootScope, $http, OpenCPU) {
 
     var d = {
       id: undefined,
       brushExtents: {},
+      schema: {},
       data: [],
-      backend: {
-        data: undefined // OpenCPU Session object
+      backend: { // OpenCPU Session objects
+        schema: undefined,
+        data: undefined
       }
+    }
+
+    // Initialize the schema as soon as the Dataset service is initialized.
+    OpenCPU.json("data.schema", null, notifySchemaLoad);
+
+    function notifySchemaLoad(session, schema) {
+      d.backend.schema = schema;
+      $rootScope.$broadcast("DataSet::schemaLoaded", schema);
     }
 
     return {
       FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE' },
+
+      get: function(variables, cb) {
+        var args = {
+          variables: variables
+        };
+        if (d.backend.data !== undefined) {
+          args.data = d.backend.data;
+        }
+
+        OpenCPU.json("data.get", args, cb);
+      },
 
       filter: function(filterMethod) {
         var args = {
           extents: d.brushExtents,
           method: filterMethod
         };
-
         if (d.backend.data !== undefined) {
           args.data = d.backend.data;
         }
 
-        ocpu.call("filterByExtents", args, retrieveResult);
-
         var me = this;
-        function retrieveResult(session) {
+        OpenCPU.json("data.filter", args, function(session, data) {
           d.backend.data = session; // Keep track of the current state.
-          $http({method: 'GET', url: session.loc + "R/.val/json"})
-            .success(function(response) {
-              $rootScope.$broadcast("DataSet::filtered", response);
-              me.brush({});
-            });
-        }
+          $rootScope.$broadcast("DataSet::filtered", data);
+          me.brush({});
+        });
       },
 
       brush: function(extents) {
         d.brushExtents = extents;
         $rootScope.$broadcast("DataSet::brushed", d.brushExtents);
-      },
-
-      load: function() {
-        var request = $http({method: 'GET', url: dataUrl}),
-            me = this;
-
-        request.success(function(response, status, headers, config) {
-          d.id = response.id;
-          d.data = response.data;
-          d.backend.data = undefined;
-          $rootScope.$broadcast("DataSet::loaded", response.schema, response.data);
-          me.brush({});
-        });
       }
     };
   });

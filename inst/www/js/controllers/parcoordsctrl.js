@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('contigBinningApp.controllers')
-  .controller('ParcoordsCtrl', function($scope, $element, DataSet) {
+  .controller('ParcoordsCtrl', function($scope, $element, DataSet, R) {
 
     /// private Controller vars
     var parcoords = d3.parcoords()($element[0])
@@ -35,45 +35,40 @@ angular.module('contigBinningApp.controllers')
       }
     }
 
-    /**
-     * The schema as returned by our R script contains R specific types for the
-     * variables. We need to JSIfy this schema to make it work with
-     * d3.parcoords.js.
-     */
-    function cleanSchema(schema) {
-      var cleanedSchema = {};
-      // For each key-value pair in the schema, convert the r type to a js type.
-      _.each(schema, function(value, key) {
-        cleanedSchema[key] = convertRTypeToJSType(value);
-      });
-      return cleanedSchema;
-    };
-
-    function getNumericDims(schema) {
-      return _.map(
-        _.filter(_.pairs(schema), function(pair) {
-          return pair[1] === "number";
-        }),
-        function(pair) {
-          return pair[0];
-        }
-      );
-    };
-
     /// Scope extensions
-    $scope.$on("DataSet::loaded", function(e, schema, data) {
-      $scope.brushed = [];
-      var schema = cleanSchema(schema);
-      var dims = getNumericDims(schema);
+    $scope.$on("DataSet::schemaLoaded", function(e, schema) {
+      // As a heuristic (which works for Hydviga) we only take variables that
+      // are numeric and which belong to a Characteristics or TimeSeries group.
+     var dims = _.filter(schema, function(variable) {
+        return R.is.numeric(variable["type"]) &&
+          (variable["group.type"] === "Characteristics"
+          || variable["group.type"] === "TimeSeries")
+      });
+
+      dims = _.map(dims, function(variable) {
+        return variable['name'];
+      });
+
+      var types = {};
+      _.each(dims, function(dim) {
+        types[dim] = "number";
+      });
 
       parcoords
         .dimensions(dims)
-        .types(schema)
+        .types(types);
+
+      DataSet.get(dims, render);
+    });
+
+    function render(session, data) {
+      $scope.brushed = [];
+      parcoords
         .data(data)
         .autoscale()
         .render()
         .updateAxes();
-    });
+    };
 
     $scope.$on("DataSet::filtered", function(e, data) {
       $scope.brushed = [];
