@@ -14,17 +14,15 @@ data.filter <- function(data = cstr, extents, method = "KEEP") {
 
   methods <- list(
     "KEEP" = function(name, extents) {
-      select <- filtered[name] >= extents[1] & filtered[name] <= extents[2]
+      select <- data[name] >= extents[1] & data[name] <= extents[2]
       finalSelection <<- finalSelection & select
     },
     "REMOVE" = function(name, extents) {
-      select <- filtered[name] < extents[1] | filtered[name] > extents[2]
+      select <- data[name] < extents[1] | data[name] > extents[2]
       finalSelection <<- finalSelection & select
     }
   )
 
   Map(methods[[method]], names(extents), extents)
-
-  filtered <- data
-  filtered[finalSelection, ]
+  data[finalSelection, ]
 }
