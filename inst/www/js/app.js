@@ -9,9 +9,3 @@ angular.module('contigBinningApp', [
   'contigBinningApp.controllers',
   'contigBinningApp.services',
 ]);
-
-$(document).ready(function() {
-    $('.multiselect').multiselect({
-        buttonClass: 'btn btn-default btn-sm'
-    });
-});
