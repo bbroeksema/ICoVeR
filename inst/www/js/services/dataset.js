@@ -25,6 +25,10 @@ angular.module('contigBinningApp.services')
     return {
       FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE', RESET: 'RESET' },
 
+      backendData: function() {
+        return d.backend.data;
+      },
+
       get: function(variables, cb) {
         var args = {
           variables: variables
