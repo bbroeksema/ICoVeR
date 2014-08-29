@@ -34,60 +34,8 @@
           <!-- Tab panes -->
           <div class="tab-content">
             <div class="tab-pane container-fluid active" id="actions">
-
-              <form role="form" class="form-horizontal" ng-controller="FilterCtrl"
-                    ng-show="itemsBrushed || dataFiltered">
-                <div class="form-group row">
-                  <label class="col-lg-1 control-label text-right">Filter:</label>
-
-                  <div class="col-lg-11">
-                    <button type="button" class="btn btn-sm btn-success"
-                            ng-show="itemsBrushed" ng-click="keepSelected()"
-                            ng-disabled="filteringInProgress">
-                      Keep selected</button>
-                    <button type="button" class="btn btn-sm btn-danger"
-                            ng-show="itemsBrushed" ng-click="removeSelected()"
-                            ng-disabled="filteringInProgress">
-                      Remove selected</button>
-                    <i class="fa fa-circle-o-notch fa-spin" ng-show="filteringInProgress"></i>
-                    <button type="button" class="btn btn-sm btn-default"
-                            ng-show="dataFiltered" ng-click="reloadData()"
-                            ng-disabled="filteringInProgress">
-                      Reload data</button>
-                  </div>
-                </div>
-              </form>
-
-              <form role="form" class="form-horizontal"
-                    ng-controller="ClusterCtrl"
-                    ng-show="dataAvailable">
-                <div class="form-group">
-                  <label class="col-lg-1 control-label text-right">Cluster:</label>
-
-                  <div class="col-lg-2 adjusted-rigth-padding">
-                    <select class="form-control input-sm"
-                            ng-disabled="clusterMethods.length <= 1"
-                            ng-model="selectedClusterMethod"
-                            ng-options="method.name for method in clusterMethods">
-                    </select>
-                  </div>
-                  <div class="col-lg-9 no-left-padding">
-                    <!-- disabled for now, we assume default settings
-                    <button type="button" class="btn btn-default btn-sm">
-                      <span class="glyphicon glyphicon-cog"></span>
-                    </button>
-                    -->
-                    <button type="button" class="btn btn-default btn-sm"
-                            ng-click="openSelectionDialog()"
-                            ng-disabled="clusterMethods.length === 0"
-                            popover={{selectionTextLong}}
-                            popover-trigger="mouseenter">{{selectionText}}</button>
-                    <button type="button" class="btn btn-default btn-sm"
-                            ng-disabled="configurationInvalid"
-                            ng-click="cluster()">Cluster</button>
-                  </div>
-                </div>
-              </form>
+              <ng-include src="'js/templates/filterctrl.html'"></ng-include>
+              <ng-include src="'js/templates/clusterctrl.html'"></ng-include>
             </div>
           </div>
         </div>
