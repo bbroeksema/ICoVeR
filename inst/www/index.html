@@ -28,14 +28,18 @@
         <div class="col-lg-7">
 
           <ul class="nav nav-tabs" role="tablist">
-            <li class="active"><a href="#actions" role="tab" data-toggle="tab">Actions</a></li>
+            <li><a href="#actions" role="tab" data-toggle="tab">Actions</a></li>
+            <li class="active"><a href="#appearance" role="tab" data-toggle="tab">Appearance</a></li>
           </ul>
 
           <!-- Tab panes -->
           <div class="tab-content">
-            <div class="tab-pane container-fluid active" id="actions">
+            <div class="tab-pane container-fluid" id="actions">
               <ng-include src="'js/templates/filterctrl.html'"></ng-include>
               <ng-include src="'js/templates/clusterctrl.html'"></ng-include>
+            </div>
+            <div class="tab-pane container-fluid active" id="appearance">
+              <ng-include src="'js/templates/colorctrl.html'"></ng-include>
             </div>
           </div>
         </div>
@@ -56,8 +60,10 @@
     <script src="js/controllers/parcoordsctrl.js"></script>
     <script src="js/controllers/filterctrl.js"></script>
     <script src="js/controllers/clusterctrl.js"></script>
+    <script src="js/controllers/colorctrl.js"></script>
     <script src="js/controllers/variableselectionctrl.js"></script>
     <script src="js/services/analytics.js"></script>
+    <script src="js/services/color.js"></script>
     <script src="js/services/dataset.js"></script>
     <script src="js/services/opencpu.js"></script>
     <script src="js/services/r.js"></script>

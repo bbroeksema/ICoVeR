@@ -1,0 +1,21 @@
+<form role="form" class="form-horizontal"
+      ng-controller="ColorCtrl"
+      ng-show="dataAvailable">
+  <div class="form-group">
+    <label class="col-lg-1 control-label text-right">Color:</label>
+
+    <div class="col-lg-3 adjusted-rigth-padding">
+      <select class="form-control input-sm"
+            ng-model="colorVariable"
+            ng-options="variable.name group by variable.group for variable in variables">
+      </select>
+    </div>
+    <div class="col-lg-3 no-left-padding">
+      <select class="form-control input-sm"
+              ng-model="colorMethod"
+              ng-show="colorMethods.length >= 1"
+              ng-options="method for method in colorMethods">
+      </select>
+    </div>
+  </div>
+</form>
