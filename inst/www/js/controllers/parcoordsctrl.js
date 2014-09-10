@@ -22,15 +22,27 @@ angular.module('contigBinningApp.controllers')
       });
     });
 
-    function render(session, data) {
+    function render() {
       $scope.brushed = [];
       parcoords
         .brushReset()
-        .data(data)
         .autoscale()
         .updateAxes()
         .render();
     };
+    
+    var filterUpdate = {
+      data: false,
+      color: true // Initially we use the default color for now.
+    }
+    
+    function updateData(session, data) {
+      parcoords.data(data);
+      filterUpdate.data = true;
+      if (filterUpdate.color) {
+        render();
+      }
+    }
 
     /// Scope extensions
     $scope.$on("DataSet::schemaLoaded", function(e, schema) {
@@ -55,10 +67,27 @@ angular.module('contigBinningApp.controllers')
         .dimensions(dims)
         .types(types);
 
-      DataSet.get(dims, render);
+      DataSet.get(dims, updateData);
     });
 
-    $scope.$on("DataSet::filtered", function() {
-      DataSet.get(parcoords.dimensions(), render);
-    })
+    $scope.$on("DataSet::filtered", function(ev, filterMethod) {
+      // After a filter, we'll need to reload the colors as well. To avoid
+      // double rendering, we just update the data here and let the color
+      // callback do the axis update and the rendering.
+      // @see $scope.$on("Colors::changed")
+      filterUpdate.data = false;
+      filterUpdate.color = false;
+      DataSet.get(parcoords.dimensions(), updateData);
+    });
+
+    $scope.$on("Colors::changed", function(e, colors) {
+      function colorfn(d, i) {
+        return colors[i];
+      };
+      parcoords.color(colorfn);
+      filterUpdate.color = true;
+      if (filterUpdate.data) {
+        render();
+      }
+    });
   });
