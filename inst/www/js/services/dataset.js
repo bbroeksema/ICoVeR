@@ -6,8 +6,6 @@ angular.module('contigBinningApp.services')
     var d = {
       id: undefined,
       brushExtents: {},
-      schema: {},
-      data: [],
       backend: { // OpenCPU Session objects
         schema: undefined,
         data: undefined
