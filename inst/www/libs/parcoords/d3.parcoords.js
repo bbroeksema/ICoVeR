@@ -75,6 +75,12 @@ var side_effects = d3.dispatch.apply(this,d3.keys(__))
   .on("margin", function(d) { pc.resize(); })
   .on("rate", function(d) { rqueue.rate(d.value); })
   .on("data", function(d) {
+    // Store the index of data items on the items themselves for passing proper
+    // indices with queued rendering.
+    __.data = __.data.map(function(d, i) {
+      d.__idx__ = i;
+      return d;
+    });
     if (flags.shadows){paths(__.data, ctx.shadows);}
   })
   .on("dimensions", function(d) {
@@ -431,7 +437,7 @@ function single_curve(d, ctx) {
 
 // draw single polyline
 function color_path(d, ctx) {
-	ctx.strokeStyle = d3.functor(__.color)(d);
+	ctx.strokeStyle = d3.functor(__.color)(d, d.__idx__);
 	ctx.beginPath();
 	if (__.bundleDimension === null || (__.bundlingStrength === 0 && __.smoothness == 0)) {
 		single_path(d, ctx);
@@ -781,8 +787,16 @@ d3.renderQueue = (function(func) {
       if (!valid) return true;
       if (_i > _queue.length) return true;
       var chunk = _queue.slice(_i,_i+_rate);
+
       _i += _rate;
-      chunk.map(func);
+      // Typical d3 behavior is to pass a data item *and* its index. As the
+      // render queue splits the original data set, we'll have to store and
+      // reuse the index with the data item.
+      function wrapper(d) {
+        return func(d, d.__idx__);
+      }
+
+      chunk.map(wrapper);
     }
 
     d3.timer(doFrame);
