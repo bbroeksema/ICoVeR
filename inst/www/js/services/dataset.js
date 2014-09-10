@@ -6,9 +6,9 @@ angular.module('contigBinningApp.services')
     var d = {
       id: undefined,
       brushExtents: {},
-      backend: { // OpenCPU Session objects
+      backend: {
         schema: undefined,
-        data: undefined
+        rows: undefined
       }
     }
 
@@ -23,23 +23,27 @@ angular.module('contigBinningApp.services')
     return {
       FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE', RESET: 'RESET' },
 
-      backendData: function() {
-        return d.backend.data;
+      /**
+       * Returns the row ids of the currently filtered rows or undefined if no
+       * filtering was applied (meaning all rows will loaded when using get).
+       */
+      rows: function() {
+        return d.backend.rows;
       },
 
       get: function(variables, cb) {
         var args = {
           variables: variables
         };
-        if (d.backend.data !== undefined) {
-          args.data = d.backend.data;
+        if (d.backend.rows !== undefined) {
+          args.rows = d.backend.rows;
         }
         OpenCPU.json("data.get", args, cb);
       },
 
       filter: function(filterMethod) {
         if (filterMethod === this.FilterMethod.RESET) {
-          d.backend.data = undefined;
+          d.backend.rows = undefined;
           $rootScope.$broadcast("DataSet::filtered", filterMethod);
           return;
         }
@@ -48,15 +52,15 @@ angular.module('contigBinningApp.services')
           extents: d.brushExtents,
           method: filterMethod
         };
-        if (d.backend.data !== undefined) {
-          args.data = d.backend.data;
+        if (d.backend.rows !== undefined) {
+          args.rows = d.backend.rows;
         }
 
         var me = this;
         ocpu.call("data.filter", args, function(session) {
-          d.backend.data = session; // Keep track of the current state.
-          $rootScope.$broadcast("DataSet::filtered", filterMethod);
+          d.backend.rows = session; // Keep track of the current state.
           me.brush({});
+          $rootScope.$broadcast("DataSet::filtered", filterMethod);
         });
       },
 
