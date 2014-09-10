@@ -4,42 +4,42 @@ angular.module('contigBinningApp.controllers')
   .controller('ColorCtrl', function ($scope, R, Color) {
 
     var d = {
-      config: {}
+      config: {},
+      methods: undefined,
     };
     
-    var lastConfig = "";
-
-    function configureColorMethods() {
-      var methods = {};
+    function onVariableChange(newVar, oldVar) {
       if ($scope.colorVariable && R.is.numeric($scope.colorVariable.type)) {
-        methods = d.config.numeric;
+        d.methods = d.config.numeric;
+      } else {
+        d.methods = undefined;
+        $scope.colorMethod = undefined;
       }
       
-      $scope.colorMethods = _.keys(methods);
-      
+      $scope.colorMethods = _.keys(d.methods);
       if ($scope.colorMethod === undefined 
           || !_.contains($scope.colorMethods, $scope.colorMethod)) {
         $scope.colorMethod = $scope.colorMethods[0];
       }
+    }
+    
+    function onMethodChange(newMethod, oldMethod) {
+      if (d.methods === undefined) {
+        $scope.colorSchemes = [];
+        $scope.colorScheme = undefined;
+        return;
+      }
       
-      var schemes = methods[$scope.colorMethod];
-      if (schemes === undefined) {
+      $scope.colorSchemes = d.methods[$scope.colorMethod];
+      if ($scope.colorSchemes === undefined) {
         schemes = [];
-      } else if (!_.isArray(schemes)) {
-        schemes = [schemes];
+      } else if (!_.isArray($scope.colorSchemes)) {
+        $scope.colorSchemes = [$scope.colorSchemes];
       }
       
-      $scope.colorSchemes = schemes;
       if ($scope.colorScheme === undefined
-          || !_.contains(schemes, $scope.colorScheme)) {
+          || !_.contains($scope.colorSchemes, $scope.colorScheme)) {
         $scope.colorScheme = $scope.colorSchemes[0];
-      }
-      
-      var config = "" + $scope.colorVariable + $scope.colorMethod + $scope.colorScheme;
-      if ($scope.colorVariable && $scope.colorMethod && $scope.colorScheme
-          && config != lastConfig) {
-        lastConfig = config;
-        Color.color($scope.colorVariable.name, $scope.colorMethod, $scope.colorScheme);
       }
     }
 
@@ -49,6 +49,10 @@ angular.module('contigBinningApp.controllers')
     $scope.colorVariable = undefined;
     $scope.colorMethod = undefined;
     $scope.colorScheme = undefined;
+
+    $scope.applyColoring = function() {
+      Color.color($scope.colorVariable.name, $scope.colorMethod, $scope.colorScheme);
+    }
 
     $scope.$on('DataSet::schemaLoaded', function(e, schema) {
       $scope.dataAvailable = true;
@@ -62,6 +66,6 @@ angular.module('contigBinningApp.controllers')
       d.config = config;
     });
 
-    $scope.$watch('colorVariable', configureColorMethods);
-    $scope.$watch('colorMethod', configureColorMethods);
+    $scope.$watch('colorVariable', onVariableChange);
+    $scope.$watch('colorMethod', onMethodChange);
   });

@@ -27,5 +27,11 @@
               ng-options="scheme for scheme in colorSchemes">
       </select>
     </div>
+    <div class="col-lg-2 no-left-padding">
+      <button type="button" class="btn btn-sm btn-default"
+              ng-show="colorVariable != undefined"
+              ng-click="applyColoring()">
+        Apply</button>
+    </div>
   </div>
 </form>
