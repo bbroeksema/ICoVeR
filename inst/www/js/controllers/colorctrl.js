@@ -3,10 +3,52 @@
 angular.module('contigBinningApp.controllers')
   .controller('ColorCtrl', function ($scope, R, Color) {
 
+    var d = {
+      config: {}
+    };
+    
+    var lastConfig = "";
+
+    function configureColorMethods() {
+      var methods = {};
+      if ($scope.colorVariable && R.is.numeric($scope.colorVariable.type)) {
+        methods = d.config.numeric;
+      }
+      
+      $scope.colorMethods = _.keys(methods);
+      
+      if ($scope.colorMethod === undefined 
+          || !_.contains($scope.colorMethods, $scope.colorMethod)) {
+        $scope.colorMethod = $scope.colorMethods[0];
+      }
+      
+      var schemes = methods[$scope.colorMethod];
+      if (schemes === undefined) {
+        schemes = [];
+      } else if (!_.isArray(schemes)) {
+        schemes = [schemes];
+      }
+      
+      $scope.colorSchemes = schemes;
+      if ($scope.colorScheme === undefined
+          || !_.contains(schemes, $scope.colorScheme)) {
+        $scope.colorScheme = $scope.colorSchemes[0];
+      }
+      
+      var config = "" + $scope.colorVariable + $scope.colorMethod + $scope.colorScheme;
+      if ($scope.colorVariable && $scope.colorMethod && $scope.colorScheme
+          && config != lastConfig) {
+        lastConfig = config;
+        Color.color($scope.colorVariable.name, $scope.colorMethod, $scope.colorScheme);
+      }
+    }
+
     $scope.variables = [];
     $scope.colorMethods = [];
+    $scope.colorSchemes = [];
     $scope.colorVariable = undefined;
     $scope.colorMethod = undefined;
+    $scope.colorScheme = undefined;
 
     $scope.$on('DataSet::schemaLoaded', function(e, schema) {
       $scope.dataAvailable = true;
@@ -15,23 +57,11 @@ angular.module('contigBinningApp.controllers')
       });
       $scope.colorVariable = undefined;
     });
-
-    $scope.$watch('colorVariable', function(newVariable) {
-      if (newVariable === undefined) {
-        $scope.colorMethods = [];
-        $scope.colorMethod = undefined;
-      } else {
-        $scope.colorMethods = Color.methods(newVariable.type);
-        $scope.colorMethod = $scope.colorMethods[0];
-      }
+    
+    $scope.$on("Colors::configurationLoaded", function(e, config) {
+      d.config = config;
     });
 
-    $scope.$watch('colorMethod', function(newMethod) {
-      if (newMethod === undefined) {
-        return; // TODO: Make sure that color is reset to default.
-      }
-
-      Color.color($scope.colorVariable, newMethod);
-    });
-
+    $scope.$watch('colorVariable', configureColorMethods);
+    $scope.$watch('colorMethod', configureColorMethods);
   });

@@ -1,50 +1,51 @@
 'use strict';
 
 angular.module('contigBinningApp.services')
-  .service('Color', function($rootScope, R, DataSet) {
+  .service('Color', function($rootScope, R, DataSet, OpenCPU) {
 
     var d = {
 
-      scales: {
-        blue_to_brown: d3.scale.linear()
-          .range(["steelblue", "brown"])
-          .interpolate(d3.interpolateLab)
-      },
 
-      methods: {
-        value: function(variable) {
-          var domain = d3.extent(variable),
-              scale = d.scales.blue_to_brown.domain(domain),
-              colors = _.map(variable, scale);
 
-          $rootScope.$broadcast("Colors::changed", colors);
-        },
 
-        decile: function(variable) {
 
-        },
 
-        Zscore: function(variable) {
+      session: undefined
+    };
 
-        }
+    OpenCPU.json("color.configurations", {}, function(session, config) {
+      $rootScope.$broadcast("Colors::configurationLoaded", config);
+    });
+    
+    $rootScope.$on("DataSet::filtered", function(ev, filterMethod) {
+      var args = {};
+      if (d.session !== undefined) {
+        args.colors = d.session;
       }
-    }
+      if (DataSet.rows() !== undefined) {
+        args.rows = DataSet.rows();
+      }
+      
+      OpenCPU.json("color.get", args, function(s, colors) {
+        $rootScope.$broadcast("Colors::changed", colors);
+      });
+    });
 
     return {
-      methods: function(type) {
-        return R.is.numeric(type) ? ["value", "decile", "Z-score"] : [];
-      },
-
-      color: function(variable, method) {
-        if (!_.contains(this.methods(variable.type), method)) {
-          throw("Invalid method: " + method + " for variable: " + variable.name + "(" +
-                variable.type + ")");
+      color: function(variable, method, scheme) {        
+        var args = {
+          variable: variable,
+          method: method,
+          scheme: scheme
         }
-        DataSet.get(variable.name, function(session, variable) {
-          d.methods.value(variable);
+        if (DataSet.rows()) {
+          args.rows = DataSet.rows();
+        }
+        
+        OpenCPU.json("color.apply", args, function(session, colors) {
+          d.session = session;
+          $rootScope.$broadcast("Colors::changed", colors);
         });
-
       }
     }
-
   });

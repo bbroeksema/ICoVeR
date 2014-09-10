@@ -10,11 +10,20 @@
             ng-options="variable.name group by variable.group for variable in variables">
       </select>
     </div>
-    <div class="col-lg-3 no-left-padding">
+    <div class="col-lg-3 no-left-padding adjusted-rigth-padding">
       <select class="form-control input-sm"
               ng-model="colorMethod"
               ng-show="colorMethods.length >= 1"
+              ng-disabled="colorMethods.length <= 1"
               ng-options="method for method in colorMethods">
+      </select>
+    </div>
+    <div class="col-lg-3 no-left-padding">
+      <select class="form-control input-sm"
+              ng-model="colorScheme"
+              ng-show="colorSchemes.length >= 1"
+              ng-disabled="colorSchemes.length <= 1"
+              ng-options="scheme for scheme in colorSchemes">
       </select>
     </div>
   </div>
