@@ -31,14 +31,16 @@ angular.module('contigBinningApp.services')
         return d.backend.rows;
       },
 
-      get: function(variables, cb) {
+      get: function(variables) {
         var args = {
           variables: variables
         };
         if (d.backend.rows !== undefined) {
           args.rows = d.backend.rows;
         }
-        OpenCPU.json("data.get", args, cb);
+        OpenCPU.json("data.get", args, function(session, data) {
+          $rootScope.$broadcast("DataSet::dataLoaded", data);
+        });
       },
 
       filter: function(filterMethod) {

@@ -35,14 +35,6 @@ angular.module('contigBinningApp.controllers')
       data: false,
       color: true // Initially we use the default color for now.
     }
-    
-    function updateData(session, data) {
-      parcoords.data(data);
-      filterUpdate.data = true;
-      if (filterUpdate.color) {
-        render();
-      }
-    }
 
     /// Scope extensions
     $scope.$on("DataSet::schemaLoaded", function(e, schema) {
@@ -67,7 +59,15 @@ angular.module('contigBinningApp.controllers')
         .dimensions(dims)
         .types(types);
 
-      DataSet.get(dims, updateData);
+      DataSet.get(dims);
+    });
+    
+    $scope.$on("DataSet::dataLoaded", function(ev, data) {
+      parcoords.data(data);
+      filterUpdate.data = true;
+      if (filterUpdate.color) {
+        render();
+      }
     });
 
     $scope.$on("DataSet::filtered", function(ev, filterMethod) {
@@ -77,7 +77,7 @@ angular.module('contigBinningApp.controllers')
       // @see $scope.$on("Colors::changed")
       filterUpdate.data = false;
       filterUpdate.color = false;
-      DataSet.get(parcoords.dimensions(), updateData);
+      DataSet.get(parcoords.dimensions());
     });
 
     $scope.$on("Colors::changed", function(e, colors) {
