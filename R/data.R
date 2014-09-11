@@ -11,10 +11,17 @@ data.schema <- function() {
 # data.get(rows = c(1,2,3,5,10), variables = c("gc_content"))
 # data.get(variables = c("gc_content"))
 data.get <- function(rows = NA, variables) {
-  if (missing(rows) | length(rows) == 0)
-    gData[ ,variables]
-  else
-    gData[rows, variables]
+  data <- NA;
+  if (missing(rows) | length(rows) == 0) {
+    rows <- c(1:nrow(gData))
+    data <- gData[ ,variables]
+  } else
+    data <- gData[rows, variables]
+
+  data <- as.data.frame(data)
+  names(data) <- variables
+  data$row <- rows
+  data
 }
 
 data.filter <- function(rows = c(), extents, method = "KEEP") {
