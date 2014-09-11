@@ -50,24 +50,34 @@ color.configurations <- function() {
 
 # color.apply(variable="gc_content", method="Value", scheme="blue_to_brown")
 color.apply <- function(rows = c(), variable, method, scheme) {
-  colorVariable <- data.get(rows, c(variable))
-
+  colorVariable <- data.get(rows, c(variable))[,variable]
+  colors <- NA
   if (is.numeric(colorVariable)) {
-    p_color_numeric(colorVariable, method, scheme)
+    colors <- p_color_numeric(colorVariable, method, scheme)
   } else {
     stop("Unsupported data type")
   }
-
+  rows <- if(missing(rows) | length(rows) == 0)
+            attr(gData, "row.names")
+          else
+            rows
   # Now, combine row names and the colors in a resulting data frame.
   #data.frame("row" = rows, "vis.color" = colors, stringsAsFactors = F)
+  colors <- as.list(colors)
+  names(colors) <- rows
+  colors
 }
 
 color.get <- function(colors = NA, rows = c()) {
   if (missing(colors)) {
     if (length(rows) == 0) {
-      rep("#069", nrow(gData))
+      colors <- as.list(rep("#069", nrow(gData)))
+      names(colors) <- c(1:nrow(gData))
+      colors
     } else {
-      rep("#069", length(rows))
+      colors <- as.list(rep("#069", length(rows)))
+      names(colors) <- rows
+      colors
     }
   } else {
     if (length(rows) == 0 ) {

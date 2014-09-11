@@ -30,11 +30,6 @@ angular.module('contigBinningApp.controllers')
         .updateAxes()
         .render();
     };
-    
-    var filterUpdate = {
-      data: false,
-      color: true // Initially we use the default color for now.
-    }
 
     /// Scope extensions
     $scope.$on("DataSet::schemaLoaded", function(e, schema) {
@@ -64,30 +59,18 @@ angular.module('contigBinningApp.controllers')
     
     $scope.$on("DataSet::dataLoaded", function(ev, data) {
       parcoords.data(data);
-      filterUpdate.data = true;
-      if (filterUpdate.color) {
-        render();
-      }
+      render();
     });
 
     $scope.$on("DataSet::filtered", function(ev, filterMethod) {
-      // After a filter, we'll need to reload the colors as well. To avoid
-      // double rendering, we just update the data here and let the color
-      // callback do the axis update and the rendering.
-      // @see $scope.$on("Colors::changed")
-      filterUpdate.data = false;
-      filterUpdate.color = false;
       DataSet.get(parcoords.dimensions());
     });
 
     $scope.$on("Colors::changed", function(e, colors) {
       function colorfn(d, i) {
-        return colors[i];
+        return colors.hasOwnProperty(d.row) ? colors[d.row] : "#000";
       };
       parcoords.color(colorfn);
-      filterUpdate.color = true;
-      if (filterUpdate.data) {
-        render();
-      }
+      render();
     });
   });
