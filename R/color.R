@@ -14,7 +14,7 @@ p_color_numeric_value <- function(colorVariable, scheme) {
 
   # Now we create a color interpolation function and call it on the normalized
   # data.
-  color <- colorRamp(p_schemes$numeric$value[[scheme]])
+  color <- colorRamp(p_schemes$numeric$value[[scheme]], space=c("Lab"))
   rgb(color(normalized), max = 255)
 }
 
