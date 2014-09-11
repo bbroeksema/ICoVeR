@@ -13,12 +13,15 @@ angular.module('contigBinningApp.controllers')
       .brushable()
       .reorderable();
 
-    angular.element($window).bind('resize', function() {
+    function resize() {
       parcoords
         .width($element[0].clientWidth)
         .height($element[0].clientHeight)
         .resize();
-    });
+    }
+
+    angular.element($window).bind('resize', resize);
+    $(document).ready(resize);
 
     parcoords.on("brushend", function(d) {
       // NOTE: the brushend event from parcoords is "outside" angular, so we
