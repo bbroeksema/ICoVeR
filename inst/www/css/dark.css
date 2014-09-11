@@ -1,2 +1,12 @@
 @import url("../libs/bootstrap/css/bootstrap-slate.min.css");
 @import url("main.css");
+
+.parcoords .axis line, .parcoords .axis path {
+  fill: none;
+  stroke: #c8c8c8;
+  shape-rendering: crispEdges;
+}
+
+.parcoords text {
+  fill: #c8c8c8;
+}
