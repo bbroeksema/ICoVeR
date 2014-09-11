@@ -3,12 +3,6 @@
 angular.module('contigBinningApp.services')
   .service('Color', function($rootScope, R, DataSet, OpenCPU) {
 
-
-
-
-
-
-
     OpenCPU.json("color.configurations", {}, function(session, config) {
       $rootScope.$broadcast("Colors::configurationLoaded", config);
     });
