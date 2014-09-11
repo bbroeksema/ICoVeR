@@ -7,18 +7,26 @@
     <title></title>
 
     <link href="libs/fontawesome/css/font-awesome.css" rel="stylesheet">
-    <link href="libs/bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="libs/parcoords/d3.parcoords.css" rel="stylesheet">
-    <link href="css/main.css" rel="stylesheet">
+    <link href="css/light.css" rel="stylesheet" id="maincss">
   </head>
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
       <div class="container-fluid">
         <div class="navbar-header">
           <a class="navbar-brand">Parallel Coordinates for R</a>
         </div>
+        <form ng-controller="ThemeCtrl" class="navbar-form navbar-right">
+          <div class="form-group">
+            <label class="control-label">Theme:</label>
+            <div class="btn-group">
+              <label class="btn btn-default" ng-model="theme" btn-radio="'light'">Light</label>
+              <label class="btn btn-default" ng-model="theme" btn-radio="'dark'">Dark</label>
+            </div>
+          </div>
+        </form>
       </div>
-    </div>
+    </nav>
 
     <div id="main">
       <div id="parcoords" class="parcoords" ng-controller="ParcoordsCtrl">
@@ -61,6 +69,7 @@
     <script src="js/controllers/filterctrl.js"></script>
     <script src="js/controllers/clusterctrl.js"></script>
     <script src="js/controllers/colorctrl.js"></script>
+    <script src="js/controllers/themectrl.js"></script>
     <script src="js/controllers/variableselectionctrl.js"></script>
     <script src="js/services/analytics.js"></script>
     <script src="js/services/color.js"></script>
