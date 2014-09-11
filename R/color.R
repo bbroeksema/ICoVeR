@@ -1,7 +1,19 @@
+library(RColorBrewer)
+
 p_schemes <- list(
   numeric = list(
     value = list(
       blue_to_brown = c("steelblue", "brown")
+    ),
+    decile = list(
+      # We need 10 values here, so we manually add one. They where obtained as
+      # follows (in a browser): d3.rgb(X).darker().toString(), where X is the
+      # last color returned by each particular color pallette.
+      yellow_to_green = c(brewer.pal(9, "YlGn"), "#00301C"),
+      yellow_to_red = c(brewer.pal(9, "YlOrRd"), "#59001a"),
+      blue_to_green = c(brewer.pal(9, "BuGn"), "#002F12"),
+      blue_to_purple = c(brewer.pal(9, "BuPu"), "#350034"),
+      blues = c(brewer.pal(9, "Blues"), "#05214A")
     )
   )
 )
@@ -19,7 +31,11 @@ p_color_numeric_value <- function(colorVariable, scheme) {
 }
 
 p_color_numeric_decile <- function(colorVariable, scheme) {
-
+  # The awesomeness of R. I got the following line from:
+  # https://stackoverflow.com/questions/17932617
+  deciles <- cut(colorVariable, quantile(colorVariable, (0:10)/10), include.lowest = T, labels = c(1:10))
+  scheme <- p_schemes$numeric$decile[[scheme]]
+  scheme[deciles]
 }
 
 p_color_numeric_zscore <- function(colorVariable, scheme) {
@@ -42,13 +58,14 @@ color.configurations <- function() {
   list(
     numeric = list(
       "Value" = names(p_schemes$numeric$value),
-      "Decile" = c("BlueToGreen", "BlueToPurple", "Blues"),
+      "Decile" = names(p_schemes$numeric$decile)
       "Z-score" = c("RedToBlue", "Spectral")
     )
   )
 }
 
 # color.apply(variable="gc_content", method="Value", scheme="blue_to_brown")
+# color.apply(variable="gc_content", method="Decile", scheme="blue_to_green")
 color.apply <- function(rows = c(), variable, method, scheme) {
   colorVariable <- data.get(rows, c(variable))[,variable]
   colors <- NA
