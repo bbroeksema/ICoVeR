@@ -59,7 +59,7 @@ color.configurations <- function() {
     numeric = list(
       "Value" = names(p_schemes$numeric$value),
       "Decile" = names(p_schemes$numeric$decile)
-      "Z-score" = c("RedToBlue", "Spectral")
+      #"Z-score" = c("RedToBlue", "Spectral")
     )
   )
 }
