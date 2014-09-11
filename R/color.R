@@ -79,7 +79,6 @@ color.apply <- function(rows = c(), variable, method, scheme) {
           else
             rows
   # Now, combine row names and the colors in a resulting data frame.
-  #data.frame("row" = rows, "vis.color" = colors, stringsAsFactors = F)
   colors <- as.list(colors)
   names(colors) <- rows
   colors
