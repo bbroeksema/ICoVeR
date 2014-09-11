@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('contigBinningApp.controllers')
-  .controller('ParcoordsCtrl', function($scope, $element, DataSet, R) {
+  .controller('ParcoordsCtrl', function($scope, $window, $element, DataSet, R) {
 
     /// private Controller vars
     var parcoords = d3.parcoords()($element[0])
@@ -12,6 +12,13 @@ angular.module('contigBinningApp.controllers')
       .createAxes()
       .brushable()
       .reorderable();
+
+    angular.element($window).bind('resize', function() {
+      parcoords
+        .width($element[0].clientWidth)
+        .height($element[0].clientHeight)
+        .resize();
+    });
 
     parcoords.on("brushend", function(d) {
       // NOTE: the brushend event from parcoords is "outside" angular, so we
