@@ -33,8 +33,23 @@ p_color_numeric_value <- function(colorVariable, scheme) {
 p_color_numeric_decile <- function(colorVariable, scheme) {
   # The awesomeness of R. I got the following line from:
   # https://stackoverflow.com/questions/17932617
-  deciles <- cut(colorVariable, quantile(colorVariable, (0:10)/10), include.lowest = T, labels = c(1:10))
-  scheme <- p_schemes$numeric$decile[[scheme]]
+  deciles <- quantile(colorVariable, (0:10)/10)
+
+  # In some cases, more than a 10th of the datapoints might go through the same
+  # range. As a consequence, we get cutof points with the same value. We need to
+  # merge these in order to make the cut work properly.
+  breaks <- list("1"=deciles[[1]])
+  colors <- c(1)
+  for (i in 2:length(deciles)) {
+    if (deciles[[i]] != deciles[[i - 1]]) {
+      breaks[paste("",i, sep="")] = deciles[[i]]
+      colors <- c(colors, i - 1)
+    }
+  }
+
+  print(length(breaks))
+  deciles <- cut(colorVariable, breaks, include.lowest = T, labels = 1:(length(breaks) - 1))
+  scheme <- p_schemes$numeric$decile[[scheme]][colors]
   scheme[deciles]
 }
 
