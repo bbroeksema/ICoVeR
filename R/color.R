@@ -47,7 +47,6 @@ p_color_numeric_decile <- function(colorVariable, scheme) {
     }
   }
 
-  print(length(breaks))
   deciles <- cut(colorVariable, breaks, include.lowest = T, labels = 1:(length(breaks) - 1))
   scheme <- p_schemes$numeric$decile[[scheme]][colors]
   scheme[deciles]
