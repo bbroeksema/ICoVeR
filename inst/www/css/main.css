@@ -6,6 +6,12 @@ html, body {
   margin-bottom: 0px;
 }
 
+.navbar .progress {
+  margin-bottom: 0px;
+  margin-right: 1em;
+  width: 150px;
+}
+
 .tab-content {
   padding-top: 5px;
 }
