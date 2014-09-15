@@ -66,9 +66,9 @@ angular.module('contigBinningApp.services')
         });
       },
 
-      brush: function(extents) {
+      brush: function(extents, rows) {
         d.brushExtents = extents;
-        $rootScope.$broadcast("DataSet::brushed", d.brushExtents);
+        $rootScope.$broadcast("DataSet::brushed", d.brushExtents, rows);
       }
     };
   });

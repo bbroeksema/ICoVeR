@@ -28,7 +28,7 @@ angular.module('contigBinningApp.controllers')
       //       have to wrap it in $scope.$apply to make sure that other
       //       controllers are updated appropriately.
       $scope.$apply(function() {
-        DataSet.brush(parcoords.brushExtents());
+        DataSet.brush(parcoords.brushExtents(), parcoords.brushed());
       });
     });
 
