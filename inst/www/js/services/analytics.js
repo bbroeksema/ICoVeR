@@ -25,8 +25,8 @@ angular.module('contigBinningApp.services')
         var fnArgs = {
           vars: variables
         }
-        if (DataSet.backendData()) {
-          fnArgs.data = DataSet.backendData();
+        if (DataSet.rows()) {
+          fnArgs.rows = DataSet.rows();
         }
         // TODO: process args
 
