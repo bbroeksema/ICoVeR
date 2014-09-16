@@ -1,0 +1,12 @@
+<form role="form" class="form-horizontal" ng-controller="ParCoordsVarsCtrl">
+  <div class="form-group">
+    <label class="col-lg-2 adjusted-rigth-padding control-label text-right">Variables:</label>
+    
+    <div class="col-lg-10 no-left-padding">
+      <button type="button" class="btn btn-default btn-sm"
+              ng-click="openSelectionDialog()"
+              popover={{parcoords.selectionTextLong}}
+              popover-trigger="mouseenter">{{parcoords.selectionText}}</button>
+    </div>
+  </div>
+</form>
