@@ -33,7 +33,6 @@ angular.module('contigBinningApp.services')
         ocpu.call("cluster." + method, fnArgs, function(session) {
           $rootScope.$broadcast("Analytics::dataClustered", method, session);
         });
-        // TODO: Store results... somehow...
       },
 
       project: function() {
