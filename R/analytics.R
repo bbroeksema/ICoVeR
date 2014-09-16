@@ -1,11 +1,17 @@
 
-cluster.kmeans <- function(data = cstr, vars, centers = NA, iter.max=10) {
-  # All numeric cols in the data frame
-  if (is.na(centers)) centers <- sqrt(nrow(data))
-  clusterVars <- names(data)[sapply(data, is.numeric)]
-  clusterVars <- Filter(function(x) { x %in% vars }, clusterVars)
-  data <- data[ ,clusterVars]
-  stats::kmeans(data, centers, iter.max)$cluster
+cluster.kmeans <- function(rows = c(), vars, centers = NA, iter.max=10) {
+  clusterData <- data.get(rows, vars)
+  
+  if (is.na(centers)) centers <- floor(sqrt(nrow(clusterData)))
+  
+  rows <- if(missing(rows) | length(rows) == 0)
+            attr(gData, "row.names")
+          else
+            rows
+            
+  clusters <- as.list(stats::kmeans(clusterData, centers, iter.max)$cluster)
+  names(clusters) <- rows
+  clusters
 }
 
 cluster.methods <- function() {
