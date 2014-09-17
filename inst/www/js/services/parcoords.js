@@ -19,7 +19,8 @@ angular.module('contigBinningApp.services')
         d.variables = [];
       } else {
         d.variables = _.filter(schema, function(variable) {
-          return R.is.numeric(variable.type);
+          return R.is.numeric(variable.type) ||
+            R.is.factor(variable.type);
         });
         d.selectedVariables = [];
       }

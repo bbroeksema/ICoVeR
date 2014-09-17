@@ -8,7 +8,10 @@ angular.module('contigBinningApp.services')
       brushExtents: {},
       backend: {
         schema: undefined,
-        rows: undefined
+        rows: undefined,
+        analytics: {
+          clusterings: {},
+        }
       }
     }
 
@@ -19,6 +22,30 @@ angular.module('contigBinningApp.services')
       d.backend.schema = schema;
       $rootScope.$broadcast("DataSet::schemaLoaded", schema);
     }
+
+    // Listen to the analytics service to store the results of various
+    // analytical actions.
+    $rootScope.$on("Analytics::dataClustered", function(ev, method, session) {
+      d.backend.analytics.clusterings[method] = session;
+
+      var vars = _.filter(d.backend.schema, function(variable) {
+        return variable["group.type"] === "Analytics"
+          && variable["group"] === "clusterings"
+          && variable["name"] === method;
+      });
+
+      if (vars.length === 0) {
+        // Add it to the schema and send out notification of schema change
+        var variable = {
+          "group.type": "Analytics",
+          "group": "clusterings",
+          "name": method,
+          "type": "factor"
+        }
+        d.backend.schema.push(variable);
+        $rootScope.$broadcast("DataSet::schemaLoaded", d.backend.schema);
+      } // else nothing to do.
+    });
 
     return {
       FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE', RESET: 'RESET' },
