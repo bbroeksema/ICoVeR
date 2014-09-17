@@ -16,8 +16,14 @@ cluster.kmeans <- function(rows = c(), vars, centers = NA, iter.max=10) {
 
 cluster.methods <- function() {
   list("kmeans" = list(
-    "vars" = list("type"="schema.numeric", "required"=T),
-    "centers" = list("type"="numeric", "required"=F),
-    "iter.max" = list("type"="numeric", "required"=F, "default"=10)
+    "man" = "/ocpu/library/stats/man/kmeans/text",
+    "args" = list(
+      "vars" = list("type"="schema.numeric", "required"=T),
+      "centers" = list("type"="numeric", "required"=F),
+      "iter.max" = list("type"="numeric", "required"=F, "default"=10),
+      "nstart" = list("type"="numeric", "required"=F, default=1),
+      "algorithm" = list("type"="character", "required"=F,
+                          "values"=c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"))
+    )
   ))
 }
