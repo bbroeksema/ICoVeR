@@ -11,6 +11,7 @@ angular.module('contigBinningApp.services')
       brushExtents: {},
       backend: {
         schema: undefined,
+        schemaIndex: undefined,
         rows: undefined,
         analytics: {
           clusterings: {},
@@ -23,6 +24,7 @@ angular.module('contigBinningApp.services')
 
     function notifySchemaLoad(session, schema) {
       d.backend.schema = schema;
+      d.backend.schemaIndex = _.indexBy(schema, 'name');
       $rootScope.$broadcast("DataSet::schemaLoaded", schema);
     }
 
@@ -46,6 +48,7 @@ angular.module('contigBinningApp.services')
           "type": "factor"
         }
         d.backend.schema.push(variable);
+        d.backend.schemaIndex = _.indexBy(d.backend.schema, 'name');
         $rootScope.$broadcast("DataSet::schemaLoaded", d.backend.schema);
       } // else nothing to do.
     });
