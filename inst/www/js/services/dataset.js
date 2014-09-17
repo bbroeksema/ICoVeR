@@ -16,7 +16,7 @@ angular.module('contigBinningApp.services')
           clusterings: {},
         }
       }
-    }
+    };
 
     // Initialize the schema as soon as the Dataset service is initialized.
     OpenCPU.json("data.schema", null, notifySchemaLoad);
