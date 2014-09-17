@@ -49,6 +49,8 @@ angular.module('contigBinningApp.services')
         }
         d.backend.schema.push(variable);
         d.backend.schemaIndex = _.indexBy(d.backend.schema, 'name');
+        // TODO: This should problably change into DataSet::schemaChanged to
+        //       avoid the parallel coordinates component redrawing itself.
         $rootScope.$broadcast("DataSet::schemaLoaded", d.backend.schema);
       } // else nothing to do.
     });
