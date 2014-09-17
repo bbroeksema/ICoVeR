@@ -165,6 +165,12 @@ angular.module('contigBinningApp.services')
         })
 
 
+        // TODO: Implement dr methods in the backend
+        // TODO: retrieve and merge results, similar as with clustering results.
+        // TODO: The parcoords component listens to DataSet::dataLoaded. We 
+        //       might want to skip showing rows in the scatterplot at first
+        //       and focus on columns first, until we figured out a good way
+        //       to deal with this.
       },
 
       filter: function(filterMethod) {
