@@ -173,6 +173,8 @@ angular.module('contigBinningApp.services')
         //       to deal with this.
       },
 
+      // TODO: filter will not work at the moment when analytical variables are
+      //       included.
       filter: function(filterMethod) {
         if (filterMethod === this.FilterMethod.RESET) {
           d.backend.rows = undefined;
