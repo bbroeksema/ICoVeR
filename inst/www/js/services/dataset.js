@@ -32,16 +32,16 @@ angular.module('contigBinningApp.services')
       d.backend.analytics.clusterings[method] = session;
 
       var vars = _.filter(d.backend.schema, function(variable) {
-        return variable["group.type"] === "Analytics"
-          && variable["group"] === "clusterings"
+        return variable["group.type"] === constants.GT_ANALYTICS
+          && variable["group"] === constants.G_CLUSTERINGS
           && variable["name"] === method;
       });
 
       if (vars.length === 0) {
         // Add it to the schema and send out notification of schema change
         var variable = {
-          "group.type": "Analytics",
-          "group": "clusterings",
+          "group.type": constants.GT_ANALYTICS,
+          "group": constants.G_CLUSTERINGS,
           "name": method,
           "type": "factor"
         }
