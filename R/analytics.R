@@ -27,3 +27,10 @@ cluster.methods <- function() {
     )
   ))
 }
+
+# TODO for Dim red.
+
+# dimred.methods <- function() .....
+#
+# dimred.pca <- function(rows = c()) # maybe other params?
+# dimred.ca <- function(rows = c()) # maybe other params?
