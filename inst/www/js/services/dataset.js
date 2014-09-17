@@ -2,7 +2,10 @@
 
 angular.module('contigBinningApp.services')
   .service('DataSet', function($rootScope, $http, OpenCPU) {
-
+    var constants = {
+      GT_ANALYTICS: "Analytics",
+      G_CLUSTERINGS: "clusterings"
+    };
     var d = {
       id: undefined,
       brushExtents: {},
