@@ -70,15 +70,101 @@ angular.module('contigBinningApp.services')
       // @param variables - a list of strings, containing the names of the 
       //                    variables to be loaded.
       get: function(variables) {
-        var args = {
-          variables: variables
-        };
-        if (d.backend.rows !== undefined) {
-          args.rows = d.backend.rows;
+        var args = {},
+            schemaIndex = d.backend.schemaIndex,
+            varsByGroup = { clustervars: [], datavars: [] },
+            varsLoaded = {},
+            varsData = undefined;
+
+        // Some helper functions we need for processing the get request.
+        function loaded(name) {
+          return varsLoaded[name];
         }
-        OpenCPU.json("data.get", args, function(session, data) {
-          $rootScope.$broadcast("DataSet::dataLoaded", data);
+
+        // When we retrieve requested data, we have to update the variables
+        // that have been loaded, and we need to merge the already loaded
+        // data with the data we just received.
+        function dataReceived(data) {
+          // Mark the currently retrieved variables as loaded.
+          _.each(_.keys(data[0]), function(variable) {
+            varsLoaded[variable] = true;
+          });
+
+          // Merge the currently loaded variabels with the ones already loaded.
+          if (varsData === undefined) {
+            varsData = data;
+          } else {
+            // TODO: verify that the cluster results are in the same order, for
+            //       now I assume this (and think they actually are). Otherwise
+            //       they can be merged using the row attribute on objects in
+            //       both arrays.
+            _.each(varsData, function(dataItem, index) {
+              _.extend(dataItem, data[index]);
+            });
+          }
+
+          // Verify if we're done loading'
+          if (_.every(variables, loaded)) {
+            $rootScope.$broadcast("DataSet::dataLoaded", varsData);
+          }
+        }
+
+        // Now the actual processing of the request...
+
+        // First, we mark all requested variables as unloaded and split the
+        // requested variables in the appropriate groups. Because, we cannot
+        // get all of them straightforward from the backend.
+        _.each(variables, function(name) {
+          varsLoaded[name] = false;
+
+          var variable = schemaIndex[name];
+          switch(variable["group"]) {
+            case constants.G_CLUSTERINGS:
+              varsByGroup.clustervars.push(variable);
+              break;
+            // TODO:
+            // case constants.G_DIMRED:
+            //   varsByGroup.dimredvars.push(variable);
+            //   break;
+            default:
+              varsByGroup.datavars.push(variable);
+              break;
+          }
         });
+
+        // Get the data variables from the backend.
+        args.variables = _.pluck(varsByGroup.datavars, "name");
+        args.rows = d.backend.rows;
+        OpenCPU.json("data.get", args, function(session, data) {
+          dataReceived(data);
+        });
+
+        // For each of the performed clustering methods, trigger an http get to
+        // retrieve the cluster values from their respective ocpu sessions.
+        var clusterings = d.backend.analytics.clusterings;
+        var methods = _.keys(clusterings);
+        _.each(methods, function(method) {
+          var session = clusterings[method];
+          $http({ method: 'GET', url: session.loc + "R/.val/json?auto_unbox=true" })
+            .success(function(data) {
+              // This is a row, cluster map. E.g.:
+              // { 1: 14, 2: 14, 3: 2, etc}
+              //
+              // Remember, the rows come from R and R indexes start at 1!
+              //
+              // Below we transform this map into the format (when method is
+              // kmeans):
+              // [ { row: 1, kmeans: 14}, {row: 2, kmeans: 14}, etc]
+              var values = _.map(_.keys(data), function(key) {
+                var value = { row: key };
+                value[method] = data[key];
+                return value;
+              })
+              dataReceived(values);
+            }); // (data, status, headers, config)
+        })
+
+
       },
 
       filter: function(filterMethod) {
