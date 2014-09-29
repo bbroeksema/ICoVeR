@@ -2,16 +2,16 @@
       ng-controller="ColorCtrl"
       ng-show="dataAvailable">
   <div class="form-group">
-    <label class="col-lg-2 adjusted-rigth-padding control-label text-right">Color:</label>
+    <label class="col-lg-2 adjusted-right-padding control-label text-right">Color:</label>
 
-    <div class="col-lg-3 no-left-padding adjusted-rigth-padding">
+    <div class="col-lg-3 no-left-padding adjusted-right-padding">
       <select class="form-control input-sm"
             ng-model="colorVariable"
             ng-options="variable.name group by variable.group for variable in variables">
         <option value="">-- choose variable --</option>
       </select>
     </div>
-    <div class="col-lg-2 no-left-padding adjusted-rigth-padding">
+    <div class="col-lg-2 no-left-padding adjusted-right-padding">
       <select class="form-control input-sm"
               ng-model="colorMethod"
               ng-show="colorMethods.length >= 1"
@@ -19,7 +19,7 @@
               ng-options="method for method in colorMethods">
       </select>
     </div>
-    <div class="col-lg-2 no-left-padding adjusted-rigth-padding">
+    <div class="col-lg-2 no-left-padding adjusted-right-padding">
       <select class="form-control input-sm"
               ng-model="colorScheme"
               ng-show="colorSchemes.length >= 1"
