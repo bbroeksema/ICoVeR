@@ -1,26 +1,22 @@
-
-<div class="row">
+<div id="scatterplotControlAndVis">
   <div id="scatterplotControl" class="col-lg-4"> 
     <form role="form" class="form-horizontal"
-        ng-controller="ColorCtrl"
-        ng-show="dataAvailable">
+          ng-controller="ScatterplotCtrl">
+        
       <div class="form-group">
-        <label class="col-lg-1 control-label text-right">Data Type:</label>
+        <label class="col-lg-4 control-label text-right">Data Type:</label>
 
-        <div class="col-lg-2 adjusted-right-padding">
+        <div class="col-lg-4 adjusted-right-padding">
           <select class="form-control input-sm"
-                ng-model="colorVariable"
-                ng-options="variable.name group by variable.group for variable in variables">
+                  ng-model="scatterPlotDataType"
+                  ng-options="scatterDataType for scatterDataType in scatterDataTypes">
             <option value="">-- choose variable --</option>
           </select>
         </div>
       </div>
-    </form>    
+    </form>
   </div>
 
-  <div id="scatterplotDiv"  class="col-lg-4" ng-controller="ScatterplotCtrl" > 
-  <div id="scatterplotVisualisation" class="scatterplotVisualisation"></div>
-  
-  
+  <div id="scatterplotDiv" class="col-lg-4" ng-controller="ScatterplotCtrl">
   </div>
 </div>
