@@ -75,12 +75,6 @@ var side_effects = d3.dispatch.apply(this,d3.keys(__))
   .on("margin", function(d) { pc.resize(); })
   .on("rate", function(d) { rqueue.rate(d.value); })
   .on("data", function(d) {
-    // Store the index of data items on the items themselves for passing proper
-    // indices with queued rendering.
-    __.data = __.data.map(function(d, i) {
-      d.__idx__ = i;
-      return d;
-    });
     if (flags.shadows){paths(__.data, ctx.shadows);}
   })
   .on("dimensions", function(d) {
@@ -436,8 +430,8 @@ function single_curve(d, ctx) {
 };
 
 // draw single polyline
-function color_path(d, ctx) {
-	ctx.strokeStyle = d3.functor(__.color)(d, d.__idx__);
+function color_path(d, i, ctx) {
+	ctx.strokeStyle = d3.functor(__.color)(d, i);
 	ctx.beginPath();
 	if (__.bundleDimension === null || (__.bundlingStrength === 0 && __.smoothness == 0)) {
 		single_path(d, ctx);
@@ -471,12 +465,12 @@ function single_path(d, ctx) {
 	});
 }
 
-function path_foreground(d) {
-	return color_path(d, ctx.foreground);
+function path_foreground(d, i) {
+	return color_path(d, i, ctx.foreground);
 };
 
-function path_highlight(d) {
-	return color_path(d, ctx.highlight);
+function path_highlight(d, i) {
+	return color_path(d, i, ctx.highlight);
 };
 pc.clear = function(layer) {
   ctx[layer].clearRect(0,0,w()+2,h()+2);
@@ -731,7 +725,10 @@ function selected() {
   // We don't want to return the full data set when there are no axes brushed.
   // Actually, when there are no axes brushed, by definition, no items are
   // selected. So, let's avoid the filtering and just return false.
-  if (actives.length === 0) return false;
+  //if (actives.length === 0) return false;
+   
+  // Resolves broken examples for now. They expect to get the full dataset back from empty brushes
+  if (actives.length === 0) return __.data;
 
   // test if within range
   var within = {
@@ -760,7 +757,7 @@ function position(d) {
 }
   pc.toString = function() { return "Parallel Coordinates: " + __.dimensions.length + " dimensions (" + d3.keys(__.data[0]).length + " total) , " + __.data.length + " rows"; };
   
-  pc.version = "0.3.1";
+  pc.version = "0.4.0";
 
   return pc;
 };
@@ -786,17 +783,15 @@ d3.renderQueue = (function(func) {
     function doFrame() {
       if (!valid) return true;
       if (_i > _queue.length) return true;
-      var chunk = _queue.slice(_i,_i+_rate);
-
       _i += _rate;
-      // Typical d3 behavior is to pass a data item *and* its index. As the
-      // render queue splits the original data set, we'll have to store and
-      // reuse the index with the data item.
-      function wrapper(d) {
-        return func(d, d.__idx__);
-      }
 
-      chunk.map(wrapper);
+      // Typical d3 behavior is to pass a data item *and* its index. As the
+      // render queue splits the original data set, we'll have to be slightly
+      // more carefull about passing the correct index with the data item.
+      var end = Math.min(_i + _rate, _queue.length);
+      for (var i = _i; i < end; i++) {
+        func(_queue[i], i);
+      }
     }
 
     d3.timer(doFrame);

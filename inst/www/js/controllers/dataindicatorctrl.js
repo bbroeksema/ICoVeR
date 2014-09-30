@@ -16,7 +16,7 @@ angular.module('contigBinningApp.controllers')
       });
       
       $scope.$on("DataSet::brushed", function(ev, extents, rows) {
-        if (rows) {
+        if (Object.getOwnPropertyNames(extents).length > 0) {
           $scope.counts = [
             { rows: rows.length, type: "brushed" },
             { rows: $scope.currentRowCount - rows.length, type: "" }
