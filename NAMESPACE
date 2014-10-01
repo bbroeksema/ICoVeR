@@ -1,3 +1,4 @@
 exportPattern("^data\\.[[:alpha:]]*")
 exportPattern("^cluster\\.[[:alpha:]]*")
+exportPattern("^dimred\\.[[:alpha:]]*")
 exportPattern("^color\\.[[:alpha:]]*")
