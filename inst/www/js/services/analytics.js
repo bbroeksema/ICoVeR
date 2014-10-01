@@ -4,7 +4,8 @@ angular.module('contigBinningApp.services')
   .service('Analytics', function($rootScope, $http, DataSet, OpenCPU) {
 
     var d = {
-      clusterMethods: []
+      clusterMethods: [],
+      dimRedMethods: []
     };
 
     OpenCPU.json("cluster.methods", {}, function(session, response) {
@@ -13,6 +14,14 @@ angular.module('contigBinningApp.services')
         return methods;
       }, []);
       $rootScope.$broadcast("Analytics::clusterMethodsAvailable", d.clusterMethods);
+    });
+    
+    OpenCPU.json("dimred.methods", {}, function(session, response) {
+      d.dimRedMethods = _.reduce(_.keys(response), function(methods, method) {
+        methods.push({ name: method, args: response[method] });
+        return methods;
+      }, []);
+      $rootScope.$broadcast("Analytics::dimRedMethodsAvailable", d.dimRedMethods);
     });
 
 
