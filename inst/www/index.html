@@ -45,18 +45,18 @@
         <div class="col-lg-12">
 
           <ul class="nav nav-tabs" role="tablist">
-            <li><a href="#actions" role="tab" data-toggle="tab">Actions</a></li>
-            <li class="active"><a href="#appearance" role="tab" data-toggle="tab">Appearance</a></li>
+            <li class="active"><a href="#actions" role="tab" data-toggle="tab">Actions</a></li>
+            <li><a href="#appearance" role="tab" data-toggle="tab">Appearance</a></li>
             <li ><a href="#scatterplot" role="tab" data-toggle="tab">Scatterplot</a></li>
           </ul>
 
           <!-- Tab panes -->
           <div class="tab-content">
-            <div class="tab-pane container-fluid" id="actions">
+            <div class="tab-pane container-fluid active" id="actions">
               <ng-include src="'js/templates/filterctrl.html'"></ng-include>
               <ng-include src="'js/templates/clusterctrl.html'"></ng-include>
             </div>
-            <div class="tab-pane container-fluid active" id="appearance">
+            <div class="tab-pane container-fluid" id="appearance">
               <ng-include src="'js/templates/colorctrl.html'"></ng-include>
               <ng-include src="'js/templates/parcoordsctrl.html'"></ng-include>
             </div>
