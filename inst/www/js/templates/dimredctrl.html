@@ -1,0 +1,32 @@
+<form role="form" class="form-horizontal"
+      ng-controller="DimRedCtrl"
+      ng-show="dataAvailable">
+  <div class="form-group">
+    <label class="col-lg-1 control-label text-right"
+           popover="Dimensionality Reduction"
+           popover-trigger="mouseenter">Dim. Red:</label>
+
+    <div class="col-lg-2 adjusted-right-padding">
+      <select class="form-control input-sm"
+              ng-disabled="dimRedMethods.length <= 1"
+              ng-model="selectedDimRedMethod"
+              ng-options="method.name for method in dimRedMethods">
+      </select>
+    </div>
+    <div class="col-lg-9 no-left-padding">
+      <!-- disabled for now, we assume default settings
+      <button type="button" class="btn btn-default btn-sm">
+        <span class="glyphicon glyphicon-cog"></span>
+      </button>
+      -->
+      <button type="button" class="btn btn-default btn-sm"
+              ng-click="openSelectionDialog()"
+              ng-disabled="dimRedMethods.length === 0"
+              popover={{selectionTextLong}}
+              popover-trigger="mouseenter">{{selectionText}}</button>
+      <button type="button" class="btn btn-default btn-sm"
+              ng-disabled="configurationInvalid"
+              ng-click="reduceDimensionality()">Reduce</button>
+    </div>
+  </div>
+</form>
