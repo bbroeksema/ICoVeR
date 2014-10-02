@@ -31,10 +31,10 @@ cluster.methods <- function() {
 dimred.methods <- function() {
   list(
     "pca" = list(
-      "vars" = list("type"="schema.numeric", "group.type"="!Frequencies")
+      "restrict" = list("type"="schema.numeric", "group.type"="!Frequencies")
     ),
     "ca" = list(
-      "vars" = list("type"="schema.numeric", "group.type"="Frequencies")
+      "restrict" = list("type"="schema.numeric", "group.type"="Frequencies")
     )
   )
 }
