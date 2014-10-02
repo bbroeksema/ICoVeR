@@ -46,8 +46,17 @@ angular.module('contigBinningApp.services')
         });
       },
 
-      project: function() {
-        // Trigger dimensionality reduction and store results... somehow...
+      reduce: function(method, variables) {
+        var fnArgs = {
+          vars: variables
+        }
+        if (DataSet.rows()) {
+          fnArgs.rows = DataSet.rows();
+        }
+
+        ocpu.call("dimred." + method, fnArgs, function(session) {
+          $rootScope.$broadcast("Analytics::dimensionalityReduced", method, session);
+        });
       }
     }
 

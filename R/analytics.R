@@ -1,3 +1,4 @@
+library(FactoMineR)
 
 cluster.kmeans <- function(rows = c(), vars, centers = NA, iter.max=10) {
   clusterData <- data.get(rows, vars)
@@ -39,9 +40,14 @@ dimred.methods <- function() {
   )
 }
 
-# TODO for Dim red.
+# dimred.pca(vars = c("M4", "M20", "M28", "M36", "M40", "M44", "M48"))
+dimred.pca <- function(rows=c(), vars) {
+  data <- data.get(rows, vars)
+  PCA(data[, vars], graph=F) # data.get adds a rows attribute to the data frame.
+}
 
-# dimred.methods <- function() .....
-#
-# dimred.pca <- function(rows = c()) # maybe other params?
-# dimred.ca <- function(rows = c()) # maybe other params?
+# dimred.ca(vars=c("aaaa","aaac","aaag","aaat","aaca","aacc","aacg","aact","aaga","aagc","aagg","aagt","aata","aatc","aatg","aatt","acaa","acac","acag","acat","acca","accc","accg","acct","acga","acgc","acgg","acgt","acta","actc","actg","actt","agaa","agac","agag","agat","agca","agcc","agcg","agct","agga","aggc","aggg","aggt","agta","agtc","agtg","agtt","ataa","atac","atag","atat","atca","atcc","atcg","atct","atga","atgc","atgg","atgt","atta","attc","attg","attt","caaa","caac","caag","caat","caca","cacc","cacg","cact","caga","cagc","cagg","cagt","cata","catc","catg","catt","ccaa","ccac","ccag","ccat","ccca","cccc","cccg","ccct","ccga","ccgc","ccgg","ccgt","ccta","cctc","cctg","cctt","cgaa","cgac","cgag","cgat","cgca","cgcc","cgcg","cgct","cgga","cggc","cggg","cggt","cgta","cgtc","cgtg","cgtt","ctaa","ctac","ctag","ctat","ctca","ctcc","ctcg","ctct","ctga","ctgc","ctgg","ctgt","ctta","cttc","cttg","cttt"))
+dimred.ca <- function(rows=c(), vars) {
+  data <- data.get(rows, vars)
+  CA(data[, vars], graph=F)
+}
