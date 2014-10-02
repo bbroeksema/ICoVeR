@@ -18,7 +18,9 @@ angular.module('contigBinningApp.services')
     
     OpenCPU.json("dimred.methods", {}, function(session, response) {
       d.dimRedMethods = _.reduce(_.keys(response), function(methods, method) {
-        methods.push({ name: method, args: response[method] });
+        var cfg = response[method];
+        cfg.name = method;
+        methods.push(cfg);
         return methods;
       }, []);
       $rootScope.$broadcast("Analytics::dimRedMethodsAvailable", d.dimRedMethods);
