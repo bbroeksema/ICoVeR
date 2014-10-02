@@ -109,10 +109,10 @@ angular.module('contigBinningApp.controllers')
       dialog.result.then(updateSelectedVariables);
     };
 
-    $scope.cluster = function() {
-      Analytics.cluster(
-        $scope.selectedClusterMethod.name,
-        _.map($scope.selectedVariables, function(variable) { return variable.name; }),
-        null);
+    $scope.reduceDimensionality = function() {
+      var drMethod = $scope.selectedDimRedMethod.name,
+          vars = _.pluck($scope.selectedVariables, 'name');
+
+      Analytics.reduce(drMethod, vars);
     }
   });
