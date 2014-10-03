@@ -38,19 +38,22 @@
     </nav>
 
     <div id="main">
-      <div id="parcoords" class="parcoords" ng-controller="ParcoordsCtrl">
+      <!-- Top half of the sceen -->
+      <div id="top" class="row">
+        <div id="parcoords" class="parcoords" ng-controller="ParcoordsCtrl">
+        </div>
       </div>
 
-      <div id="controls" class="row">
-        <div class="col-lg-12">
-
+      <!-- Bottom half of the sceen -->
+      <div id="bottom" class="row">
+        <!-- Control tabs -->
+        <div id="controls" class="col-lg-6">
           <ul class="nav nav-tabs" role="tablist">
             <li class="active"><a href="#actions" role="tab" data-toggle="tab">Actions</a></li>
             <li><a href="#appearance" role="tab" data-toggle="tab">Appearance</a></li>
             <li ><a href="#scatterplot" role="tab" data-toggle="tab">Scatterplot</a></li>
           </ul>
 
-          <!-- Tab panes -->
           <div class="tab-content">
             <div class="tab-pane container-fluid active" id="actions">
               <ng-include src="'js/templates/filterctrl.html'"></ng-include>
@@ -66,8 +69,14 @@
             </div>
           </div>
         </div>
+
+        <!-- Scatterplot -->
+        <div class="col-lg-6">
+          <div id="scatterplotDiv" ng-controller="ScatterplotCtrl">
+          </div>
+        </div>
       </div>
-    </div><!-- /.container -->
+    </div>
 
     <script src="libs/lodash/lodash-2.4.1.js"></script>
     <script src="libs/jquery/jquery-1.11.1.js"></script>

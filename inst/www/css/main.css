@@ -44,10 +44,19 @@ html, body {
   margin: 50px auto 0px;
 }
 
+#top {
+  height: 60%;
+  margin: 0px;
+  margin-bottom: 10px;
+}
+
+#bottom {
+  height: 40%;
+}
+
 #parcoords {
   width: 100%;
-  height: 60%;
-  margin: 10px 0px;
+  height: 100%;
 }
 
 #controls {
