@@ -1,12 +1,8 @@
 var crpgl = crpgl || {};
 
 crpgl.DimRedPlot = function() {
-  var width = 500,
-      height = 500,
-      scales = {
-        x: d3.scale.linear(),
-        y: d3.scale.linear()
-      }
+  var size = { width: 500, height: 500 }
+      scales = { x: d3.scale.linear(),y: d3.scale.linear() }
       render = {};
     
   function prop(name) {
@@ -23,12 +19,12 @@ crpgl.DimRedPlot = function() {
   
   function updateScales(data) {
     var domain = d3.extent(data, prop("projection.x")), // input domain
-        range = [0, width];  // output range
+        range = [0, size.width];  // output range
     
     scales.x.domain(domain).range(range);
     
     domain = d3.extent(data, prop("projection.y"));
-    range = [height, 0];
+    range = [size.height, 0];
     scales.y.domain(domain).range(range);
   }
   
@@ -46,8 +42,8 @@ crpgl.DimRedPlot = function() {
   
   render.resize = function(svg) {
     svg
-      .attr("width", width)
-      .attr("height", height);
+      .attr("width", size.width)
+      .attr("height", size.height);
   };
   
   render.points = function(svg, points) {
@@ -69,8 +65,8 @@ crpgl.DimRedPlot = function() {
     rect
       .attr("x", 0)
       .attr("y", 0)
-      .attr("width", width)
-      .attr("height", height);
+      .attr("width", size.width)
+      .attr("height", size.height);
   };
 
   function drp(selection) {
@@ -88,14 +84,14 @@ crpgl.DimRedPlot = function() {
   }
 
   drp.width = function(_) {
-    if (!arguments.length) return width;
-    width = _;
+    if (!arguments.length) return size.width;
+    size.width = _;
     return drp;
   };
   
   drp.height = function(_) {
-    if (!arguments.length) return height;
-    height = _;
+    if (!arguments.length) return size.height;
+    size.height = _;
     return drp;
   }
 
