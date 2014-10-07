@@ -2,6 +2,10 @@ var crpgl = crpgl || {};
 
 crpgl.DimRedPlot = function() {
   var size = { width: 500, height: 500 },
+      origin = {
+        size: 25,
+        visible: true
+      },
       margins = { top: 15, bottom: 15, left: 15, right: 15 },
       scales = { 
         x: d3.scale.linear(),
@@ -87,6 +91,29 @@ crpgl.DimRedPlot = function() {
       .attr("height", size.height);
   };
 
+  render.origin = function(svg) {
+    var gPoints = svg.select("g.points");
+        lines = origin.visible ? [
+          { // Horizontal line
+            x1: scales.x(0) - (origin.size / 2), y1: scales.y(0),
+            x2: scales.x(0) + (origin.size / 2), y2: scales.y(0),
+          },
+          { // Vertical line
+            x1: scales.x(0), y1: scales.y(0) - (origin.size / 2),
+            x2: scales.x(0), y2: scales.y(0) + (origin.size / 2),
+          },
+        ] : [],
+        originLines = gPoints.selectAll("line.origin").data(lines);
+
+    originLines.enter().append("line").attr("class", "origin");
+    originLines
+      .attr("x1", prop("x1"))
+      .attr("y1", prop("y1"))
+      .attr("x2", prop("x2"))
+      .attr("y2", prop("y2"));
+    originLines.exit().remove();
+  }
+
   function drp(selection) {
     var svg;
     selection.each(function(data) {
@@ -98,6 +125,7 @@ crpgl.DimRedPlot = function() {
       render.resize(svg);
       render.outline(svg);
       render.points(svg, data);
+      render.origin(svg);
     });
   }
 
@@ -121,7 +149,19 @@ crpgl.DimRedPlot = function() {
     if (!arguments.length) return size.height;
     size.height = _;
     return drp;
-  }
+  };
+
+  drp.originVisible = function(_) {
+    if (!arguments.length) return origin.visible;
+    origin.visible = _;
+    return drp;
+  };
+
+  drp.originSize = function(_) {
+    if (!arguments.length) return origin.size;
+    origin.size = _;
+    return drp;
+  };
 
   return drp;
 }

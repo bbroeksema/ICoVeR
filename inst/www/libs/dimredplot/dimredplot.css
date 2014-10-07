@@ -10,3 +10,9 @@
   stroke-width: 1px;
   stroke: steelblue;
 }
+
+.dimredplot .origin {
+  fill: none;
+  stroke: #bbb;
+  stroke-width: 1px;
+}
