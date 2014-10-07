@@ -1,0 +1,12 @@
+.dimredplot .outline {
+  fill: none;
+  stroke-width: 1px;
+  stroke: #ddd;
+}
+
+.dimredplot .point {
+  fill: steelblue;
+  fill-opacity: .8;
+  stroke-width: 1px;
+  stroke: steelblue;
+}
