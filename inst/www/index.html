@@ -8,7 +8,7 @@
 
     <link href="libs/fontawesome/css/font-awesome.css" rel="stylesheet">
     <link href="libs/parcoords/d3.parcoords.css" rel="stylesheet">
-    <link href="libs/scatterplot/scatterplot.css" rel="stylesheet">
+    <link href="libs/dimredplot/dimredplot.css" rel="stylesheet">
     <link href="css/light.css" rel="stylesheet" id="maincss">
   </head>
   <body>
@@ -47,7 +47,7 @@
       <!-- Bottom half of the sceen -->
       <div id="bottom" class="row">
         <!-- Control tabs -->
-        <div id="controls" class="col-lg-6">
+        <div id="controls" class="col-lg-5">
           <ul class="nav nav-tabs" role="tablist">
             <li class="active"><a href="#actions" role="tab" data-toggle="tab">Actions</a></li>
             <li><a href="#appearance" role="tab" data-toggle="tab">Appearance</a></li>
@@ -65,15 +65,15 @@
               <ng-include src="'js/templates/parcoordsctrl.html'"></ng-include>
             </div>
             <div class="tab-pane container-fluid" id="scatterplot">
+            <!--
               <ng-include src="'js/templates/scatterplot.html'"></ng-include>
+            -->
             </div>
           </div>
         </div>
 
         <!-- Scatterplot -->
-        <div class="col-lg-6">
-          <div id="scatterplotDiv" ng-controller="ScatterplotCtrl">
-          </div>
+        <div id="dimRedPlot" class="col-lg-5" ng-controller="DimRedPlotCtrl">
         </div>
       </div>
     </div>
@@ -84,8 +84,7 @@
     <script src="libs/opencpu/opencpu-0.5.js"></script>
     <script src="libs/d3/d3.js"></script>
     <script src="libs/parcoords/d3.parcoords.js"></script>
-    <script src="libs/scatterplot/polybrush.js"></script>
-    <script src="libs/scatterplot/scatterplot.js"></script>
+    <script src="libs/dimredplot/dimredplot.js"></script>
     <script src="libs/angularjs/angular-1.2.21.js"></script>
     <script src="libs/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js"></script>
 
@@ -97,6 +96,7 @@
     <script src="js/controllers/filterctrl.js"></script>
     <script src="js/controllers/clusterctrl.js"></script>
     <script src="js/controllers/dimredctrl.js"></script>
+    <script src="js/controllers/dimredplotctrl.js"></script>
     <script src="js/controllers/colorctrl.js"></script>
     <script src="js/controllers/themectrl.js"></script>
     <script src="js/controllers/variableselectionctrl.js"></script>

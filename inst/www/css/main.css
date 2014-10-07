@@ -39,7 +39,7 @@ html, body {
 }
 
 #main {
-  height: calc(100% - 50px);
+  height: 100%;
   width: 100%;
   margin: 50px auto 0px;
 }
@@ -60,5 +60,9 @@ html, body {
 }
 
 #controls {
-  padding-left: 10px;
+  margin-left: 10px;
+}
+
+#dimRedPlot {
+  height: 100%;
 }
