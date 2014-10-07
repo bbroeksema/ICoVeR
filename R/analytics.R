@@ -51,3 +51,25 @@ dimred.ca <- function(rows=c(), vars) {
   data <- data.get(rows, vars)
   FactoMineR::CA(data[, vars], graph=F)
 }
+
+dimred.ca.plotdata <- function(ca, dimensions=c(1,2)) {
+  # Now wrangle the result in a format suitable for plotting.
+  dimensions = dimensions[1:2] # A plot can only show two dimensions.
+  plotdata <- data.frame(ca$col$coord[,dimensions], ca$col$contrib[,dimensions])
+  plotdata <- data.frame(rownames(plotdata), plotdata)
+  plotdata <- data.frame(plotdata, cutree(hclust(dist(plotdata[,c(2,3)])), k=c(2:nrow(plotdata))))
+
+  colnames(plotdata) <- c("label", "projection.x", "projection.y", "contrib.x",
+                          "contrib.y",
+                          mapply(function(x) paste("clust.", x, sep=""),
+                                 c(2:nrow(plotdata))))
+
+  eigenvalues = c(ca$eig[dimensions[1], 2], ca$eig[dimensions[2], 2])
+  list(
+    plotdata=plotdata,
+    meta=list(
+      dims=dimensions,
+      eig=eigenvalues
+    )
+  )
+}
