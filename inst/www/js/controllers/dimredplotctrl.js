@@ -5,6 +5,10 @@ angular.module('contigBinningApp.controllers')
 
     var plot = crpgl.DimRedPlot();
     
+    plot
+      .originSize(30);
+      .originVisible(true);
+
     function resize() {
       plot
         .width($element[0].clientWidth)
