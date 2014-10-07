@@ -1,8 +1,9 @@
 var crpgl = crpgl || {};
 
 crpgl.DimRedPlot = function() {
-  var size = { width: 500, height: 500 }
-      scales = { x: d3.scale.linear(),y: d3.scale.linear() }
+  var size = { width: 500, height: 500 },
+      margins = { top: 5, bottom: 5, left: 5, right: 5 },
+      scales = { x: d3.scale.linear(),y: d3.scale.linear() },
       render = {};
     
   function prop(name) {
@@ -19,12 +20,12 @@ crpgl.DimRedPlot = function() {
   
   function updateScales(data) {
     var domain = d3.extent(data, prop("projection.x")), // input domain
-        range = [0, size.width];  // output range
+        range = [0 + margins.left, size.width - margins.right];  // output range
     
     scales.x.domain(domain).range(range);
     
     domain = d3.extent(data, prop("projection.y"));
-    range = [size.height, 0];
+    range = [size.height - margins.top, 0 + margins.bottom];
     scales.y.domain(domain).range(range);
   }
   
@@ -81,6 +82,16 @@ crpgl.DimRedPlot = function() {
       render.outline(svg);
       render.points(svg, data);
     });
+  }
+
+  drp.margins = function(_) {
+    if (!arguments.length) return margins;
+    
+    if (_.top) marings.top = _.top;
+    if (_.bottom) marings.top = _.bottom;
+    if (_.left) marings.top = _.left;
+    if (_.right) marings.top = _.right;
+    return drp;
   }
 
   drp.width = function(_) {
