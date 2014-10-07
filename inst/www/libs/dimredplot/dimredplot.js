@@ -2,8 +2,13 @@ var crpgl = crpgl || {};
 
 crpgl.DimRedPlot = function() {
   var size = { width: 500, height: 500 },
-      margins = { top: 5, bottom: 5, left: 5, right: 5 },
-      scales = { x: d3.scale.linear(),y: d3.scale.linear() },
+      margins = { top: 15, bottom: 15, left: 15, right: 15 },
+      scales = { 
+        x: d3.scale.linear(),
+        y: d3.scale.linear(),
+        cx: d3.scale.linear(),
+        cy: d3.scale.linear()
+      },
       render = {};
     
   function prop(name) {
@@ -22,11 +27,23 @@ crpgl.DimRedPlot = function() {
     var domain = d3.extent(data, prop("projection.x")), // input domain
         range = [0 + margins.left, size.width - margins.right];  // output range
     
+    // Update the x scale
     scales.x.domain(domain).range(range);
-    
+
+    // Update the y scale
     domain = d3.extent(data, prop("projection.y"));
     range = [size.height - margins.top, 0 + margins.bottom];
     scales.y.domain(domain).range(range);
+
+    // Update the cx scale
+    domain = d3.extent(data, prop("contrib.x"));
+    range = [2, 10]; // A point is at least 2 and max 10 pixels wide.
+    scales.cx.domain(domain).range(range);
+
+    // Update the cy scale
+    domain = d3.extent(data, prop("contrib.y"));
+    range = [2, 10]; // A point is at least 2 and max 10 pixels high.
+    scales.cy.domain(domain).range(range);
   }
   
   render.init = function(svg) {
@@ -54,13 +71,13 @@ crpgl.DimRedPlot = function() {
     rect.enter().append("rect");
     rect.exit().remove();
     rect
-      .attr("x", scaleProp(scales.x, "projection.x"))
-      .attr("y", scaleProp(scales.y, "projection.y"))
-      .attr("width", 2)
-      .attr("height", 2)
+      .attr("x", scaleProp(scales.x, "projection.x")) // TODO: Adjust by 1/2 point width
+      .attr("y", scaleProp(scales.y, "projection.y")) // TODO: Adjust by 1/2 point height
+      .attr("width", scaleProp(scales.cx, "contrib.x"))
+      .attr("height", scaleProp(scales.cy, "contrib.y"))
       .attr("class", "point");
   }
-  
+
   render.outline = function(svg) {
     var rect = svg.select(".outline");
     rect
@@ -99,7 +116,7 @@ crpgl.DimRedPlot = function() {
     size.width = _;
     return drp;
   };
-  
+
   drp.height = function(_) {
     if (!arguments.length) return size.height;
     size.height = _;
