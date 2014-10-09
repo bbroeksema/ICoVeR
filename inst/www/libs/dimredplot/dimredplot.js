@@ -150,6 +150,31 @@ crpgl.DimRedPlot = function() {
       .attr("class", "point");
   };
 
+  render.labels = function(svg, points) {
+    var gPoints = svg.select("g.points"),
+        text = gPoints.selectAll("text"),
+        pointsWithLabels,
+        avgContribution = 100 / points.length;
+
+    // We only render labels for points that have more than average
+    // contribution on both the first and the second active principal axes.
+    pointsWithLabels = points.filter(function(d) {
+      return d[properties.cx] > avgContribution
+        && d[properties.cy] > avgContribution;
+    });
+
+    text = text.data(pointsWithLabels);
+    text.enter().append("text");
+    text
+      .transition()
+      .duration(1500)
+      .attr("x", scaleProp(scales.x, properties.x))
+      .attr("y", scaleProp(scales.y, properties.y))
+      .attr("text-anchor", "start")
+      .text(prop("_row")(d).toUpperCase(); });
+    text.exit().remove();
+  };
+
   render.outline = function(svg) {
     var rect = svg.select(".outline");
     rect
@@ -206,6 +231,7 @@ crpgl.DimRedPlot = function() {
       properties.cy = "contrib." + data.actives[1];
       updateScales(data.projections);
       render.points(svg, data.projections);
+      render.labels(svg, data.projections);
       render.origin(svg);
     });
   }
