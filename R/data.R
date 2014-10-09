@@ -10,7 +10,7 @@ data.schema <- function() {
 
 # data.get(rows = c(1,2,3,5,10), variables = c("gc_content"))
 # data.get(variables = c("gc_content"))
-data.get <- function(rows = NA, variables) {
+data.get <- function(rows = NA, variables, addRows=T) {
   data <- NA;
   if (missing(rows) | length(rows) == 0) {
     rows <- c(1:nrow(gData))
@@ -20,7 +20,9 @@ data.get <- function(rows = NA, variables) {
 
   data <- as.data.frame(data)
   names(data) <- variables
-  data$row <- rows
+  if (addRows) {
+    data$row <- rows
+  }
   data
 }
 
