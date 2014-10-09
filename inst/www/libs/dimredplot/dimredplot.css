@@ -16,3 +16,18 @@
   stroke: #bbb;
   stroke-width: 1px;
 }
+
+.dimredplot .variances .variance {
+  fill: steelblue;
+  fill-opacity: 1;
+  stroke-width: 0px;
+}
+
+.dimredplot .variances .variance.active {
+  fill: lightblue;
+}
+
+.dimredplot .variances .bg {
+  fill: white;
+  cursor: ns-resize;
+}
