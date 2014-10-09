@@ -8,8 +8,27 @@ angular.module('contigBinningApp.controllers')
         pair = 1;
 
     plot
-      .originSize(30);
-      .originVisible(true);
+      .originSize(30)
+      .originVisible(true)
+      .on("rotate", rotate);
+
+    function rotate(drp, direction) {
+      var update = false;
+      if (direction === "up" && pair > 1) {
+        pair = pair - 1;
+        update = true;
+      } else if (direction === "down" && pair < data.explainedVariance.length -1) {
+        pair = pair + 1;
+        update = true;
+      }
+
+      if (update) {
+        data.actives = [pair, pair + 1];
+        d3.select($element[0])
+          .datum(data)
+          .call(plot);
+      }
+    }
 
     function resize() {
       plot
