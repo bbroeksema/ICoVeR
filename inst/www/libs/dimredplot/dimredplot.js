@@ -171,7 +171,7 @@ crpgl.DimRedPlot = function() {
       .attr("x", scaleProp(scales.x, properties.x))
       .attr("y", scaleProp(scales.y, properties.y))
       .attr("text-anchor", "start")
-      .text(prop("_row")(d).toUpperCase(); });
+      .text(prop("_row"));
     text.exit().remove();
   };
 
