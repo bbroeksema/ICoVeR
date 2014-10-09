@@ -3,8 +3,10 @@
 angular.module('contigBinningApp.controllers')
   .controller('DimRedPlotCtrl', function ($scope, $element, $window, OpenCPU) {
 
-    var plot = crpgl.DimRedPlot();
-    
+    var plot = crpgl.DimRedPlot(),
+        data = undefined,
+        pair = 1;
+
     plot
       .originSize(30);
       .originVisible(true);
@@ -16,10 +18,18 @@ angular.module('contigBinningApp.controllers')
       d3.select($element[0]).call(plot);
     }
     
-    function updatePlot(session, json) {
-      console.log(json);
+    function updatePlot(session, dimRedData) {
+      data = dimRedData;
+      data.actives = [pair, pair + 1];
+      // TODO: Introduce various ways to 'cut' the number of principal axes.
+      //       Various approaches could be taken, such as taking the axes upto
+      //       a certain amount of explained variances or retaint only the
+      //       first N principal axes. In both cases the variance and N should
+      //       be configurable by the user.
+      //data.explainedVariance = data.explainedVariance.slice(0, 10);
+
       d3.select($element[0])
-        .datum(json.plotdata)
+        .datum(data)
         .call(plot);
     }
 
