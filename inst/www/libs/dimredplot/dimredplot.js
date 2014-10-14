@@ -164,7 +164,9 @@ crpgl.DimRedPlot = function() {
     });
 
     text = text.data(pointsWithLabels);
-    text.enter().append("text");
+    text.enter().append("text")
+      .attr("pointer-events", "none");
+
     text
       .transition()
       .duration(1500)
