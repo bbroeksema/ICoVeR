@@ -139,6 +139,7 @@ crpgl.DimRedPlot = function() {
     // considered the important ones.
 
     rect.enter().append("rect")
+      .attr("class", "point")
       .on("click", function(d) {
         var values = [d["_row"]];
 
@@ -159,8 +160,7 @@ crpgl.DimRedPlot = function() {
       .attr("x", scaleProp(scales.x, properties.x)) // TODO: Adjust by 1/2 point width
       .attr("y", scaleProp(scales.y, properties.y)) // TODO: Adjust by 1/2 point height
       .attr("width", scaleProp(scales.cx, properties.cx))
-      .attr("height", scaleProp(scales.cy, properties.cy))
-      .attr("class", "point");
+      .attr("height", scaleProp(scales.cy, properties.cy));
   };
 
   render.labels = function(svg, points) {
