@@ -21,7 +21,7 @@ crpgl.DimRedPlot = function() {
         cy: d3.scale.linear()
       },
       render = {},
-      events = d3.dispatch.apply(this, ["rotate"]);
+      events = d3.dispatch.apply(this, ["rotate", "pointclick"]);
 
   function prop(name) {
     return function(x) {
@@ -138,7 +138,20 @@ crpgl.DimRedPlot = function() {
     // a contribution larger than the average contribute (1/numberOfVars) are
     // considered the important ones.
 
-    rect.enter().append("rect");
+    rect.enter().append("rect")
+      .on("click", function(d) {
+        var values = [d["_row"]];
+
+        if (d.hasOwnProperty("points")) {
+          values = _.reduce(d.points, function(values, point) {
+            values.push(point["_row"]);
+            return values;
+          }, []);
+        }
+
+        events.pointclick(values);
+      });
+
     rect.exit().remove();
     rect
       .transition()
