@@ -55,24 +55,36 @@ dimred.ca <- function(rows=c(), vars) {
   FactoMineR::CA(data, ncp=length(vars), graph=F)
 }
 
-dimred.ca.plotdata <- function(ca, dimensions=c(1,2)) {
+dimred.ca.plotdata <- function(ca) {
   # Now wrangle the result in a format suitable for plotting.
-  dimensions = dimensions[1:2] # A plot can only show two dimensions.
-  plotdata <- data.frame(ca$col$coord[,dimensions], ca$col$contrib[,dimensions])
-  plotdata <- data.frame(rownames(plotdata), plotdata)
-  plotdata <- data.frame(plotdata, cutree(hclust(dist(plotdata[,c(2,3)])), k=c(2:nrow(plotdata))))
+  plotdata <- data.frame(ca$col$coord, ca$col$contrib)
+  # Set some propert column names.
+  # There are N - 1 factors, where N is the dimensionality of the original dataset
+  factors <- c(1:(nrow(plotdata) - 1))
+  colNames <- c(mapply(function(x) paste("factor.", x, sep=""), factors),
+                mapply(function(x) paste("contrib.", x, sep=""), factors))
 
-  colnames(plotdata) <- c("label", "projection.x", "projection.y", "contrib.x",
-                          "contrib.y",
-                          mapply(function(x) paste("clust.", x, sep=""),
-                                 c(2:nrow(plotdata))))
+  # If we have N coordinates, we have N-1 pairs of (consecutive) coordinates.
+  # For each pair, we perfom hierarchical clusterings, and make cuts in the
+  # resulting tree to get clusterings with 2,3,4,...,12 clusters. (So eleven
+  # clusterings for each pair).
+  pairs <- c(1:(ncol(ca$col$coord) - 1))
+  mapply(function(pair) {
+    pairData <- plotdata[,c(pair, pair + 1)]
+    pairDistances <- dist(pairData)
+    clusterings <- cutree(hclust(pairDistances), k=c(2:12))
+    cnames <- mapply(function(x) paste("clustering.", pair, ".", x, sep=""), c(2:12))
 
-  eigenvalues = c(ca$eig[dimensions[1], 2], ca$eig[dimensions[2], 2])
+    # Note: the double << are required to assign new values to variables outside
+    #       the scope of this mapply.
+    plotdata <<- data.frame(plotdata, clusterings)
+    colNames <<- c(colNames, cnames)
+  }, pairs)
+
+  colnames(plotdata) <- colNames;
+
   list(
-    plotdata=plotdata,
-    meta=list(
-      dims=dimensions,
-      eig=eigenvalues
-    )
+    projections=plotdata,
+    explainedVariance=ca$eig$"percentage of variance"
   )
 }
