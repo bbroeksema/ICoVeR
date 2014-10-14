@@ -5,7 +5,8 @@ angular.module('contigBinningApp.controllers')
 
     var plot = crpgl.DimRedPlot(),
         data = undefined,
-        pair = 1;
+        pair = 1,
+        clusterCount = 1;
 
     plot
       .originSize(30)
@@ -28,6 +29,63 @@ angular.module('contigBinningApp.controllers')
           .datum(data)
           .call(plot);
       }
+    }
+
+    // TODO: Connect slider changes to this function.
+    function cluster(drp, newClusterCount) {
+      var clusteredData = {
+            projections: data.projections,
+            actives: data.actives,
+            explainedVariance: data.explainedVariance
+          };
+
+      if (clusterCount === newClusterCount)
+        return; // Nothing to do.
+
+      clusterCount = newClusterCount;
+      if (clusterCount > 1) {
+        var prop = { cluster: "clustering." + pair  + "." + clusterCount },
+            clustered = _.groupBy(data.projections, prop.cluster),
+            points = [];
+
+        prop.factorX = "factor." + data.actives[0];
+        prop.factorY = "factor." + data.actives[1];
+        prop.contribX = "contrib." + data.actives[0];
+        prop.contribY = "contrib." + data.actives[1];
+
+        clusteredData.actives = data.actives;
+
+        _.forIn(clustered, function(cluster, id) {
+          // cluster is an array of points.
+          // The position of the cluster is determined by taking averages for
+          // x and y positions. The size of the cluster is determined by
+          // summing contributions.
+          var clusterPoint = {};
+          clusterPoint[prop.factorX] = 0;
+          clusterPoint[prop.factorY] = 0;
+          clusterPoint[prop.contribX] = 0;
+          clusterPoint[prop.contribY] = 0;
+          clusterPoint.points = cluster;
+
+          _.forEach(cluster, function(point) {
+            clusterPoint[prop.factorX] += point[prop.factorX];
+            clusterPoint[prop.factorY] += point[prop.factorY];
+            clusterPoint[prop.contribX] += point[prop.contribX];
+            clusterPoint[prop.contribY] += point[prop.contribY];
+          });
+
+          // Average the position
+          clusterPoint[prop.factorX] /= cluster.length;
+          clusterPoint[prop.factorY] /= cluster.length;
+          points.push(clusterPoint);
+        });
+
+        clusteredData.projections = points;
+      }
+
+      d3.select($element[0])
+        .datum(clusteredData)
+        .call(plot);
     }
 
     function resize() {
