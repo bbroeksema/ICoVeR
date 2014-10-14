@@ -49,13 +49,13 @@ crpgl.DimRedPlot = function() {
     scales.y.domain(domain).range(range);
 
     // Update the cx scale
-    domain = d3.extent(data, prop(properties.cx));
-    range = [2, 10]; // A point is at least 2 and max 10 pixels wide.
+    domain = [0, 100]; // Contributions are in %
+    range = [2, 50];
     scales.cx.domain(domain).range(range);
 
     // Update the cy scale
-    domain = d3.extent(data, prop(properties.cy));
-    range = [2, 10]; // A point is at least 2 and max 10 pixels high.
+    domain = [0, 100]; // Contributions are in %
+    range = [2, 50];
     scales.cy.domain(domain).range(range);
   }
 
