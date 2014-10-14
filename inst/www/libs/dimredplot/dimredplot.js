@@ -141,13 +141,14 @@ crpgl.DimRedPlot = function() {
     rect.enter().append("rect")
       .attr("class", "point")
       .on("click", function(d) {
-        var values = [d["_row"]];
+        var values = {};
 
         if (d.hasOwnProperty("points")) {
-          values = _.reduce(d.points, function(values, point) {
-            values.push(point["_row"]);
-            return values;
-          }, []);
+          _.each(d.points, function(point) { 
+            values[point["_row"]] = [point[properties.cx], point[properties.cy]];
+          });
+        } else {
+          values[d["_row"]] = [d[properties.cx], d[properties.cy]];
         }
 
         events.pointclick(values);
