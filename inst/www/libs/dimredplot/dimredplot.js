@@ -130,7 +130,7 @@ crpgl.DimRedPlot = function() {
 
   render.points = function(svg, points) {
     var gPoints = svg.select("g.points"),
-        rect = gPoints.selectAll("rect").data(points);
+        rect = gPoints.selectAll("rect.point").data(points);
 
     // Points width and height are based on their contributions to their
     // respective principal axes. Contributions help locating the the variables
