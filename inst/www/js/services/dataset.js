@@ -4,7 +4,8 @@ angular.module('contigBinningApp.services')
   .service('DataSet', function($rootScope, $http, OpenCPU) {
     var constants = {
       GT_ANALYTICS: "Analytics",
-      G_CLUSTERINGS: "clusterings"
+      G_CLUSTERINGS: "Clusterings",
+      G_SUMMARIES: "Summaries"
     };
     var d = {
       id: undefined,
@@ -15,6 +16,7 @@ angular.module('contigBinningApp.services')
         rows: undefined,
         analytics: {
           clusterings: {},
+          summaries: {}
         }
       }
     };
@@ -55,6 +57,43 @@ angular.module('contigBinningApp.services')
       } // else nothing to do.
     });
 
+    $rootScope.$on("Analytics::variablesSummarized", function(ev, variableContributions, session) {
+      function sum(array) {
+        return _.reduce(array, function(a, b) { return a + b; }, 0);
+      }
+
+      var summaryName = _.chain(variableContributions)
+        .map(function(contribs, variable) {
+          return { variable: variable, contrib: sum(contribs) };
+        })
+        .sortBy('contrib')
+        .reverse()
+        .first(2)
+        .pluck('variable')
+        .join('-')
+        .value();
+
+      // Prepend a distinghuising string, so that we don't inadvertly replace
+      // one of the existing variables.
+      summaryName = "smry-" + summaryName;
+
+      // TODO: When different clustering levels, result in clusters where the
+      //       two most important variables are the same, this will result in an
+      //       earlier calculated summary being replaced.
+      d.backend.analytics.summaries[summaryName] = session;
+      if (!d.backend.schemaIndex.hasOwnProperty(summaryName)) {
+        var variable = {
+          "group.type": constants.GT_ANALYTICS,
+          "group": constants.G_SUMMARIES,
+          "name": summaryName,
+          "type": "numeric"
+        };
+        d.backend.schema.push(variable);
+        d.backend.schemaIndex = _.indexBy(d.backend.schema, "name");
+      }
+      $rootScope.$broadcast("DataSet::schemaLoaded", d.backend.schema);
+    });
+
     return {
       FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE', RESET: 'RESET' },
 
@@ -72,7 +111,7 @@ angular.module('contigBinningApp.services')
       get: function(variables) {
         var args = {},
             schemaIndex = d.backend.schemaIndex,
-            varsByGroup = { clustervars: [], datavars: [] },
+            varsByGroup = { clustervars: [], datavars: [], summaryvars: [] },
             varsLoaded = {},
             varsData = undefined;
 
@@ -122,6 +161,9 @@ angular.module('contigBinningApp.services')
             case constants.G_CLUSTERINGS:
               varsByGroup.clustervars.push(variable);
               break;
+            case constants.G_SUMMARIES:
+              varsByGroup.summaryvars.push(variable);
+              break;
             // TODO:
             // case constants.G_DIMRED:
             //   varsByGroup.dimredvars.push(variable);
@@ -163,6 +205,28 @@ angular.module('contigBinningApp.services')
               dataReceived(values);
             }); // (data, status, headers, config)
         })
+
+        // For each of the requested summaries, trigger an http get to retrieve
+        // the summary values from their respective ocpu sessions.
+        var smryVariables = _.pluck(varsByGroup.summaryvars);
+        _.each(smryVariables, function(smryVariable) {
+          var session = d.backend.analytics.summaries[smryVariable.name];
+          $http({ method: 'GET', url: session.loc + "R/.val/json?auto_unbox=true" })
+            .success(function(data) { // (data, status, headers, config)
+              // This is a row, summary map. E.g.:
+              // { 1: 14, 2: 14, 3: 2, etc}
+              //
+              // Remember, the rows come from R and R indexes start at 1!
+              //
+              // [ { row: 1, smry-aaaa-aaat: 0.023}, {row: 2, smry-aaaa-aaat: 1.2401}, etc]
+              var values = _.map(_.keys(data), function(key) {
+                var value = { row: key };
+                value[smryVariable.name] = data[key];
+                return value;
+              });
+              dataReceived(values);
+            });
+        });
 
 
         // TODO: Implement dr methods in the backend
