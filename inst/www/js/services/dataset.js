@@ -1,5 +1,8 @@
 'use strict';
 
+/*global angular, _, ocpu*/
+/*jslint todo:true, unparam: true*/
+
 angular.module('contigBinningApp.services')
   .service('DataSet', function($rootScope, $http, OpenCPU) {
     var constants = {
@@ -22,13 +25,11 @@ angular.module('contigBinningApp.services')
     };
 
     // Initialize the schema as soon as the Dataset service is initialized.
-    OpenCPU.json("data.schema", null, notifySchemaLoad);
-
-    function notifySchemaLoad(session, schema) {
+    OpenCPU.json("data.schema", null, function(session, schema) {
       d.backend.schema = schema;
       d.backend.schemaIndex = _.indexBy(schema, 'name');
       $rootScope.$broadcast("DataSet::schemaLoaded", schema);
-    }
+    });
 
     // Listen to the analytics service to store the results of various
     // analytical actions.
@@ -37,8 +38,8 @@ angular.module('contigBinningApp.services')
 
       var vars = _.filter(d.backend.schema, function(variable) {
         return variable["group.type"] === constants.GT_ANALYTICS
-          && variable["group"] === constants.G_CLUSTERINGS
-          && variable["name"] === method;
+          && variable.group === constants.G_CLUSTERINGS
+          && variable.name === method;
       });
 
       if (vars.length === 0) {
@@ -48,7 +49,7 @@ angular.module('contigBinningApp.services')
           "group": constants.G_CLUSTERINGS,
           "name": method,
           "type": "factor"
-        }
+        };
         d.backend.schema.push(variable);
         d.backend.schemaIndex = _.indexBy(d.backend.schema, 'name');
         // TODO: This should problably change into DataSet::schemaChanged to
@@ -113,7 +114,7 @@ angular.module('contigBinningApp.services')
             schemaIndex = d.backend.schemaIndex,
             varsByGroup = { clustervars: [], datavars: [], summaryvars: [] },
             varsLoaded = {},
-            varsData = undefined;
+            varsData;
 
         // Some helper functions we need for processing the get request.
         function loaded(name) {
@@ -157,7 +158,7 @@ angular.module('contigBinningApp.services')
           varsLoaded[name] = false;
 
           var variable = schemaIndex[name];
-          switch(variable["group"]) {
+          switch(variable.group) {
             case constants.G_CLUSTERINGS:
               varsByGroup.clustervars.push(variable);
               break;
@@ -201,10 +202,10 @@ angular.module('contigBinningApp.services')
                 var value = { row: key };
                 value[method] = data[key];
                 return value;
-              })
+              });
               dataReceived(values);
             }); // (data, status, headers, config)
-        })
+        });
 
         // For each of the requested summaries, trigger an http get to retrieve
         // the summary values from their respective ocpu sessions.
