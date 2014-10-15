@@ -57,6 +57,18 @@ angular.module('contigBinningApp.services')
         ocpu.call("dimred." + method, fnArgs, function(session) {
           $rootScope.$broadcast("Analytics::dimensionalityReduced", method, session);
         });
+      },
+
+      summarize: function(variableWeights) {
+        var fnArgs = { variableWeights: variableWeights };
+
+        if (DataSet.rows()) {
+          fnArgs.rows = DataSet.rows();
+        }
+
+        ocpu.call("dimred.summarize", fnArgs, function(session) {
+          $rootScope.$broadcast("Analytics::variablesSummarized", variableWeights, session);
+        });
       }
     }
 
