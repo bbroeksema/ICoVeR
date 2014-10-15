@@ -122,4 +122,7 @@ angular.module('contigBinningApp.controllers')
       
       OpenCPU.json(fnName, args, updatePlot)
     })
+    $scope.$on("DimRedDisplay::cluster", function(ev, clusterCount){
+      cluster(null, clusterCount)
+    });
   });
