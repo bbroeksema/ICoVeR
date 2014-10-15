@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedPlotCtrl', function ($scope, $element, $window, OpenCPU) {
+  .controller('DimRedPlotCtrl', function ($scope, $element, $window, OpenCPU, Analytics) {
 
     var plot = crpgl.DimRedPlot(),
         data = undefined,
@@ -11,7 +11,15 @@ angular.module('contigBinningApp.controllers')
     plot
       .originSize(30)
       .originVisible(true)
-      .on("rotate", rotate);
+      .on("rotate", rotate)
+      .on("pointclick", function(values) {
+        // For now, it is assumed that elements in @param values are actual
+        // column names of the table in the back-end. The thing that needs to
+        // happen at this point is that, in the backend a new variable is
+        // generated, that consists of the weighted sum of @param values for
+        // each observation in the original data table.
+        Analytics.summarize(values);
+      });
 
     function rotate(drp, direction) {
       var update = false;
