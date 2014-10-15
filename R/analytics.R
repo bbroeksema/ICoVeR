@@ -88,3 +88,29 @@ dimred.ca.plotdata <- function(ca) {
     explainedVariance=ca$eig$"percentage of variance"
   )
 }
+
+# dimred.summarize(variableWeights=list(aaaa=c(6.0151, 7.0562), aaat=c(4.7641, 2.7563), aata=c(4.175, 0.851), aatt=c(4.4429, 2.0970), ataa=c(4.1547, 0.8407), atat=c(3.1881, 0.1051), atta=c(4.1958, 0.7357), attt=c(4.7248, 2.7704)))
+dimred.summarize <- function(rows=c(), variableWeights) {
+  data <- data.get(rows, names(variableWeights), addRows=F)
+  vars <- names(variableWeights)
+  summary <- rep(0, nrow(data))
+
+  sapply(vars, function(variable) {
+    weights <- variableWeights[[variable]]
+    col <- data[variable]
+    summary <<- summary + weights[1] * col + weights[2] * col
+  })
+
+  # FIXME: apperently summary is a one-itme list. The item is equal to a column
+  # name (the first one?), the value of this item is a vector with the summary
+  # values. There must be more R-like ways to prevent this from happening.
+  summary <- as.list(summary[[1]])
+
+  rows <- if(missing(rows) | length(rows) == 0)
+    attr(gData, "row.names")
+  else
+    rows
+
+  names(summary) <- rows
+  summary
+}
