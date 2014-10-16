@@ -1,10 +1,13 @@
 'use strict';
 
+/*global angular, crpgl, d3, ocpu, _, $*/
+/*jslint browser: true, todo:true, unparam: true*/
+
 angular.module('contigBinningApp.controllers')
   .controller('DimRedPlotCtrl', function ($scope, $element, $window, OpenCPU, Analytics) {
 
     var plot = crpgl.DimRedPlot(),
-        data = undefined,
+        data,
         pair = 1,
         clusterCount = 1;
 
@@ -47,8 +50,9 @@ angular.module('contigBinningApp.controllers')
             explainedVariance: data.explainedVariance
           };
 
-      if (clusterCount === newClusterCount)
+      if (clusterCount === newClusterCount) {
         return; // Nothing to do.
+      }
 
       clusterCount = newClusterCount;
       if (clusterCount > 1) {
@@ -131,6 +135,6 @@ angular.module('contigBinningApp.controllers')
       OpenCPU.json(fnName, args, updatePlot)
     })
     $scope.$on("DimRedDisplay::cluster", function(ev, clusterCount){
-      cluster(null, clusterCount)
+      cluster(null, clusterCount);
     });
   });

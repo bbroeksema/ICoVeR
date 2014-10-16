@@ -1,7 +1,11 @@
 'use strict';
 
+/*global angular, ocpu, _ */
+/*jslint todo:true, unparam: true*/
+
+
 angular.module('contigBinningApp.services')
-  .service('Analytics', function($rootScope, $http, DataSet, OpenCPU) {
+  .service('Analytics', function($rootScope, DataSet, OpenCPU) {
 
     var d = {
       clusterMethods: [],
@@ -35,7 +39,7 @@ angular.module('contigBinningApp.services')
       cluster: function(method, variables, args) {
         var fnArgs = {
           vars: variables
-        }
+        };
         if (DataSet.rows()) {
           fnArgs.rows = DataSet.rows();
         }
@@ -49,7 +53,7 @@ angular.module('contigBinningApp.services')
       reduce: function(method, variables) {
         var fnArgs = {
           vars: variables
-        }
+        };
         if (DataSet.rows()) {
           fnArgs.rows = DataSet.rows();
         }
@@ -70,6 +74,6 @@ angular.module('contigBinningApp.services')
           $rootScope.$broadcast("Analytics::variablesSummarized", variableWeights, session);
         });
       }
-    }
+    };
 
   });
