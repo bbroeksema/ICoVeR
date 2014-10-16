@@ -82,6 +82,8 @@ plotdata.ca <- function(ca) {
   }, pairs)
 
   colnames(plotdata) <- colNames;
+  plotdata$label <- rownames(plotdata)
+  rownames(plotdata) <- NULL
 
   list(
     projections=plotdata,

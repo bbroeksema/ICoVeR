@@ -145,10 +145,10 @@ crpgl.DimRedPlot = function() {
 
         if (d.hasOwnProperty("points")) {
           _.each(d.points, function(point) { 
-            values[point["_row"]] = [point[properties.cx], point[properties.cy]];
+            values[point.label] = [point[properties.cx], point[properties.cy]];
           });
         } else {
-          values[d["_row"]] = [d[properties.cx], d[properties.cy]];
+          values[d.label] = [d[properties.cx], d[properties.cy]];
         }
 
         events.pointclick(values);
@@ -187,7 +187,7 @@ crpgl.DimRedPlot = function() {
       .attr("x", scaleProp(scales.x, properties.x))
       .attr("y", scaleProp(scales.y, properties.y))
       .attr("text-anchor", "start")
-      .text(prop("_row"));
+      .text(prop("label"));
     text.exit().remove();
   };
 

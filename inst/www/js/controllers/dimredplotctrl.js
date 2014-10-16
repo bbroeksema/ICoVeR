@@ -125,13 +125,6 @@ angular.module('contigBinningApp.controllers')
     angular.element($window).bind('resize', resize);
     $(document).ready(resize);
 
-    // TODO: Remove this because it loads hard coded data. We probably want to
-    //       trigger a CA of TNF by default and update the plot when the results
-    //       get in.
-    d3.json("libs/dimredplot/ca.json", function(error, data) {
-      updatePlot(data);
-    });
-
     $scope.$on("Analytics::dimensionalityReduced", function(ev, method, session) {
       session.getObject(updatePlot);
     });
