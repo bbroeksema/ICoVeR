@@ -66,7 +66,11 @@ angular.module('contigBinningApp.controllers')
 
       DataSet.get(dims);
     });
-    
+
+    $scope.$on("ParCoords::brushPredicateChanged", function() {
+      d.parcoords.brushPredicate(ParCoords.brushPredicate).render();
+    });
+
     $scope.$on("DataSet::dataLoaded", function(ev, data) {
       d.parcoords.data(data);
       render();

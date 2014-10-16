@@ -2,7 +2,8 @@ angular.module('contigBinningApp.controllers')
   .controller('ParCoordsVarsCtrl', function($modal, $scope, ParCoords) {
 
     $scope.parcoords = ParCoords;
-    
+    $scope.brushPredicate = $scope.parcoords.brushPredicates[0];
+
     $scope.openSelectionDialog = function() {
       var dialog = $modal.open({
         templateUrl: 'js/templates/selectvars.html',
@@ -20,5 +21,8 @@ angular.module('contigBinningApp.controllers')
 
       dialog.result.then($scope.parcoords.updateSelectedVariables);
     };
-    
+
+    $scope.$watch("brushPredicate", function(newPredicate) {
+      $scope.parcoords.updateBrushPredicate(newPredicate);
+    });
   });

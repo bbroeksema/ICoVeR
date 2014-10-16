@@ -11,7 +11,10 @@ angular.module('contigBinningApp.services')
       selectedVariables: [], // List of variables currently displayed in parcoords.
       
       selectionText: "",
-      selectionTextLong: ""
+      selectionTextLong: "",
+
+      brushPredicates: ["AND", "OR"],
+      brushPredicate: "AND"
     };
     
     function setVariables(schema) {
@@ -40,6 +43,13 @@ angular.module('contigBinningApp.services')
       d.selectedVariables = variables;
       $rootScope.$broadcast("ParCoords::selectedVariablesChanged");
     }
+
+    d.updateBrushPredicate = function(newPredicate) {
+      if (d.brushPredicate !== newPredicate) {
+        d.brushPredicate = newPredicate;
+        $rootScope.$broadcast("ParCoords::brushPredicateChanged");
+      }
+    };
     
     $rootScope.$on('DataSet::schemaLoaded', function(e, schema) {
       setVariables(schema);
