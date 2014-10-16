@@ -5,6 +5,7 @@ d3.parcoords = function(config) {
     dimensionTitles: {},
     types: {},
     brushed: false,
+    brushPredicate: "AND",
     mode: "default",
     rate: 20,
     width: 600,
@@ -718,6 +719,20 @@ function is_brushed(p) {
 };
 
 // data within extents
+
+pc.brushPredicate = function(predicate) {
+  if (!arguments.length) return __.brushPredicate;
+
+  predicate = ("" + predicate).toUpperCase();
+  if (predicate !== "AND" && predicate !== "OR") {
+    throw "Invalid predicate " + predicate;
+  };
+
+  __.brushPredicate = predicate;
+  __.brushed = selected();
+  return pc;
+};
+
 function selected() {
   var actives = __.dimensions.filter(is_brushed),
       extents = actives.map(function(p) { return yscale[p].brush.extent(); });
@@ -745,9 +760,18 @@ function selected() {
 
   return __.data
     .filter(function(d) {
-      return actives.every(function(p, dimension) {
-        return within[__.types[p]](d,p,dimension);
-      });
+      switch(__.brushPredicate) {
+      case "AND":
+        return actives.every(function(p, dimension) {
+          return within[__.types[p]](d,p,dimension);
+        });
+      case "OR":
+        return actives.some(function(p, dimension) {
+          return within[__.types[p]](d,p,dimension);
+        });
+      default:
+        throw "Unknown brush predicate " + __.brushPredicate;
+      }
     });
 };
 
@@ -791,7 +815,7 @@ d3.renderQueue = (function(func) {
       for (var i = _i; i < end; i++) {
         func(_queue[i], i);
       }
-     _i += _rate;
+      _i += _rate;
     }
 
     d3.timer(doFrame);
