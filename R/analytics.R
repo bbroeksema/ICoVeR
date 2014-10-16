@@ -52,10 +52,10 @@ dimred.ca <- function(rows=c(), vars) {
   #       columns as well. It must be something ling: data x data^T. Its size
   #       is number of cols X number of cols. It should make the operation.
   data <- data.get(rows, vars, addRows=F)
-  FactoMineR::CA(data, ncp=length(vars), graph=F)
+  plotdata.ca(FactoMineR::CA(data, ncp=length(vars), graph=F))
 }
 
-dimred.ca.plotdata <- function(ca) {
+plotdata.ca <- function(ca) {
   # Now wrangle the result in a format suitable for plotting.
   plotdata <- data.frame(ca$col$coord, ca$col$contrib)
   # Set some propert column names.

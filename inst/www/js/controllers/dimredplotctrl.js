@@ -106,8 +106,8 @@ angular.module('contigBinningApp.controllers')
         .height($element[0].clientHeight);
       d3.select($element[0]).call(plot);
     }
-    
-    function updatePlot(session, dimRedData) {
+
+    function updatePlot(dimRedData) {
       data = dimRedData;
       data.actives = [pair, pair + 1];
       // TODO: Introduce various ways to 'cut' the number of principal axes.
@@ -125,15 +125,14 @@ angular.module('contigBinningApp.controllers')
     angular.element($window).bind('resize', resize);
     $(document).ready(resize);
 
-    // Draw an empty plot at first.
-    d3.json("libs/dimredplot/ca.json", updatePlot);
     
+    d3.json("libs/dimredplot/ca.json", function(error, data) {
+      updatePlot(data);
+    });
+
     $scope.$on("Analytics::dimensionalityReduced", function(ev, method, session) {
-      var fnName = "dimred." + method + ".plotdata",
-          args = { ca: session };
-      
-      OpenCPU.json(fnName, args, updatePlot)
-    })
+      session.getObject(updatePlot);
+    });
     $scope.$on("DimRedDisplay::cluster", function(ev, clusterCount){
       cluster(null, clusterCount);
     });
