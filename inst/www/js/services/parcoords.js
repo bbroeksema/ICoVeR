@@ -14,7 +14,7 @@ angular.module('contigBinningApp.services')
       selectionTextLong: "",
 
       brushPredicates: ["AND", "OR"],
-      brushPredicate: "AND"
+      brushPredicate: undefined
     };
     
     function setVariables(schema) {
@@ -47,7 +47,7 @@ angular.module('contigBinningApp.services')
     d.updateBrushPredicate = function(newPredicate) {
       if (d.brushPredicate !== newPredicate) {
         d.brushPredicate = newPredicate;
-        $rootScope.$broadcast("ParCoords::brushPredicateChanged");
+        $rootScope.$broadcast("ParCoords::brushPredicateChanged", d.brushPredicate);
       }
     };
     

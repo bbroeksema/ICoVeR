@@ -13,6 +13,7 @@ angular.module('contigBinningApp.services')
     var d = {
       id: undefined,
       brushExtents: {},
+      brushPredicate: undefined,
       backend: {
         schema: undefined,
         schemaIndex: undefined,
@@ -31,6 +32,9 @@ angular.module('contigBinningApp.services')
       $rootScope.$broadcast("DataSet::schemaLoaded", schema);
     });
 
+    $rootScope.$on("ParCoords::brushPredicateChanged", function(ev, predicate) {
+      d.brushPredicate = predicate;
+    });
     // Listen to the analytics service to store the results of various
     // analytical actions.
     $rootScope.$on("Analytics::dataClustered", function(ev, method, session) {
@@ -249,6 +253,7 @@ angular.module('contigBinningApp.services')
 
         var args = {
           extents: d.brushExtents,
+          predicate: d.brushPredicate,
           method: filterMethod
         };
         if (d.backend.rows !== undefined) {
