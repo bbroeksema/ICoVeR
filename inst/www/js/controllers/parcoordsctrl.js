@@ -43,6 +43,12 @@ angular.module('contigBinningApp.controllers')
         });
       });
 
+    // function to be used as callback when data is requested
+    function loadData(data) {
+      d.parcoords.data(data);
+      render();
+    }
+
     angular.element($window).bind('resize', resize);
     $(document).ready(resize);
 
@@ -64,20 +70,15 @@ angular.module('contigBinningApp.controllers')
         .dimensions(dims)
         .types(types);
 
-      DataSet.get(dims);
+      DataSet.get(dims,loadData);
     });
 
     $scope.$on("ParCoords::brushPredicateChanged", function() {
       d.parcoords.brushPredicate(ParCoords.brushPredicate).render();
     });
 
-    $scope.$on("DataSet::dataLoaded", function(ev, data) {
-      d.parcoords.data(data);
-      render();
-    });
-
     $scope.$on("DataSet::filtered", function(ev, filterMethod) {
-      DataSet.get(d.parcoords.dimensions());
+      DataSet.get(d.parcoords.dimensions(), loadData);
     });
 
     $scope.$on("Colors::changed", function(e, colors) {

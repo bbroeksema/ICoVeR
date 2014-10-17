@@ -113,7 +113,8 @@ angular.module('contigBinningApp.services')
       // Returns the data values for given variables.
       // @param variables - a list of strings, containing the names of the 
       //                    variables to be loaded.
-      get: function(variables) {
+      // @param callback -  a function to be executed once data has been successfully loaded
+      get: function(variables,callback) {
         var args = {},
             schemaIndex = d.backend.schemaIndex,
             varsByGroup = { clustervars: [], datavars: [], summaryvars: [] },
@@ -149,7 +150,7 @@ angular.module('contigBinningApp.services')
 
           // Verify if we're done loading'
           if (_.every(variables, loaded)) {
-            $rootScope.$broadcast("DataSet::dataLoaded", varsData);
+            callback(varsData)
           }
         }
 
