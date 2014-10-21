@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# We're only interested in checking files that are in the js directory. The js
+# files in inst/www/lib/* are considered to be external libraries over which we
+# have no control or that fall outside the responsibility of this project.
+files=$(git diff --cached --name-only --diff-filter=ACM | grep "^inst/www/js/.*.js$")
+if [ "$files" = "" ]; then
+  exit 0 
+fi
+
+pass=true
+
+echo "\nValidating JavaScript:\n"
+
+for file in ${files}; do
+  result=$(jslint ${file} | grep "${file} is OK")
+  if [ "$result" != "" ]; then
+    echo "\t\033[32mJSLint Passed: ${file}\033[0m"
+  else
+    echo "\t\033[31mJSLint Failed: ${file}\033[0m"
+    pass=false
+  fi
+done
+
+echo "\nJavaScript validation complete\n"
+
+if ! $pass; then
+  echo "\033[41mCOMMIT FAILED\033[0m"
+  echo "Your commit contains files that should pass JSLint but do not."
+  echo "Please fix the JSLint errors and try again.\n"
+  exit 1
+else
+  echo "\033[42mCOMMIT SUCCEEDED\033[0m\n"
+fi
