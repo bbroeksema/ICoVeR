@@ -37,6 +37,6 @@ githooks: .git/hooks/pre-commit
 init: jslint githooks
 
 check: $(JS_SRC)
-	jslint $^
+	@jslint $^
 
 .PHONY: githooks init check
