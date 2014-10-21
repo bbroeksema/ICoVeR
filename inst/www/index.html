@@ -19,6 +19,10 @@
         </div>
         
         <form class="navbar-form navbar-right form-inline">
+        <div class="form-group" ng-controller="NameHighlightCtrl">
+        <label class="control-label col-lg-4" for="rowNameHighlight">Highlight</label>
+        <input type="text" id="rowNameHighlight" class = "col-lg-5 input-sm"  ng-model="rowName" ng-change="highlightRow()">
+        </div>
           <div class="form-group" ng-controller="DataIndicatorCtrl">
             <progress max="1" animate="false">
               <bar ng-repeat="bar in counts track by $index" 
@@ -87,6 +91,7 @@
     <script src="libs/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js"></script>
 
     <script src="js/app.js"></script>
+    <script src="js/controllers/namehighlightctrl.js"></script>
     <script src="js/controllers/dataindicatorctrl.js"></script>
     <script src="js/controllers/parcoordsctrl.js"></script>
     <script src="js/controllers/parcoordsvarsctrl.js"></script>

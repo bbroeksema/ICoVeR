@@ -48,6 +48,16 @@ angular.module('contigBinningApp.controllers')
       d.parcoords.data(data);
       render();
     }
+    
+    var HighlightRow = function (itemIndex) {
+      if(itemIndex > -1)  {
+        console.log("Highlighing Row " + itemIndex);
+        d.parcoords.highlight([d.parcoords.data()[itemIndex]]);
+      } else {
+        d.parcoords.unhighlight();
+      }
+      
+    }
 
     angular.element($window).bind('resize', resize);
     $(document).ready(resize);
@@ -88,4 +98,6 @@ angular.module('contigBinningApp.controllers')
       d.parcoords.color(colorfn);
       render();
     });
+    
+    ParCoords.setHighlightFunction(HighlightRow);
   });

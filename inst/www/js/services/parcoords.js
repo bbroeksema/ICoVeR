@@ -16,7 +16,7 @@ angular.module('contigBinningApp.services')
       brushPredicates: ["AND", "OR"],
       brushPredicate: undefined
     };
-    
+
     function setVariables(schema) {
       if (schema === undefined) {
         d.variables = [];
@@ -50,7 +50,7 @@ angular.module('contigBinningApp.services')
         $rootScope.$broadcast("ParCoords::brushPredicateChanged", d.brushPredicate);
       }
     };
-    
+
     $rootScope.$on('DataSet::schemaLoaded', function(e, schema) {
       setVariables(schema);
       
@@ -61,6 +61,17 @@ angular.module('contigBinningApp.services')
       });
       d.updateSelectedVariables(variables);
     });
-   
+    
+    var highlightFunction = null;
+    d.setHighlightFunction = function(highlightFunc) {
+      highlightFunction = highlightFunc;
+    }
+
+    d.highlightRow = function(rowIndex) {
+      if(highlightFunction) {
+        highlightFunction(rowIndex);
+      }
+    }
+
     return d;
   });
