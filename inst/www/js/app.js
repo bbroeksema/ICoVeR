@@ -1,3 +1,6 @@
+/*jslint indent: 2 */
+/*global angular */
+
 //ocpu.seturl("/ocpu/library/RParcoords/R");
 
 // Create empty modules, which will be populated once the deps are loaded.
