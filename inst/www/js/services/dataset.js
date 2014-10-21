@@ -10,6 +10,8 @@ angular.module('contigBinningApp.services')
       G_CLUSTERINGS: "Clusterings",
       G_SUMMARIES: "Summaries"
     };
+    var maxRowCount = 0;
+    var currentRowCount = 0;
     var d = {
       id: undefined,
       brushExtents: {},
@@ -24,6 +26,8 @@ angular.module('contigBinningApp.services')
         }
       }
     };
+    var currentNumRowsCallback = null; // if defined is sued as a callback so a controller can
+                                  // be updated witht he current numebr of row of data
 
     // Initialize the schema as soon as the Dataset service is initialized.
     OpenCPU.json("data.schema", null, function(session, schema) {
@@ -150,6 +154,9 @@ angular.module('contigBinningApp.services')
 
           // Verify if we're done loading'
           if (_.every(variables, loaded)) {
+            if(currentNumRowsCallback){
+              currentNumRowsCallback(data.length);
+            }
             callback(varsData)
           }
         }
@@ -272,6 +279,20 @@ angular.module('contigBinningApp.services')
       brush: function(extents, rows) {
         d.brushExtents = extents;
         $rootScope.$broadcast("DataSet::brushed", d.brushExtents, rows);
+      },
+
+      // Returns the totalumber of rows in the dataset
+      getTotalNumRows: function (callback) {
+        OpenCPU.json("data.gettotalnumrows", {}, function(session, returnedNumberOfRows) {
+          callback(returnedNumberOfRows.rows);
+        });
+      },
+
+      //Set callback function for updating the current data set size
+      setCurrentNumRowsCallback: function (callback) {
+        currentNumRowsCallback = callback;
       }
+
     };
+
   });

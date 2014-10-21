@@ -26,6 +26,10 @@ data.get <- function(rows = NA, variables, addRows=T) {
   data
 }
 
+data.gettotalnumrows <- function() {
+	list(rows=nrow(gData))
+}
+
 data.filter <- function(rows = c(), extents, predicate="AND", method = "KEEP") {
   if (predicate != "AND" && predicate != "OR") {
     stop(paste("Invalid predicate ", predicate, sep=""))

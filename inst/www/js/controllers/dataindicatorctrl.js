@@ -1,20 +1,12 @@
 'use strict';
 
 angular.module('contigBinningApp.controllers')
-  .controller('DataIndicatorCtrl', function ($scope) {
+  .controller('DataIndicatorCtrl', function ($scope,DataSet) {
       
       $scope.rowCount = 0;
       $scope.currentRowCount = 0;
       $scope.counts = [];
-      
-      $scope.$on("DataSet::dataLoaded", function(ev, data) {
-        if ($scope.rowCount === 0) {
-          $scope.rowCount = data.length;
-        }
-        $scope.currentRowCount = data.length;
-        $scope.counts = [{ rows: $scope.currentRowCount, type: "" }];
-      });
-      
+
       $scope.$on("DataSet::brushed", function(ev, extents, rows) {
         if (Object.getOwnPropertyNames(extents).length > 0) {
           $scope.counts = [
@@ -24,5 +16,16 @@ angular.module('contigBinningApp.controllers')
         } else {
           $scope.counts = [{ rows: $scope.currentRowCount, type: "" }];
         }
+      });
+
+     // setting the call back  for the total row count
+      DataSet.getTotalNumRows(function (rowCount) {
+        $scope.rowCount  = rowCount;
+      });
+
+       // setting the call back  for the current row count
+      DataSet.setCurrentNumRowsCallback(function(currentRowCount) {
+        $scope.currentRowCount = currentRowCount;
+        $scope.counts = [{ rows: $scope.currentRowCount, type: "" }];
       });
   });
