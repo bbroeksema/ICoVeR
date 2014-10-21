@@ -1,13 +1,14 @@
+/*global angular */
 'use strict';
 
 angular.module('contigBinningApp.services')
-  .service('R', function($rootScope, $http) {
+  .service('R', function () {
     return {
       is: {
-        factor: function(typestr) {
+        factor: function (typestr) {
           return typestr === "factor";
         },
-        numeric: function(typestr) {
+        numeric: function (typestr) {
           return typestr === "numeric" || typestr === "integer";
         }
       }
