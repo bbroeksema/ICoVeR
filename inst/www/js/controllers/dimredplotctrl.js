@@ -1,35 +1,24 @@
+/*jslint browser: true, todo:true, nomen: true, indent: 2 */
+/*global angular, crpgl, d3, ocpu, _, $*/
+
 'use strict';
 
-/*global angular, crpgl, d3, ocpu, _, $*/
-/*jslint browser: true, todo:true, unparam: true*/
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedPlotCtrl', function ($scope, $element, $window, OpenCPU, Analytics) {
+  .controller('DimRedPlotCtrl', function ($scope, $element, $window, Analytics) {
 
     var plot = crpgl.DimRedPlot(),
-        data,
-        pair = 1,
-        clusterCount = 1;
+      data,
+      pair = 1,
+      clusterCount = 1;
 
-    plot
-      .originSize(30)
-      .originVisible(true)
-      .on("rotate", rotate)
-      .on("pointclick", function(values) {
-        // For now, it is assumed that elements in @param values are actual
-        // column names of the table in the back-end. The thing that needs to
-        // happen at this point is that, in the backend a new variable is
-        // generated, that consists of the weighted sum of @param values for
-        // each observation in the original data table.
-        Analytics.summarize(values);
-      });
-
+    /*jslint unparam: true*/
     function rotate(drp, direction) {
       var update = false;
       if (direction === "up" && pair > 1) {
         pair = pair - 1;
         update = true;
-      } else if (direction === "down" && pair < data.explainedVariance.length -1) {
+      } else if (direction === "down" && pair < data.explainedVariance.length - 1) {
         pair = pair + 1;
         update = true;
       }
@@ -41,14 +30,31 @@ angular.module('contigBinningApp.controllers')
           .call(plot);
       }
     }
+    /*jslint unparam: false */
 
-    // TODO: Connect slider changes to this function.
+    plot
+      .originSize(30)
+      .originVisible(true)
+      .on("rotate", rotate)
+      .on("pointclick", function (values) {
+        // For now, it is assumed that elements in @param values are actual
+        // column names of the table in the back-end. The thing that needs to
+        // happen at this point is that, in the backend a new variable is
+        // generated, that consists of the weighted sum of @param values for
+        // each observation in the original data table.
+        Analytics.summarize(values);
+      });
+
+    /*jslint unparam: true*/
     function cluster(drp, newClusterCount) {
       var clusteredData = {
-            projections: data.projections,
-            actives: data.actives,
-            explainedVariance: data.explainedVariance
-          };
+          projections: data.projections,
+          actives: data.actives,
+          explainedVariance: data.explainedVariance
+        },
+        prop,
+        clustered,
+        points;
 
       if (clusterCount === newClusterCount) {
         return; // Nothing to do.
@@ -56,9 +62,9 @@ angular.module('contigBinningApp.controllers')
 
       clusterCount = newClusterCount;
       if (clusterCount > 1) {
-        var prop = { cluster: "clustering." + pair  + "." + clusterCount },
-            clustered = _.groupBy(data.projections, prop.cluster),
-            points = [];
+        prop = { cluster: "clustering." + pair  + "." + clusterCount };
+        clustered = _.groupBy(data.projections, prop.cluster);
+        points = [];
 
         prop.factorX = "factor." + data.actives[0];
         prop.factorY = "factor." + data.actives[1];
@@ -67,7 +73,7 @@ angular.module('contigBinningApp.controllers')
 
         clusteredData.actives = data.actives;
 
-        _.forIn(clustered, function(cluster, id) {
+        _.forIn(clustered, function (cluster, id) {
           // cluster is an array of points.
           // The position of the cluster is determined by taking averages for
           // x and y positions. The size of the cluster is determined by
@@ -79,7 +85,7 @@ angular.module('contigBinningApp.controllers')
           clusterPoint[prop.contribY] = 0;
           clusterPoint.points = cluster;
 
-          _.forEach(cluster, function(point) {
+          _.forEach(cluster, function (point) {
             clusterPoint[prop.factorX] += point[prop.factorX];
             clusterPoint[prop.factorY] += point[prop.factorY];
             clusterPoint[prop.contribX] += point[prop.contribX];
@@ -125,10 +131,14 @@ angular.module('contigBinningApp.controllers')
     angular.element($window).bind('resize', resize);
     $(document).ready(resize);
 
-    $scope.$on("Analytics::dimensionalityReduced", function(ev, method, session) {
+    /*jslint unparam: true */
+    $scope.$on("Analytics::dimensionalityReduced", function (ev, method, session) {
       session.getObject(updatePlot);
     });
-    $scope.$on("DimRedDisplay::cluster", function(ev, clusterCount){
+    /*jslint unparam: false */
+    /*jslint unparam: true */
+    $scope.$on("DimRedDisplay::cluster", function (ev, clusterCount) {
       cluster(null, clusterCount);
     });
+    /*jslint unparam: false */
   });
