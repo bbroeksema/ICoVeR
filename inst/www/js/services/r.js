@@ -1,4 +1,6 @@
+/*jslint white: false, indent: 2 */
 /*global angular */
+
 'use strict';
 
 angular.module('contigBinningApp.services')
