@@ -1,27 +1,26 @@
+/*jslint todo:true, unparam: true, nomen: true, indent: 2 */
+/*global angular, ocpu, _ */
+
 'use strict';
 
-/*global angular, ocpu, _ */
-/*jslint todo:true, unparam: true*/
-
-
 angular.module('contigBinningApp.services')
-  .service('Analytics', function($rootScope, DataSet, OpenCPU) {
+  .service('Analytics', function ($rootScope, DataSet, OpenCPU) {
 
     var d = {
       clusterMethods: [],
       dimRedMethods: []
     };
 
-    OpenCPU.json("cluster.methods", {}, function(session, response) {
-      d.clusterMethods = _.reduce(_.keys(response), function(methods, method) {
+    OpenCPU.json("cluster.methods", {}, function (session, response) {
+      d.clusterMethods = _.reduce(_.keys(response), function (methods, method) {
         methods.push({ name: method, args: response[method] });
         return methods;
       }, []);
       $rootScope.$broadcast("Analytics::clusterMethodsAvailable", d.clusterMethods);
     });
 
-    OpenCPU.json("dimred.methods", {}, function(session, response) {
-      d.dimRedMethods = _.reduce(_.keys(response), function(methods, method) {
+    OpenCPU.json("dimred.methods", {}, function (session, response) {
+      d.dimRedMethods = _.reduce(_.keys(response), function (methods, method) {
         var cfg = response[method];
         cfg.name = method;
         methods.push(cfg);
@@ -32,11 +31,11 @@ angular.module('contigBinningApp.services')
 
 
     return {
-      clusterMethods: function() {
+      clusterMethods: function () {
         return d.clusterMethods;
       },
 
-      cluster: function(method, variables, args) {
+      cluster: function (method, variables, args) {
         var fnArgs = {
           vars: variables
         };
@@ -45,12 +44,12 @@ angular.module('contigBinningApp.services')
         }
         // TODO: process args
 
-        ocpu.call("cluster." + method, fnArgs, function(session) {
+        ocpu.call("cluster." + method, fnArgs, function (session) {
           $rootScope.$broadcast("Analytics::dataClustered", method, session);
         });
       },
 
-      reduce: function(method, variables) {
+      reduce: function (method, variables) {
         var fnArgs = {
           vars: variables
         };
@@ -58,19 +57,19 @@ angular.module('contigBinningApp.services')
           fnArgs.rows = DataSet.rows();
         }
 
-        ocpu.call("dimred." + method, fnArgs, function(session) {
+        ocpu.call("dimred." + method, fnArgs, function (session) {
           $rootScope.$broadcast("Analytics::dimensionalityReduced", method, session);
         });
       },
 
-      summarize: function(variableWeights) {
+      summarize: function (variableWeights) {
         var fnArgs = { variableWeights: variableWeights };
 
         if (DataSet.rows()) {
           fnArgs.rows = DataSet.rows();
         }
 
-        ocpu.call("dimred.summarize", fnArgs, function(session) {
+        ocpu.call("dimred.summarize", fnArgs, function (session) {
           $rootScope.$broadcast("Analytics::variablesSummarized", variableWeights, session);
         });
       }
