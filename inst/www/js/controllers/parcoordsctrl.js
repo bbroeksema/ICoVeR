@@ -1,7 +1,10 @@
+/*jslint browser:true, unparam: true, indent: 2, nomen: true */
+/*global angular, d3, $, _*/
+
 'use strict';
 
 angular.module('contigBinningApp.controllers')
-  .controller('ParcoordsCtrl', function($scope, $window, $element, DataSet, ParCoords) {
+  .controller('ParcoordsCtrl', function ($scope, $window, $element, DataSet, ParCoords) {
 
     /// private Controller vars
     var d = {
@@ -34,11 +37,11 @@ angular.module('contigBinningApp.controllers')
       .createAxes()
       .brushable()
       .reorderable()
-      .on("brushend", function() {
+      .on("brushend", function () {
         // NOTE: the brushend event from parcoords is "outside" angular, so we
         //       have to wrap it in $scope.$apply to make sure that other
         //       controllers are updated appropriately.
-        $scope.$apply(function() {
+        $scope.$apply(function () {
           DataSet.brush(d.parcoords.brushExtents(), d.parcoords.brushed());
         });
       });
@@ -48,15 +51,14 @@ angular.module('contigBinningApp.controllers')
       d.parcoords.data(data);
       render();
     }
-    
-    var HighlightRow = function (itemIndex) {
-      if(itemIndex > -1)  {
+
+    function highlightRow(itemIndex) {
+      if (itemIndex > -1) {
         console.log("Highlighing Row " + itemIndex);
         d.parcoords.highlight([d.parcoords.data()[itemIndex]]);
       } else {
         d.parcoords.unhighlight();
       }
-      
     }
 
     angular.element($window).bind('resize', resize);
@@ -66,13 +68,11 @@ angular.module('contigBinningApp.controllers')
     // For some reason $scope.$watch(ParCoords.selectedVariables), doesn't
     // work. So for now, I'll fall back to the more reliable broadcast
     //meganism.
-    $scope.$on("ParCoords::selectedVariablesChanged", function() {
-      var dims = _.map(ParCoords.selectedVariables, function(variable) {
-        return variable['name'];
-      });
+    $scope.$on("ParCoords::selectedVariablesChanged", function () {
+      var dims = _.pluck(ParCoords.selectedVariables, "name"),
+        types = {};
 
-      var types = {};
-      _.each(dims, function(dim) {
+      _.each(dims, function (dim) {
         types[dim] = "number";
       });
 
@@ -80,24 +80,29 @@ angular.module('contigBinningApp.controllers')
         .dimensions(dims)
         .types(types);
 
-      DataSet.get(dims,loadData);
+      DataSet.get(dims, loadData);
     });
 
-    $scope.$on("ParCoords::brushPredicateChanged", function() {
+    $scope.$on("ParCoords::brushPredicateChanged", function () {
       d.parcoords.brushPredicate(ParCoords.brushPredicate).render();
     });
 
-    $scope.$on("DataSet::filtered", function(ev, filterMethod) {
+    $scope.$on("DataSet::dataLoaded", function (ev, data) {
+      d.parcoords.data(data);
+      render();
+    });
+
+    $scope.$on("DataSet::filtered", function (ev, filterMethod) {
       DataSet.get(d.parcoords.dimensions(), loadData);
     });
 
-    $scope.$on("Colors::changed", function(e, colors) {
+    $scope.$on("Colors::changed", function (e, colors) {
       function colorfn(d, i) {
         return colors.hasOwnProperty(d.row) ? colors[d.row] : "#000";
-      };
+      }
       d.parcoords.color(colorfn);
       render();
     });
-    
-    ParCoords.setHighlightFunction(HighlightRow);
+
+    ParCoords.setHighlightFunction(highlightRow);
   });
