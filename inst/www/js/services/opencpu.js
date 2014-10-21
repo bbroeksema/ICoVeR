@@ -1,10 +1,13 @@
+/*jslint white: false, indent: 2, nomen: true */
+/*global angular, ocpu, _ */
+
 'use strict';
 
 angular.module('contigBinningApp.services')
-  .service('OpenCPU', function($rootScope, $http) {
+  .service('OpenCPU', function ($http) {
 
     function asJson(callback) {
-      return function(session) {
+      return function (session) {
         $http({method: 'GET', url: session.loc + "R/.val/json?auto_unbox=true"})
           .success(_.partial(callback, session));
       };
@@ -12,8 +15,8 @@ angular.module('contigBinningApp.services')
 
     return {
 
-      json: function(fn, args, cb) {
+      json: function (fn, args, cb) {
         ocpu.call(fn, args, asJson(cb));
       }
-    }
+    };
   });
