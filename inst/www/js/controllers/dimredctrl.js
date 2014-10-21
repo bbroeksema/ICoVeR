@@ -1,58 +1,44 @@
+/*jslint indent: 2, nomen: true */
+/*global angular, _ */
+
 'use strict';
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedCtrl', function ($scope, $http, $modal, DataSet, Analytics, R) {
+  .controller('DimRedCtrl', function ($scope, $modal, Analytics, R) {
     var d = {
       schema: undefined
     };
 
     function createGroupTypeRestrictionTest(restriction) {
       var groupType = restriction,
-          test = function(gt) { return gt === groupType; };
+        test = function (gt) { return gt === groupType; };
 
       if (restriction[0] === '!') {
-        groupType = restriction.substr(1),
-        test = function(gt) { return gt !== groupType; };
+        groupType = restriction.substr(1);
+        test = function (gt) { return gt !== groupType; };
       }
 
-      return function(variable) {
-        return test(variable['group.type'])
-      }
+      return function (variable) {
+        return test(variable['group.type']);
+      };
     }
 
     function createTypeRestrictionTest(restriction) {
       if (restriction === 'schema.numeric') {
-        return function(variable) {
-          return R.is.numeric(variable['type']);
-        }
+        return function (variable) {
+          return R.is.numeric(variable.type);
+        };
       }
 
-      throw('Unsupported type restriction');
+      throw ('Unsupported type restriction');
     }
-
-    function setVariables() {
-      if ($scope.selectedDimRedMethod === undefined || d.schema === undefined) {
-        $scope.variables = [];
-      } else {
-        // FIXME: This is a sloppy implementation as I didn't think this out
-        //        very well. Actually, it should allow for multiple types for
-        //        group restriction.
-        var restrictions = $scope.selectedDimRedMethod['restrict'];
-        var matchesGroupRestriction = createGroupTypeRestrictionTest(restrictions["group.type"]);
-        var matchesTypeRestriction = createTypeRestrictionTest(restrictions["type"]);
-        $scope.variables = _.filter(d.schema, matchesGroupRestriction);
-        $scope.variables = _.filter($scope.variables, matchesTypeRestriction)
-        $scope.selectedVariables = [];
-        updateSelectedVariables([]);
-      }
-    };
 
     function updateSelectedVariables(variables) {
       if (variables.length === 0) {
         $scope.selectionText = "Select variables...";
         $scope.selectionTextLong = "No variables selected";
       } else {
-        var text = _.reduce(variables, function(str, variable) {
+        var text = _.reduce(variables, function (str, variable) {
           return str === "" ? variable.name : str + ", " + variable.name;
         }, "");
         if (text.length > "Select variables...".length) {
@@ -65,6 +51,24 @@ angular.module('contigBinningApp.controllers')
       $scope.configurationInvalid = $scope.selectedVariables.length === 0;
     }
 
+    function setVariables() {
+      if ($scope.selectedDimRedMethod === undefined || d.schema === undefined) {
+        $scope.variables = [];
+      } else {
+        // FIXME: This is a sloppy implementation as I didn't think this out
+        //        very well. Actually, it should allow for multiple types for
+        //        group restriction.
+        var restrictions = $scope.selectedDimRedMethod.restrict,
+          matchesGroupRestriction = createGroupTypeRestrictionTest(restrictions["group.type"]),
+          matchesTypeRestriction = createTypeRestrictionTest(restrictions.type);
+
+        $scope.variables = _.filter(d.schema, matchesGroupRestriction);
+        $scope.variables = _.filter($scope.variables, matchesTypeRestriction);
+        $scope.selectedVariables = [];
+        updateSelectedVariables([]);
+      }
+    }
+
     $scope.selectionText = "Select variables...";
     $scope.selectionTextLong = "No variables selected";
     $scope.variables = [];
@@ -74,33 +78,37 @@ angular.module('contigBinningApp.controllers')
     $scope.selectedDimRedMethod = $scope.dimRedMethods[0];
     $scope.selectedVariables = [];
 
-    $scope.$watch('selectedDimRedMethod', function(newMethod, oldMethod) {
-      if (newMethod === undefined) return;
+    $scope.$watch('selectedDimRedMethod', function (newMethod) {
+      if (newMethod === undefined) { return; }
       setVariables();
     });
 
-    $scope.$on('DataSet::schemaLoaded', function(e, schema) {
-      $scope.dataAvailable = true
+    /*jslint unparam: true */
+    $scope.$on('DataSet::schemaLoaded', function (e, schema) {
+      $scope.dataAvailable = true;
       d.schema = schema;
       setVariables();
     });
+    /*jslint unparam: false */
 
-    $scope.$on('Analytics::dimRedMethodsAvailable', function(e, methods) {
+    /*jslint unparam: true */
+    $scope.$on('Analytics::dimRedMethodsAvailable', function (e, methods) {
       $scope.dimRedMethods = methods;
       $scope.selectedDimRedMethod = $scope.dimRedMethods[0];
       setVariables();
     });
+    /*jslint unparam: false */
 
-    $scope.openSelectionDialog = function() {
+    $scope.openSelectionDialog = function () {
       var dialog = $modal.open({
         templateUrl: 'js/templates/selectvars.html',
         size: 'sm',
         controller: 'VariableSelectionCtrl',
         resolve: {
-          variables: function() {
+          variables: function () {
             return $scope.variables;
           },
-          selected: function() {
+          selected: function () {
             return $scope.selectedVariables;
           }
         }
@@ -109,10 +117,10 @@ angular.module('contigBinningApp.controllers')
       dialog.result.then(updateSelectedVariables);
     };
 
-    $scope.reduceDimensionality = function() {
+    $scope.reduceDimensionality = function () {
       var drMethod = $scope.selectedDimRedMethod.name,
-          vars = _.pluck($scope.selectedVariables, 'name');
+        vars = _.pluck($scope.selectedVariables, 'name');
 
       Analytics.reduce(drMethod, vars);
-    }
+    };
   });
