@@ -1,58 +1,57 @@
+/*jslint todo:true, nomen: true, white: false, indent: 2, unparam: true */
+/*global angular, _, ocpu*/
+
 'use strict';
 
-/*global angular, _, ocpu*/
-/*jslint todo:true, unparam: true*/
-
 angular.module('contigBinningApp.services')
-  .service('DataSet', function($rootScope, $http, OpenCPU) {
+  .service('DataSet', function ($rootScope, $http, OpenCPU) {
     var constants = {
-      GT_ANALYTICS: "Analytics",
-      G_CLUSTERINGS: "Clusterings",
-      G_SUMMARIES: "Summaries"
-    };
-    var maxRowCount = 0;
-    var currentRowCount = 0;
-    var d = {
-      id: undefined,
-      brushExtents: {},
-      brushPredicate: undefined,
-      backend: {
-        schema: undefined,
-        schemaIndex: undefined,
-        rows: undefined,
-        analytics: {
-          clusterings: {},
-          summaries: {}
+        GT_ANALYTICS: "Analytics",
+        G_CLUSTERINGS: "Clusterings",
+        G_SUMMARIES: "Summaries"
+      },
+      d = {
+        id: undefined,
+        brushExtents: {},
+        brushPredicate: undefined,
+        backend: {
+          schema: undefined,
+          schemaIndex: undefined,
+          rows: undefined,
+          analytics: {
+            clusterings: {},
+            summaries: {}
+          }
         }
-      }
-    };
-    var currentNumRowsCallback = null; // if defined is sued as a callback so a controller can
-                                  // be updated witht he current numebr of row of data
+      },
+      currentNumRowsCallback = null; // if defined is sued as a callback so a controller can
+                                     // be updated witht he current numebr of row of data
 
     // Initialize the schema as soon as the Dataset service is initialized.
-    OpenCPU.json("data.schema", null, function(session, schema) {
+    OpenCPU.json("data.schema", null, function (session, schema) {
       d.backend.schema = schema;
       d.backend.schemaIndex = _.indexBy(schema, 'name');
       $rootScope.$broadcast("DataSet::schemaLoaded", schema);
     });
 
-    $rootScope.$on("ParCoords::brushPredicateChanged", function(ev, predicate) {
+    $rootScope.$on("ParCoords::brushPredicateChanged", function (ev, predicate) {
       d.brushPredicate = predicate;
     });
     // Listen to the analytics service to store the results of various
     // analytical actions.
-    $rootScope.$on("Analytics::dataClustered", function(ev, method, session) {
+    $rootScope.$on("Analytics::dataClustered", function (ev, method, session) {
       d.backend.analytics.clusterings[method] = session;
 
-      var vars = _.filter(d.backend.schema, function(variable) {
-        return variable["group.type"] === constants.GT_ANALYTICS
-          && variable.group === constants.G_CLUSTERINGS
-          && variable.name === method;
-      });
+      var variable = {},
+        vars = _.filter(d.backend.schema, function (variable) {
+          return variable["group.type"] === constants.GT_ANALYTICS
+            && variable.group === constants.G_CLUSTERINGS
+            && variable.name === method;
+        });
 
       if (vars.length === 0) {
         // Add it to the schema and send out notification of schema change
-        var variable = {
+        variable = {
           "group.type": constants.GT_ANALYTICS,
           "group": constants.G_CLUSTERINGS,
           "name": method,
@@ -66,21 +65,22 @@ angular.module('contigBinningApp.services')
       } // else nothing to do.
     });
 
-    $rootScope.$on("Analytics::variablesSummarized", function(ev, variableContributions, session) {
+    $rootScope.$on("Analytics::variablesSummarized", function (ev, variableContributions, session) {
       function sum(array) {
-        return _.reduce(array, function(a, b) { return a + b; }, 0);
+        return _.reduce(array, function (a, b) { return a + b; }, 0);
       }
 
-      var summaryName = _.chain(variableContributions)
-        .map(function(contribs, variable) {
-          return { variable: variable, contrib: sum(contribs) };
-        })
-        .sortBy('contrib')
-        .reverse()
-        .first(2)
-        .pluck('variable')
-        .join('-')
-        .value();
+      var variable = {},
+        summaryName = _.chain(variableContributions)
+          .map(function (contribs, variable) {
+            return { variable: variable, contrib: sum(contribs) };
+          })
+          .sortBy('contrib')
+          .reverse()
+          .first(2)
+          .pluck('variable')
+          .join('-')
+          .value();
 
       // Prepend a distinghuising string, so that we don't inadvertly replace
       // one of the existing variables.
@@ -91,7 +91,7 @@ angular.module('contigBinningApp.services')
       //       earlier calculated summary being replaced.
       d.backend.analytics.summaries[summaryName] = session;
       if (!d.backend.schemaIndex.hasOwnProperty(summaryName)) {
-        var variable = {
+        variable = {
           "group.type": constants.GT_ANALYTICS,
           "group": constants.G_SUMMARIES,
           "name": summaryName,
@@ -110,7 +110,7 @@ angular.module('contigBinningApp.services')
        * Returns the row ids of the currently filtered rows or undefined if no
        * filtering was applied (meaning all rows will loaded when using get).
        */
-      rows: function() {
+      rows: function () {
         return d.backend.rows;
       },
 
@@ -118,12 +118,12 @@ angular.module('contigBinningApp.services')
       // @param variables - a list of strings, containing the names of the 
       //                    variables to be loaded.
       // @param callback -  a function to be executed once data has been successfully loaded
-      get: function(variables,callback) {
+      get: function (variables, callback) {
         var args = {},
-            schemaIndex = d.backend.schemaIndex,
-            varsByGroup = { clustervars: [], datavars: [], summaryvars: [] },
-            varsLoaded = {},
-            varsData;
+          schemaIndex = d.backend.schemaIndex,
+          varsByGroup = { clustervars: [], datavars: [], summaryvars: [] },
+          varsLoaded = {},
+          varsData;
 
         // Some helper functions we need for processing the get request.
         function loaded(name) {
@@ -135,7 +135,7 @@ angular.module('contigBinningApp.services')
         // data with the data we just received.
         function dataReceived(data) {
           // Mark the currently retrieved variables as loaded.
-          _.each(_.keys(data[0]), function(variable) {
+          _.each(_.keys(data[0]), function (variable) {
             varsLoaded[variable] = true;
           });
 
@@ -147,17 +147,17 @@ angular.module('contigBinningApp.services')
             //       now I assume this (and think they actually are). Otherwise
             //       they can be merged using the row attribute on objects in
             //       both arrays.
-            _.each(varsData, function(dataItem, index) {
+            _.each(varsData, function (dataItem, index) {
               _.extend(dataItem, data[index]);
             });
           }
 
           // Verify if we're done loading'
           if (_.every(variables, loaded)) {
-            if(currentNumRowsCallback){
+            if (currentNumRowsCallback) {
               currentNumRowsCallback(data.length);
             }
-            callback(varsData)
+            callback(varsData);
           }
         }
 
@@ -166,42 +166,40 @@ angular.module('contigBinningApp.services')
         // First, we mark all requested variables as unloaded and split the
         // requested variables in the appropriate groups. Because, we cannot
         // get all of them straightforward from the backend.
-        _.each(variables, function(name) {
+        _.each(variables, function (name) {
           varsLoaded[name] = false;
 
           var variable = schemaIndex[name];
-          switch(variable.group) {
-            case constants.G_CLUSTERINGS:
-              varsByGroup.clustervars.push(variable);
-              break;
-            case constants.G_SUMMARIES:
-              varsByGroup.summaryvars.push(variable);
-              break;
-            // TODO:
-            // case constants.G_DIMRED:
-            //   varsByGroup.dimredvars.push(variable);
-            //   break;
-            default:
-              varsByGroup.datavars.push(variable);
-              break;
+          switch (variable.group) {
+          case constants.G_CLUSTERINGS:
+            varsByGroup.clustervars.push(variable);
+            break;
+          case constants.G_SUMMARIES:
+            varsByGroup.summaryvars.push(variable);
+            break;
+          // TODO:
+          // case constants.G_DIMRED:
+          //   varsByGroup.dimredvars.push(variable);
+          //   break;
+          default:
+            varsByGroup.datavars.push(variable);
+            break;
           }
         });
 
         // Get the data variables from the backend.
         args.variables = _.pluck(varsByGroup.datavars, "name");
         args.rows = d.backend.rows;
-        OpenCPU.json("data.get", args, function(session, data) {
+        OpenCPU.json("data.get", args, function (session, data) {
           dataReceived(data);
         });
 
         // For each of the performed clustering methods, trigger an http get to
         // retrieve the cluster values from their respective ocpu sessions.
-        var clusterings = d.backend.analytics.clusterings;
-        var methods = _.keys(clusterings);
-        _.each(methods, function(method) {
-          var session = clusterings[method];
+        _.each(_.keys(d.backend.analytics.clusterings), function (method) {
+          var session = d.backend.analytics.clusterings[method];
           $http({ method: 'GET', url: session.loc + "R/.val/json?auto_unbox=true" })
-            .success(function(data) {
+            .success(function (data) {
               // This is a row, cluster map. E.g.:
               // { 1: 14, 2: 14, 3: 2, etc}
               //
@@ -210,7 +208,7 @@ angular.module('contigBinningApp.services')
               // Below we transform this map into the format (when method is
               // kmeans):
               // [ { row: 1, kmeans: 14}, {row: 2, kmeans: 14}, etc]
-              var values = _.map(_.keys(data), function(key) {
+              var values = _.map(_.keys(data), function (key) {
                 var value = { row: key };
                 value[method] = data[key];
                 return value;
@@ -221,18 +219,17 @@ angular.module('contigBinningApp.services')
 
         // For each of the requested summaries, trigger an http get to retrieve
         // the summary values from their respective ocpu sessions.
-        var smryVariables = _.pluck(varsByGroup.summaryvars);
-        _.each(smryVariables, function(smryVariable) {
+        _.each(_.pluck(varsByGroup.summaryvars), function (smryVariable) {
           var session = d.backend.analytics.summaries[smryVariable.name];
           $http({ method: 'GET', url: session.loc + "R/.val/json?auto_unbox=true" })
-            .success(function(data) { // (data, status, headers, config)
+            .success(function (data) { // (data, status, headers, config)
               // This is a row, summary map. E.g.:
               // { 1: 14, 2: 14, 3: 2, etc}
               //
               // Remember, the rows come from R and R indexes start at 1!
               //
               // [ { row: 1, smry-aaaa-aaat: 0.023}, {row: 2, smry-aaaa-aaat: 1.2401}, etc]
-              var values = _.map(_.keys(data), function(key) {
+              var values = _.map(_.keys(data), function (key) {
                 var value = { row: key };
                 value[smryVariable.name] = data[key];
                 return value;
@@ -252,38 +249,39 @@ angular.module('contigBinningApp.services')
 
       // TODO: filter will not work at the moment when analytical variables are
       //       included.
-      filter: function(filterMethod) {
+      filter: function (filterMethod) {
         if (filterMethod === this.FilterMethod.RESET) {
           d.backend.rows = undefined;
           $rootScope.$broadcast("DataSet::filtered", filterMethod);
           return;
         }
 
-        var args = {
-          extents: d.brushExtents,
-          predicate: d.brushPredicate,
-          method: filterMethod
-        };
+        var me = this,
+          args = {
+            extents: d.brushExtents,
+            predicate: d.brushPredicate,
+            method: filterMethod
+          };
+
         if (d.backend.rows !== undefined) {
           args.rows = d.backend.rows;
         }
 
-        var me = this;
-        ocpu.call("data.filter", args, function(session) {
+        ocpu.call("data.filter", args, function (session) {
           d.backend.rows = session; // Keep track of the current state.
           me.brush({});
           $rootScope.$broadcast("DataSet::filtered", filterMethod);
         });
       },
 
-      brush: function(extents, rows) {
+      brush: function (extents, rows) {
         d.brushExtents = extents;
         $rootScope.$broadcast("DataSet::brushed", d.brushExtents, rows);
       },
 
       // Returns the totalumber of rows in the dataset
       getTotalNumRows: function (callback) {
-        OpenCPU.json("data.gettotalnumrows", {}, function(session, returnedNumberOfRows) {
+        OpenCPU.json("data.gettotalnumrows", {}, function (session, returnedNumberOfRows) {
           callback(returnedNumberOfRows.rows);
         });
       },
