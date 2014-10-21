@@ -1,3 +1,6 @@
+/*jslint indent: 2, nomen: true */
+/*global angular, _*/
+
 'use strict';
 
 angular.module('contigBinningApp.controllers')
@@ -7,36 +10,36 @@ angular.module('contigBinningApp.controllers')
       config: {},
       methods: undefined,
     };
-    
-    function onVariableChange(newVar, oldVar) {
+
+    function onVariableChange() {
       if ($scope.colorVariable && R.is.numeric($scope.colorVariable.type)) {
         d.methods = d.config.numeric;
       } else {
         d.methods = undefined;
         $scope.colorMethod = undefined;
       }
-      
+
       $scope.colorMethods = _.keys(d.methods);
-      if ($scope.colorMethod === undefined 
+      if ($scope.colorMethod === undefined
           || !_.contains($scope.colorMethods, $scope.colorMethod)) {
         $scope.colorMethod = $scope.colorMethods[0];
       }
     }
-    
-    function onMethodChange(newMethod, oldMethod) {
+
+    function onMethodChange() {
       if (d.methods === undefined) {
         $scope.colorSchemes = [];
         $scope.colorScheme = undefined;
         return;
       }
-      
+
       $scope.colorSchemes = d.methods[$scope.colorMethod];
       if ($scope.colorSchemes === undefined) {
-        schemes = [];
+        $scope.colorSchemes = [];
       } else if (!_.isArray($scope.colorSchemes)) {
         $scope.colorSchemes = [$scope.colorSchemes];
       }
-      
+
       if ($scope.colorScheme === undefined
           || !_.contains($scope.colorSchemes, $scope.colorScheme)) {
         $scope.colorScheme = $scope.colorSchemes[0];
@@ -50,21 +53,25 @@ angular.module('contigBinningApp.controllers')
     $scope.colorMethod = undefined;
     $scope.colorScheme = undefined;
 
-    $scope.applyColoring = function() {
+    $scope.applyColoring = function () {
       Color.color($scope.colorVariable.name, $scope.colorMethod, $scope.colorScheme);
-    }
+    };
 
-    $scope.$on('DataSet::schemaLoaded', function(e, schema) {
+    /*jslint unparam: true */
+    $scope.$on('DataSet::schemaLoaded', function (e, schema) {
       $scope.dataAvailable = true;
-      $scope.variables = _.filter(schema, function(variable) {
-        return R.is.numeric(variable.type)
+      $scope.variables = _.filter(schema, function (variable) {
+        return R.is.numeric(variable.type);
       });
       $scope.colorVariable = undefined;
     });
-    
-    $scope.$on("Colors::configurationLoaded", function(e, config) {
+    /*jslint unparam: false */
+
+    /*jslint unparam: true */
+    $scope.$on("Colors::configurationLoaded", function (e, config) {
       d.config = config;
     });
+    /*jslint unparam: false */
 
     $scope.$watch('colorVariable', onVariableChange);
     $scope.$watch('colorMethod', onMethodChange);
