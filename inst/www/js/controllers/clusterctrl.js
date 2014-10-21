@@ -4,7 +4,7 @@
 'use strict';
 
 angular.module('contigBinningApp.controllers')
-  .controller('ClusterCtrl', function ($scope, $http, $modal, DataSet, Analytics, R) {
+  .controller('ClusterCtrl', function ($scope, $modal, Analytics, R) {
     var d = {
       schema: undefined
     };
