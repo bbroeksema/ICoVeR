@@ -37,6 +37,6 @@ githooks: .git/hooks/pre-commit
 init: jslint githooks
 
 check: $(JS_SRC)
-	@jslint $^
+	@jslint --edition=2014-07-08 $^
 
 .PHONY: githooks init check
