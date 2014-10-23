@@ -8,7 +8,7 @@ angular.module('contigBinningApp.controllers')
 
     /// private Controller vars
     var d = {
-      parcoords: d3.parcoords()($element[0]),
+      parcoords: d3.parcoords()($element[0])
     };
 
     /// private controller functions

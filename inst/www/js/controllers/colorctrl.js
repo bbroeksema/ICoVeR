@@ -8,7 +8,7 @@ angular.module('contigBinningApp.controllers')
 
     var d = {
       config: {},
-      methods: undefined,
+      methods: undefined
     };
 
     function onVariableChange() {

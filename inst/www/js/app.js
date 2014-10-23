@@ -10,5 +10,5 @@ angular.module('contigBinningApp.services', []);
 // Create a module for the application with the dependencies specified.
 angular.module('contigBinningApp', [
   'contigBinningApp.controllers',
-  'contigBinningApp.services',
+  'contigBinningApp.services'
 ]);
