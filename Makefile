@@ -22,8 +22,8 @@ jslint: npm
 ifdef JSLINT
 	@which jslint > /dev/null
 else
-	@echo "* Installing jslint"
-	@sudo npm install -g jslint
+	@echo "* Please install jslint before continuing..."
+	@echo "  - e.g. try npm install jslint -g"
 	@which jslint > /dev/null
 endif
 
