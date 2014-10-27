@@ -52,9 +52,19 @@ angular.module('contigBinningApp.controllers')
       render();
     }
 
+    // function to be used as callback when new varaibles
+    // are requested to be added on to existing data
+    function loadAdditionalData(data) {
+      d.parcoords.data().forEach(function (d, i) {
+        _.forEach(data[i], function (val, key) {
+          d[key] = val;
+        });
+      });
+      render();
+    }
+
     function highlightRow(itemIndex) {
       if (itemIndex > -1) {
-        console.log("Highlighing Row " + itemIndex);
         d.parcoords.highlight([d.parcoords.data()[itemIndex]]);
       } else {
         d.parcoords.unhighlight();
@@ -70,17 +80,35 @@ angular.module('contigBinningApp.controllers')
     //meganism.
     $scope.$on("ParCoords::selectedVariablesChanged", function () {
       var dims = _.pluck(ParCoords.selectedVariables, "name"),
-        types = {};
+        types = {},
+        newVariables = _.difference(dims, d.parcoords.dimensions()),
+        missingVariables = _.difference(d.parcoords.dimensions(), dims),
+        existingVariables =  _.intersection(d.parcoords.dimensions(), dims);
 
       _.each(dims, function (dim) {
         types[dim] = "number";
+      });
+      // Comparing variable names to existing variables and only requesting new ones
+      // and removing absent ones from the parcoords data
+
+      d.parcoords.data().forEach(function (dataItem) {
+        missingVariables.forEach(function (missingVariable) {
+          delete dataItem[missingVariable];
+        });
       });
 
       d.parcoords
         .dimensions(dims)
         .types(types);
-
-      DataSet.get(dims, loadData);
+      if (existingVariables.length === 0) {
+        DataSet.get(dims, loadData);
+      } else {
+        if (newVariables.length > 0) {
+          DataSet.get(newVariables, loadAdditionalData);
+        } else if (missingVariables.length > 0) {
+          render();
+        }
+      }
     });
 
     $scope.$on("ParCoords::brushPredicateChanged", function () {

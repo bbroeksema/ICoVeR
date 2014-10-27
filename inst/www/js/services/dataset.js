@@ -190,9 +190,14 @@ angular.module('contigBinningApp.services')
         // Get the data variables from the backend.
         args.variables = _.pluck(varsByGroup.datavars, "name");
         args.rows = d.backend.rows;
-        OpenCPU.json("data.get", args, function (session, data) {
-          dataReceived(data);
-        });
+        // Request data from back end, but only
+        // if there are non dnamic / clustering variables
+        // being requested
+        if (args.variables.length > 0) {
+          OpenCPU.json("data.get", args, function (session, data) {
+            dataReceived(data);
+          });
+        }
 
         // For each of the performed clustering methods, trigger an http get to
         // retrieve the cluster values from their respective ocpu sessions.
