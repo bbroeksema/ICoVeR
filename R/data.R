@@ -10,20 +10,10 @@ data.schema <- function() {
 
 # data.get(rows = c(1,2,3,5,10), variables = c("gc_content"))
 # data.get(variables = c("gc_content"))
-data.get <- function(rows = NA, variables, addRows=T) {
-  data <- NA;
-  if (missing(rows) | length(rows) == 0) {
-    rows <- c(1:nrow(gData))
-    data <- gData[ ,variables]
-  } else
-    data <- gData[rows, variables]
+data.get <- function(rows = c(), variables, addRows=T) {
+  if (addRows) variables <- c("row", variables)
 
-  data <- as.data.frame(data)
-  names(data) <- variables
-  if (addRows) {
-    data$row <- rows
-  }
-  data
+  db.select(table="cstr", variables, rows)
 }
 
 data.gettotalnumrows <- function() {
