@@ -39,30 +39,17 @@ angular.module('contigBinningApp.services')
     });
     // Listen to the analytics service to store the results of various
     // analytical actions.
-    $rootScope.$on("Analytics::dataClustered", function (ev, method, session) {
-      d.backend.analytics.clusterings[method] = session;
-
-      var variable = {},
-        vars = _.filter(d.backend.schema, function (variable) {
-          return variable["group.type"] === constants.GT_ANALYTICS
-            && variable.group === constants.G_CLUSTERINGS
-            && variable.name === method;
+    $rootScope.$on("Analytics::dataClustered", function (ev, identifier) {
+      if (!d.backend.schemaIndex.hasOwnProperty(identifier)) {
+        OpenCPU.json("data.schema", null, function (session, schema) {
+          d.backend.schema = schema;
+          d.backend.schemaIndex = _.indexBy(schema, 'name');
+          $rootScope.$broadcast("DataSet::schemaLoaded", schema);
+          $rootScope.$broadcast("DataSet::clusterDataAvailable", d.backend.schemaIndex[identifier]);
         });
-
-      if (vars.length === 0) {
-        // Add it to the schema and send out notification of schema change
-        variable = {
-          "group.type": constants.GT_ANALYTICS,
-          "group": constants.G_CLUSTERINGS,
-          "name": method,
-          "type": "factor"
-        };
-        d.backend.schema.push(variable);
-        d.backend.schemaIndex = _.indexBy(d.backend.schema, 'name');
-        // TODO: This should problably change into DataSet::schemaChanged to
-        //       avoid the parallel coordinates component redrawing itself.
-        $rootScope.$broadcast("DataSet::schemaLoaded", d.backend.schema);
-      } // else nothing to do.
+      } else {
+        $rootScope.$broadcast("DataSet::clusterDataAvailable", d.backend.schemaIndex[identifier]);
+      }
     });
 
     $rootScope.$on("Analytics::variablesSummarized", function (ev, variableContributions, session) {
@@ -92,7 +79,7 @@ angular.module('contigBinningApp.services')
       d.backend.analytics.summaries[summaryName] = session;
       if (!d.backend.schemaIndex.hasOwnProperty(summaryName)) {
         variable = {
-          "group.type": constants.GT_ANALYTICS,
+          "group_type": constants.GT_ANALYTICS,
           "group": constants.G_SUMMARIES,
           "name": summaryName,
           "type": "numeric"
@@ -171,9 +158,6 @@ angular.module('contigBinningApp.services')
 
           var variable = schemaIndex[name];
           switch (variable.group) {
-          case constants.G_CLUSTERINGS:
-            varsByGroup.clustervars.push(variable);
-            break;
           case constants.G_SUMMARIES:
             varsByGroup.summaryvars.push(variable);
             break;
@@ -198,29 +182,6 @@ angular.module('contigBinningApp.services')
             dataReceived(data);
           });
         }
-
-        // For each of the performed clustering methods, trigger an http get to
-        // retrieve the cluster values from their respective ocpu sessions.
-        _.each(_.keys(d.backend.analytics.clusterings), function (method) {
-          var session = d.backend.analytics.clusterings[method];
-          $http({ method: 'GET', url: session.loc + "R/.val/json?auto_unbox=true" })
-            .success(function (data) {
-              // This is a row, cluster map. E.g.:
-              // { 1: 14, 2: 14, 3: 2, etc}
-              //
-              // Remember, the rows come from R and R indexes start at 1!
-              //
-              // Below we transform this map into the format (when method is
-              // kmeans):
-              // [ { row: 1, kmeans: 14}, {row: 2, kmeans: 14}, etc]
-              var values = _.map(_.keys(data), function (key) {
-                var value = { row: key };
-                value[method] = data[key];
-                return value;
-              });
-              dataReceived(values);
-            }); // (data, status, headers, config)
-        });
 
         // For each of the requested summaries, trigger an http get to retrieve
         // the summary values from their respective ocpu sessions.

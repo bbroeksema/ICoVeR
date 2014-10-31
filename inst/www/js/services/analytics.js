@@ -35,17 +35,20 @@ angular.module('contigBinningApp.services')
         return d.clusterMethods;
       },
 
-      cluster: function (method, variables, args) {
+      cluster: function (method, variables, args, id) {
         var fnArgs = {
-          vars: variables
+          vars: variables,
+          identifier: id
         };
         if (DataSet.rows()) {
           fnArgs.rows = DataSet.rows();
         }
-        // TODO: process args
+        _.each(_.keys(args), function (key) {
+          fnArgs[key] = args[key];
+        });
 
-        ocpu.call("cluster." + method, fnArgs, function (session) {
-          $rootScope.$broadcast("Analytics::dataClustered", method, session);
+        ocpu.call("cluster." + method, fnArgs, function () {
+          $rootScope.$broadcast("Analytics::dataClustered", id);
         });
       },
 

@@ -60,10 +60,19 @@ angular.module('contigBinningApp.services')
 
       var variables = _.filter(d.variables, function (variable) {
         return R.is.numeric(variable.type) &&
-          (variable["group.type"] === "Characteristics"
-          || variable["group.type"] === "TimeSeries");
+          (variable.group_type === "Characteristics"
+          || variable.group_type === "TimeSeries");
       });
       d.updateSelectedVariables(variables);
+    });
+    /*jslint unparam: false */
+
+    /*jslint unparam: true */
+    $rootScope.$on('DataSet::clusterDataAvailable', function (e, clusterVariable) {
+      if (!_.any(d.selectedVariables, { name: clusterVariable.name })) {
+        d.selectedVariables.push(clusterVariable);
+        d.updateSelectedVariables(d.selectedVariables);
+      }
     });
     /*jslint unparam: false */
 

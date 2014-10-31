@@ -10,84 +10,70 @@ angular.module('contigBinningApp.controllers')
     };
 
     function setVariables() {
-      if ($scope.selectedClusterMethod === undefined || d.schema === undefined) {
-        $scope.variables = [];
+      $scope.options.variables = _.filter(d.schema, function (variable) {
+        return R.is.numeric(variable.type);
+      });
+    }
+
+    function performClustering(config) {
+      var args = {};
+      // FIXME: Generalize this code, we don't want to change this code for
+      //        every clustering method we add.
+      if (config.method.name === "kmeans") {
+        args.centers = config.centers;
       } else {
-        $scope.variables = _.filter(d.schema, function (variable) {
-          return R.is.numeric(variable.type);
-        });
-        $scope.selectedVariables = [];
+        throw "Unknown clustering method: " + config.method.name;
       }
+
+      Analytics.cluster(
+        config.method.name,
+        _.map(config.variables,
+              function (variable) { return variable.name; }),
+        args,
+        config.identifier
+      );
     }
 
-    function updateSelectedVariables(variables) {
-      var text = _.reduce(variables, function (str, variable) {
-        return str === "" ? variable.name : str + ", " + variable.name;
-      }, "");
-      if (text.length > "Select variables...".length) {
-        $scope.selectionTextLong = text;
-        text = "Selected " + variables.length + " variables";
+    // Available clustering options.
+    $scope.options = {
+      methods: [],
+      variables: [],
+
+      valid: function () {
+        return $scope.options.methods.length > 0
+          && $scope.options.variables.length > 2;
       }
-      $scope.selectionText = text;
-      $scope.selectedVariables = variables;
-      $scope.configurationInvalid = $scope.selectedVariables.length === 0;
-    }
+    };
 
-    $scope.selectionText = "Select variables...";
-    $scope.selectionTextLong = "No variables selected";
-    $scope.variables = [];
-    $scope.clusterMethods = [];
-
-    $scope.configurationInvalid = true;
-    $scope.selectedClusterMethod = $scope.clusterMethods[0];
-    $scope.selectedVariables = [];
-
-    /*jslint unparam: true */
-    $scope.$watch('selectedClusterMethod', function (newMethod, oldMethod) {
-      if (newMethod === undefined) { return; }
-    });
-    /*jslint unparam: false */
+    $scope.canCluster = false;
 
     /*jslint unparam: true */
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
-      $scope.dataAvailable = true;
       d.schema = schema;
       setVariables();
+      $scope.canCluster = $scope.options.valid();
     });
     /*jslint unparam: false */
 
     /*jslint unparam: true */
     $scope.$on('Analytics::clusterMethodsAvailable', function (e, methods) {
-      $scope.clusterMethods = methods;
-      $scope.selectedClusterMethod = $scope.clusterMethods[0];
-      setVariables();
+      $scope.options.methods = methods;
+      $scope.canCluster = $scope.options.valid();
     });
     /*jslint unparam: false */
 
     $scope.openSelectionDialog = function () {
       var dialog = $modal.open({
-        templateUrl: 'js/templates/selectvars.html',
-        size: 'sm',
-        controller: 'VariableSelectionCtrl',
+        templateUrl: 'js/templates/clusterconfig.html',
+        size: 'md',
+        controller: 'ClusterConfigCtrl',
         resolve: {
-          variables: function () {
-            return $scope.variables;
-          },
-          selected: function () {
-            return $scope.selectedVariables;
+          options: function () {
+            return $scope.options;
           }
         }
       });
 
-      dialog.result.then(updateSelectedVariables);
-    };
-
-    $scope.cluster = function () {
-      Analytics.cluster(
-        $scope.selectedClusterMethod.name,
-        _.map($scope.selectedVariables,
-              function (variable) { return variable.name; }),
-        null
-      );
+      dialog.result.then(performClustering);
     };
   });

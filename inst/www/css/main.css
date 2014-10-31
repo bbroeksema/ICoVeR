@@ -1,6 +1,9 @@
 html, body {
   height: calc(100% - 50px);
 }
+.form-control.ng-invalid {
+  border: 2px solid red;
+}
 
 .navbar {
   margin-bottom: 0px;
@@ -21,16 +24,26 @@ html, body {
    margin-right: 0 !important;
 }
 
+.adjusted-left-padding {
+   padding-left: 9px !important;
+   margin-left: 0 !important;
+}
+
 .no-left-padding {
    padding-left: 0 !important;
    margin-left: 0 !important;
+}
+
+.no-right-padding {
+   padding-right: 0 !important;
+   margin-right: 0 !important;
 }
 
 .form-group {
   margin-bottom: 5px;
 }
 
-.modal-body select {
+.modal-body select[multiple] {
   min-height: 200px;
 }
 

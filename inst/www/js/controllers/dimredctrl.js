@@ -19,7 +19,7 @@ angular.module('contigBinningApp.controllers')
       }
 
       return function (variable) {
-        return test(variable['group.type']);
+        return test(variable.group_type);
       };
     }
 
@@ -59,7 +59,7 @@ angular.module('contigBinningApp.controllers')
         //        very well. Actually, it should allow for multiple types for
         //        group restriction.
         var restrictions = $scope.selectedDimRedMethod.restrict,
-          matchesGroupRestriction = createGroupTypeRestrictionTest(restrictions["group.type"]),
+          matchesGroupRestriction = createGroupTypeRestrictionTest(restrictions.group_type),
           matchesTypeRestriction = createTypeRestrictionTest(restrictions.type);
 
         $scope.variables = _.filter(d.schema, matchesGroupRestriction);
