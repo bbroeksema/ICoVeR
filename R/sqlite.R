@@ -1,24 +1,34 @@
 library(RSQLite)
 
-# Some private helper functions (starting with p.db.)
+# Some private helper functions and variables (starting with p.db.)
 
-# Note: This only works if the packe is installed in a directory that can be
-#       written by the user that runs opencpu.
-# Note: To make this work under linux, make sure you have the following line in
-#       /etc/apparmor.d/opencpu.d/custom:
-#       /home/${user.name}/R/x86_64-pc-linux-gnu-library/3.1/RParcoords/data/*.db rwk,
+# NOTE: The "cache" databse will be created as: /tmp/RParcoords/cache.db under
+#       linux. In order to make this work with the opencpu service a couple of
+#       things need to be done on linux:
+#       1) Some apparmor rules need to be set enable the RParcoords plugin to
+#          create a cache. The file: /etc/apparmor.d/opencpu.d/custom needs the
+#          following lines:
 #
-#       Replace ${user.name} with your actual user name. Also make sure that is
-#       actually represent the directory in which you have installed this packeage.
-p.db.file.name <- system.file("data", "cstr.db", package="RParcoords")
+#          /tmp/RParcoords/ rw,
+#          /tmp/RParcoords/** rwkmix,
+#
+#       2) The OpenCPU cache service must be disabled. Rationale: opencpu
+#          assumes each function to be pure (which is a reasonable assumption).
+#          However, we update the schema table in the sqlite database, and as
+#          such two calls to data.schema() can yield different results. This
+#          doesn't happen when the opencpu cache is enabled, as it will cache
+#          results of a function for given parameter configuration.
 
-if (!file.exists(p.db.file.name)) {
-  p.db.init()
-}
+p.db.file.path <- paste(.Platform$file.sep, paste("tmp", "RParcoords", sep=.Platform$file.sep), sep="")
+p.db.file.name <- paste(p.db.file.path, "cache.db", sep=.Platform$file.sep)
 
 p.db.init <- function() {
   data(cstr)
   data(cstr.schema)
+
+  if (!file.exists(p.db.file.path)) {
+    dir.create(p.db.file.path, recursive = T)
+  }
 
   # rownames(cstr) returns a vector of character, in the databse we actually
   # prefer to have it as integer
