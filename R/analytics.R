@@ -1,30 +1,36 @@
 library(FactoMineR)
 
-cluster.kmeans <- function(rows = c(), vars, centers = NA, iter.max=10) {
+# cluster.kmeans(vars=c("M4", "M20", "M28", "M36", "M40", "M44", "M48"), identifier="kmeans_30_7", centers=30)
+cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=10) {
   clusterData <- data.get(rows, vars)
 
   if (is.na(centers)) centers <- floor(sqrt(nrow(clusterData)))
 
-  rows <- if(missing(rows) | length(rows) == 0)
-            attr(gData, "row.names")
-          else
-            rows
+  clusters <- as.factor(stats::kmeans(clusterData, centers, iter.max)$cluster)
+  clusters <- data.frame(row = clusterData$row, cluster = clusters)
 
-  clusters <- as.list(stats::kmeans(clusterData, centers, iter.max)$cluster)
-  names(clusters) <- rows
-  clusters
+  p.db.extend.schema(name = identifier, type = "factor", group = "Analytics",
+                     group_type = "Clusterings")
+  p.db.add.column(column.name = identifier, type = "integer")
+
+  lapply(levels(clusters$cluster), function(level) {
+    level <- as.numeric(level)
+    rows <- clusters$row[clusters$cluster==level]
+    p.db.store(column.name = identifier, rows = rows, value = level)
+  })
 }
 
 cluster.methods <- function() {
   list("kmeans" = list(
     "man" = "/ocpu/library/stats/man/kmeans/text",
     "args" = list(
+      "identifier" = list("type" = "character", "required" = T),
       "vars" = list("type"="schema.numeric", "required"=T),
       "centers" = list("type"="numeric", "required"=F),
       "iter.max" = list("type"="numeric", "required"=F, "default"=10),
       "nstart" = list("type"="numeric", "required"=F, default=1),
       "algorithm" = list("type"="character", "required"=F,
-                          "values"=c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"))
+                         "values"=c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"))
     )
   ))
 }
@@ -32,10 +38,10 @@ cluster.methods <- function() {
 dimred.methods <- function() {
   list(
     "pca" = list(
-      "restrict" = list("type"="schema.numeric", "group.type"="!Frequencies")
+      "restrict" = list("type"="schema.numeric", "group_type"="!Frequencies")
     ),
     "ca" = list(
-      "restrict" = list("type"="schema.numeric", "group.type"="Frequencies")
+      "restrict" = list("type"="schema.numeric", "group_type"="Frequencies")
     )
   )
 }
