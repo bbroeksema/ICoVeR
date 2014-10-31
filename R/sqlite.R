@@ -77,9 +77,9 @@ p.db.extend.schema <- function(name, type, group, group_type) {
 }
 
 # p.db.store(column.name="kmeans_30_7", 1:10, 8)
-p.db.store <- function(con, column.name, rows = c(), value) {
+p.db.store <- function(column.name, rows = c(), value) {
   # NOTE: for now value is expected to be a numeric value.
-
+  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
   q <- paste("UPDATE cstr SET ", column.name, " = ", value, sep="")
 
   if (length(rows) > 0) {
@@ -89,6 +89,7 @@ p.db.store <- function(con, column.name, rows = c(), value) {
 
   res <- DBI::dbSendQuery(con, q)
   DBI::dbClearResult(res)
+  DBI::dbDisconnect(con)
 }
 
 # API exposed to the front-end
