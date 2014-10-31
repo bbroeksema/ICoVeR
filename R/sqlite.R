@@ -86,8 +86,10 @@ db.reset <- function() {
 }
 
 # db.select(vars=c("M4", "M20"), rows=c(1,2,100,2300))
-db.select <- function(table="cstr", vars, rows=c()) {
-  vars <- paste(unlist(vars), collapse=", ")
+db.select <- function(table="cstr", vars=c(), rows=c()) {
+  vars <- ifelse(length(vars) == 0,
+                 "*",
+                 paste(unlist(vars), collapse=", "))
   q <- paste("SELECT ", vars, " FROM ", table, sep="")
 
   if (length(rows) > 0) {
