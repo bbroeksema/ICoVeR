@@ -57,9 +57,9 @@ db.reset <- function() {
   db.init()
 }
 
-# db.add.column(column.name="kmeans_35_M4", type="integer")
-db.add.column <- function(table="cstr", column.name, type) {
-  type <- db.check.column.type(type)
+# p.db.add.column(column.name="kmeans_35_M4", type="integer")
+p.db.add.column <- function(table="cstr", column.name, type) {
+  type <- p.db.check.column.type(type)
 
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
   if (!(column.name %in% DBI::dbListFields(con, "cstr"))) {
