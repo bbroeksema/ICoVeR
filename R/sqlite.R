@@ -62,6 +62,20 @@ p.db.add.column <- function(table="cstr", column.name, type) {
   DBI::dbDisconnect(con)
 }
 
+# p.db.extend.schema("kmeans_30_7", "integer", "Analytics", "Clusterings")
+p.db.extend.schema <- function(name, type, group, group_type) {
+  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+  q <- paste("SELECT count(*) FROM cstr_schema WHERE name='", name, "'", sep="")
+  count <- unlist(DBI::dbGetQuery(con, q))
+  if (count == 0) {
+    values <- paste("'", c(name, type, group, group_type), "'", sep="", collapse=", ")
+    q <- paste("INSERT INTO cstr_schema VALUES(", values , ")", sep="")
+    res <- DBI::dbSendQuery(con, q)
+    DBI::dbClearResult(res)
+  }
+  DBI::dbDisconnect(con)
+}
+
 # API exposed to the front-end
 
 db.reset <- function() {
