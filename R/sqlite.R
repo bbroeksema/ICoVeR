@@ -48,15 +48,6 @@ p.db.check.column.type <- function(type) {
   type
 }
 
-# API exposed to the front-end
-
-db.reset <- function() {
-  if (file.exists(p.db.file.name)) {
-    file.remove(p.db.file.name)
-  }
-  db.init()
-}
-
 # p.db.add.column(column.name="kmeans_35_M4", type="integer")
 p.db.add.column <- function(table="cstr", column.name, type) {
   type <- p.db.check.column.type(type)
@@ -69,6 +60,15 @@ p.db.add.column <- function(table="cstr", column.name, type) {
   }
 
   DBI::dbDisconnect(con)
+}
+
+# API exposed to the front-end
+
+db.reset <- function() {
+  if (file.exists(p.db.file.name)) {
+    file.remove(p.db.file.name)
+  }
+  db.init()
 }
 
 # db.select(vars=c("M4", "M20"), rows=c(1,2,100,2300))
