@@ -76,6 +76,21 @@ p.db.extend.schema <- function(name, type, group, group_type) {
   DBI::dbDisconnect(con)
 }
 
+# p.db.store(column.name="kmeans_30_7", 1:10, 8)
+p.db.store <- function(con, column.name, rows = c(), value) {
+  # NOTE: for now value is expected to be a numeric value.
+
+  q <- paste("UPDATE cstr SET ", column.name, " = ", value, sep="")
+
+  if (length(rows) > 0) {
+    rows <- paste(as.character(rows), collapse=", ")
+    q <- paste(q, " WHERE row in (", rows, ")", sep="")
+  }
+
+  res <- DBI::dbSendQuery(con, q)
+  DBI::dbClearResult(res)
+}
+
 # API exposed to the front-end
 
 db.reset <- function() {
