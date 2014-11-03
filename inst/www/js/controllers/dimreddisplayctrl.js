@@ -1,22 +1,34 @@
-/*jslint indent: 2, todo:true */
-/*global angular, d3 */
+/*jslint indent: 2, todo:true, nomen:true */
+/*global angular, d3, _ */
 
 'use strict';
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedDisplayCtrl', function ($rootScope) {
+  .controller('DimRedDisplayCtrl', function ($scope, $rootScope) {
+    $scope.clusters = [];
+    $scope.cluster = undefined;
 
-    //TODO The clsuter slider control currently uses D3  functionality to get it working.
-    // it would be preferable to use the angualar-ui  slider functionality
-    // without mixing it with d3
-    d3.select("#clusterCountSlider").on("change", function () {
-      var inputClusterCount = this.value;
-      if (inputClusterCount < 13  && inputClusterCount > 1) {
-        d3.select("#clusterCount").text(Math.round(this.value));
-      } else {
-        inputClusterCount = 1; // the clustering function interprets 1 as no clustering selected
-        d3.select("#clusterCount").text("No Clustering");
+    function updateState(dimRedData) {
+      // NOTE: The backend calculates up to 12 clustering levels (at most).
+      var maxClusterCount = Math.min(dimRedData.projections.length, 13);
+      $scope.clusters = _.map(_.range(2, maxClusterCount),
+        function (val) {
+          return { count: val, label: String(val) };
+        });
+
+      $scope.clusters.unshift({ count: 0, label: "No clustering" });
+      $scope.cluster = $scope.clusters[0];
+    }
+
+    /*jslint unparam: true */
+    $scope.$on("Analytics::dimensionalityReduced", function (ev, method, session) {
+      session.getObject(updateState);
+    });
+    /*jslint unparam: false */
+
+    $scope.$watch('cluster', function (newCount) {
+      if (newCount !== undefined) {
+        $rootScope.$broadcast("DimRedDisplay::cluster", newCount.count);
       }
-      $rootScope.$broadcast("DimRedDisplay::cluster", inputClusterCount);
     });
   });
