@@ -52,7 +52,7 @@ p.plotdata <- function(dim.red.res, column.results) {
 
   # Set some propert column names.
   # There are N - 1 factors, where N is the dimensionality of the original dataset
-  factors <- c(1:(nrow(plotdata) - 1))
+  factors <- 1:(nrow(plotdata) - 1)
   colNames <- c(mapply(function(x) paste("factor.", x, sep=""), factors),
                 mapply(function(x) paste("contrib.", x, sep=""), factors))
 
@@ -80,7 +80,7 @@ p.plotdata <- function(dim.red.res, column.results) {
 
   list(
     projections=plotdata,
-    explainedVariance=dim.red.res$eig$"percentage of variance"
+    explainedVariance=dim.red.res$eig$"percentage of variance"[1:(nrow(plotdata) - 1)]
   )
 }
 
