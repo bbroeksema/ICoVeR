@@ -48,11 +48,12 @@ dimred.methods <- function() {
 
 p.plotdata <- function(dim.red.res, column.results) {
   # Now wrangle the result in a format suitable for plotting.
-  plotdata <- data.frame(dim.red.res[[column.results]]$coord, dim.red.res[[column.results]]$contrib)
+  factors <- 1:(nrow(dim.red.res[[column.results]]$coord) - 1)
+  plotdata <- data.frame(dim.red.res[[column.results]]$coord[ ,factors],
+                         dim.red.res[[column.results]]$contrib[, factors])
 
   # Set some propert column names.
   # There are N - 1 factors, where N is the dimensionality of the original dataset
-  factors <- 1:(nrow(plotdata) - 1)
   colNames <- c(mapply(function(x) paste("factor.", x, sep=""), factors),
                 mapply(function(x) paste("contrib.", x, sep=""), factors))
 
