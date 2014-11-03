@@ -114,8 +114,8 @@ crpgl.DimRedPlot = function() {
     //  Next, we add bars which that represent the actual variances.
     rect = gVariances.selectAll("rect.variance").data(variances)
     rect.enter().append("rect")
-      .attr("height", barHeight);
     rect
+      .attr("height", barHeight)
       .attr("x", function(d) { return barOrigin - barWidth(d); })
       .attr("y", function(d, i) { return i * barHeight; })
       .attr("width", function(d) { return barWidth(d); })
@@ -289,3 +289,4 @@ crpgl.DimRedPlot = function() {
   d3.rebind(drp, events, "on");
   return drp;
 }
+
