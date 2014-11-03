@@ -114,6 +114,7 @@ angular.module('contigBinningApp.controllers')
     }
 
     function updatePlot(dimRedData) {
+      pair = 1; // Always start with the first pair for a new plot
       data = dimRedData;
       data.actives = [pair, pair + 1];
       // TODO: Introduce various ways to 'cut' the number of principal axes.
