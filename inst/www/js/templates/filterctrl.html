@@ -1,9 +1,9 @@
 <form role="form" class="form-horizontal" ng-controller="FilterCtrl"
                     ng-show="itemsBrushed || dataFiltered">
   <div class="form-group row">
-    <label class="col-lg-1 control-label text-right">Filter:</label>
+    <label class="col-sm-3 control-label text-right">Filter:</label>
 
-    <div class="col-lg-11">
+    <div class="col-sm-9">
       <button type="button" class="btn btn-sm btn-success"
               ng-show="itemsBrushed" ng-click="keepSelected()"
               ng-disabled="filteringInProgress">
