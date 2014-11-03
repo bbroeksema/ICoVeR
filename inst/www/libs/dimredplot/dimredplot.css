@@ -9,6 +9,7 @@
   fill-opacity: .8;
   stroke-width: 1px;
   stroke: steelblue;
+  cursor: pointer;
 }
 
 .dimredplot .origin {
