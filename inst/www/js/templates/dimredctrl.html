@@ -2,11 +2,11 @@
       ng-controller="DimRedCtrl"
       ng-show="dataAvailable">
   <div class="form-group">
-    <label class="col-sm-3 control-label text-right"
+    <label class="col-sm-3 adjusted-right-padding control-label text-right"
            popover="Dimensionality Reduction"
            popover-trigger="mouseenter">Dim. Red:</label>
 
-    <div class="col-sm-3 adjusted-right-padding">
+    <div class="col-sm-3 no-left-padding adjusted-right-padding">
       <select class="form-control input-sm"
               ng-disabled="dimRedMethods.length <= 1"
               ng-model="selectedDimRedMethod"
