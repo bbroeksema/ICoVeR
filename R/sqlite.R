@@ -25,6 +25,7 @@ p.db.file.name <- paste(p.db.file.path, "cache.db", sep=.Platform$file.sep)
 p.db.init <- function() {
   data(cstr)
   data(cstr.schema)
+  names(cstr.schema) <- c("name", "type", "group", "group_type")
 
   if (!file.exists(p.db.file.path)) {
     dir.create(p.db.file.path, recursive = T)
