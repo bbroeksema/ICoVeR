@@ -98,7 +98,7 @@ db.reset <- function() {
   if (file.exists(p.db.file.name)) {
     file.remove(p.db.file.name)
   }
-  db.init()
+  p.db.init()
 }
 
 # db.select(vars=c("M4", "M20"), rows=c(1,2,100,2300))
