@@ -46,24 +46,10 @@ dimred.methods <- function() {
   )
 }
 
-# dimred.pca(vars = c("M4", "M20", "M28", "M36", "M40", "M44", "M48"))
-dimred.pca <- function(rows=c(), vars) {
-  data <- data.get(rows, vars)
-  FactoMineR::PCA(data[, vars], graph=F) # data.get adds a rows attribute to the data frame.
-}
-
-# dimred.ca(vars=c("aaaa","aaac","aaag","aaat","aaca","aacc","aacg","aact","aaga","aagc","aagg","aagt","aata","aatc","aatg","aatt","acaa","acac","acag","acat","acca","accc","accg","acct","acga","acgc","acgg","acgt","acta","actc","actg","actt","agaa","agac","agag","agat","agca","agcc","agcg","agct","agga","aggc","aggg","aggt","agta","agtc","agtg","agtt","ataa","atac","atag","atat","atca","atcc","atcg","atct","atga","atgc","atgg","atgt","atta","attc","attg","attt","caaa","caac","caag","caat","caca","cacc","cacg","cact","caga","cagc","cagg","cagt","cata","catc","catg","catt","ccaa","ccac","ccag","ccat","ccca","cccc","cccg","ccct","ccga","ccgc","ccgg","ccgt","ccta","cctc","cctg","cctt","cgaa","cgac","cgag","cgat","cgca","cgcc","cgcg","cgct","cgga","cggc","cggg","cggt","cgta","cgtc","cgtg","cgtt","ctaa","ctac","ctag","ctat","ctca","ctcc","ctcg","ctct","ctga","ctgc","ctgg","ctgt","ctta","cttc","cttg","cttt"))
-dimred.ca <- function(rows=c(), vars) {
-  # TODO: Instead of this matrix use the burt matrix where rows represent
-  #       columns as well. It must be something ling: data x data^T. Its size
-  #       is number of cols X number of cols. It should make the operation.
-  data <- data.get(rows, vars, addRows=F)
-  plotdata.ca(FactoMineR::CA(data, ncp=length(vars), graph=F))
-}
-
-plotdata.ca <- function(ca) {
+p.plotdata <- function(dim.red.res, column.results) {
   # Now wrangle the result in a format suitable for plotting.
-  plotdata <- data.frame(ca$col$coord, ca$col$contrib)
+  plotdata <- data.frame(dim.red.res[[column.results]]$coord, dim.red.res[[column.results]]$contrib)
+
   # Set some propert column names.
   # There are N - 1 factors, where N is the dimensionality of the original dataset
   factors <- c(1:(nrow(plotdata) - 1))
@@ -74,12 +60,13 @@ plotdata.ca <- function(ca) {
   # For each pair, we perfom hierarchical clusterings, and make cuts in the
   # resulting tree to get clusterings with 2,3,4,...,12 clusters. (So eleven
   # clusterings for each pair).
-  pairs <- c(1:(ncol(ca$col$coord) - 1))
+  pairs <- c(1:(ncol(dim.red.res[[column.results]]$coord) - 1))
+  maxClusterCount <- min(12, nrow(plotdata))
   mapply(function(pair) {
-    pairData <- plotdata[,c(pair, pair + 1)]
+    pairData <- plotdata[, c(pair, pair + 1)]
     pairDistances <- dist(pairData)
-    clusterings <- cutree(hclust(pairDistances), k=c(2:12))
-    cnames <- mapply(function(x) paste("clustering.", pair, ".", x, sep=""), c(2:12))
+    clusterings <- cutree(hclust(pairDistances), k=c(2:maxClusterCount))
+    cnames <- mapply(function(x) paste("clustering.", pair, ".", x, sep=""), c(2:maxClusterCount))
 
     # Note: the double << are required to assign new values to variables outside
     #       the scope of this mapply.
@@ -93,8 +80,23 @@ plotdata.ca <- function(ca) {
 
   list(
     projections=plotdata,
-    explainedVariance=ca$eig$"percentage of variance"
+    explainedVariance=dim.red.res$eig$"percentage of variance"
   )
+}
+
+# dimred.pca(vars = c("M4", "M20", "M28", "M36", "M40", "M44", "M48"))
+dimred.pca <- function(rows=c(), vars) {
+  data <- data.get(rows, vars, addRows = F)
+  p.plotdata(FactoMineR::PCA(data, ncp=length(vars), graph=F), column.results="var")
+}
+
+# dimred.ca(vars=c("aaaa","aaac","aaag","aaat","aaca","aacc","aacg","aact","aaga","aagc","aagg","aagt","aata","aatc","aatg","aatt","acaa","acac","acag","acat","acca","accc","accg","acct","acga","acgc","acgg","acgt","acta","actc","actg","actt","agaa","agac","agag","agat","agca","agcc","agcg","agct","agga","aggc","aggg","aggt","agta","agtc","agtg","agtt","ataa","atac","atag","atat","atca","atcc","atcg","atct","atga","atgc","atgg","atgt","atta","attc","attg","attt","caaa","caac","caag","caat","caca","cacc","cacg","cact","caga","cagc","cagg","cagt","cata","catc","catg","catt","ccaa","ccac","ccag","ccat","ccca","cccc","cccg","ccct","ccga","ccgc","ccgg","ccgt","ccta","cctc","cctg","cctt","cgaa","cgac","cgag","cgat","cgca","cgcc","cgcg","cgct","cgga","cggc","cggg","cggt","cgta","cgtc","cgtg","cgtt","ctaa","ctac","ctag","ctat","ctca","ctcc","ctcg","ctct","ctga","ctgc","ctgg","ctgt","ctta","cttc","cttg","cttt"))
+dimred.ca <- function(rows=c(), vars) {
+  # TODO: Instead of this matrix use the burt matrix where rows represent
+  #       columns as well. It must be something ling: data x data^T. Its size
+  #       is number of cols X number of cols. It should make the operation.
+  data <- data.get(rows, vars, addRows=F)
+  p.plotdata(FactoMineR::CA(data, ncp=length(vars), graph=F), column.results="col")
 }
 
 # dimred.summarize(variableWeights=list(aaaa=c(6.0151, 7.0562), aaat=c(4.7641, 2.7563), aata=c(4.175, 0.851), aatt=c(4.4429, 2.0970), ataa=c(4.1547, 0.8407), atat=c(3.1881, 0.1051), atta=c(4.1958, 0.7357), attt=c(4.7248, 2.7704)))
