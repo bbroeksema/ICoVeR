@@ -45,8 +45,7 @@ angular.module('contigBinningApp.controllers')
         Analytics.summarize(values);
       });
 
-    /*jslint unparam: true*/
-    function cluster(drp, newClusterCount) {
+    function cluster(newClusterCount) {
       var clusteredData = {
           projections: data.projections,
           actives: data.actives,
@@ -73,7 +72,7 @@ angular.module('contigBinningApp.controllers')
 
         clusteredData.actives = data.actives;
 
-        _.forIn(clustered, function (cluster, id) {
+        _.forIn(clustered, function (cluster) {
           // cluster is an array of points.
           // The position of the cluster is determined by taking averages for
           // x and y positions. The size of the cluster is determined by
@@ -139,7 +138,7 @@ angular.module('contigBinningApp.controllers')
     /*jslint unparam: false */
     /*jslint unparam: true */
     $scope.$on("DimRedDisplay::cluster", function (ev, clusterCount) {
-      cluster(null, clusterCount);
+      cluster(clusterCount);
     });
     /*jslint unparam: false */
   });
