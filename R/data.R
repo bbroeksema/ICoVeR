@@ -36,31 +36,29 @@ data.gettotalnumrows <- function() {
 	list(rows=nrow(gData))
 }
 
+# data.filter(extents=list(kmeans_30_7=c(10,12), gc_content=c(40,50)), method="KEEP")
 data.filter <- function(rows = c(), extents, predicate="AND", method = "KEEP") {
   if (predicate != "AND" && predicate != "OR") {
     stop(paste("Invalid predicate ", predicate, sep=""))
   }
 
-  initialData <- NA
-  if (missing(rows)) {
-    initialData <- gData
-  } else {
-    initialData <- gData[rows, ]
-  }
+  initialData <- data.get(rows = rows, variables = names(extents))
 
-  rows <- ifelse(missing(rows), nrow(gData), length(rows))
+  rows <- nrow(initialData)
   finalSelection <- ifelse(predicate == "AND", rep(TRUE, rows), rep(FALSE, rows))
 
   methods <- list(
     "KEEP" = function(name, extents) {
-      select <- initialData[name] >= extents[1] & initialData[name] <= extents[2]
+      var <- as.numeric(unlist(initialData[name]))
+      select <- var >= extents[1] & var <= extents[2]
       if (predicate == "AND")
         finalSelection <<- finalSelection & select
       else # predicate == "OR"
         finalSelection <<- finalSelection | select
     },
     "REMOVE" = function(name, extents) {
-      select <- initialData[name] < extents[1] | initialData[name] > extents[2]
+      var <- as.numeric(unlist(initialData[name]))
+      select <- var < extents[1] | var > extents[2]
       if (predicate == "AND")
         finalSelection <<- finalSelection & select
       else # predicate == "OR"
@@ -69,5 +67,5 @@ data.filter <- function(rows = c(), extents, predicate="AND", method = "KEEP") {
   )
 
   Map(methods[[method]], names(extents), extents)
-  attr(initialData[finalSelection, ], "row.names")
+  initialData$row[finalSelection]
 }
