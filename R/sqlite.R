@@ -93,6 +93,16 @@ p.db.store <- function(column.name, rows = c(), value) {
   DBI::dbDisconnect(con)
 }
 
+p.db.types <- function(variables) {
+  # NOTE: for now value is expected to be a numeric value.
+  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+  q <- paste("SELECT name, type FROM cstr_schema WHERE name in (\""
+             , paste(variables, collapse="\", \""), "\")", sep="")
+  data <- DBI::dbGetQuery(con, q)
+  DBI::dbDisconnect(con)
+  data
+}
+
 # API exposed to the front-end
 
 db.reset <- function() {
@@ -107,6 +117,7 @@ db.select <- function(table="cstr", vars=c(), rows=c()) {
   vars <- ifelse(length(vars) == 0,
                  "*",
                  paste(unlist(vars), collapse=", "))
+
   q <- paste("SELECT ", vars, " FROM ", table, sep="")
 
   if (length(rows) > 0) {
