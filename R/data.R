@@ -21,7 +21,15 @@ data.schema <- function() {
 data.get <- function(rows = c(), variables, addRows=T) {
   if (addRows) variables <- c("row", variables)
 
-  db.select(table="cstr", variables, rows)
+  data <- db.select(table="cstr", vars=variables, rows=rows)
+
+  factorVariables <- p.db.types(variables)
+  factorVariables <- factorVariables[factorVariables$type == "factor", c('name')]
+  Map(function(variable) {
+    data[variable] <<- as.factor(unlist(data[variable]))
+  }, factorVariables);
+
+  data
 }
 
 data.gettotalnumrows <- function() {
