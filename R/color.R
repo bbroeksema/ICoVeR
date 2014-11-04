@@ -15,6 +15,18 @@ p_schemes <- list(
       blue_to_purple = c(brewer.pal(9, "BuPu"), "#350034"),
       blues = c(brewer.pal(9, "Blues"), "#05214A")
     )
+  ),
+  factor = list(
+    value = list(
+      accent = brewer.pal(8, "Accent"),
+      dark2 = brewer.pal(8, "Dark2"),
+      paired = brewer.pal(12, "Paired"),
+      pastel1 = brewer.pal(9, "Pastel1"),
+      pastel2 = brewer.pal(8, "Pastel2"),
+      set1 = brewer.pal(9, "Set1"),
+      set2 = brewer.pal(8, "Set2"),
+      set3 = brewer.pal(12, "Set3")
+    )
   )
 )
 
@@ -68,12 +80,29 @@ p_color_numeric <- function(colorVariable, method, scheme) {
   }
 }
 
+p_color_factor_value <- function(colorVariable, scheme) {
+  scheme <- p_schemes$factor$value[[scheme]]
+  colorsModulo <- as.integer(colorVariable) %% length(scheme) + 1
+  scheme[colorVariable]
+}
+
+p_color_factor <- function(colorVariable, method, scheme) {
+  if (method == "Value") {
+    p_color_factor_value(colorVariable, scheme)
+  } else {
+    stop(paste("Unsupported color method:", method))
+  }
+}
+
 color.configurations <- function() {
   list(
     numeric = list(
       "Value" = names(p_schemes$numeric$value),
       "Decile" = names(p_schemes$numeric$decile)
       #"Z-score" = c("RedToBlue", "Spectral")
+    ),
+    factor = list(
+      "Value" = names(p_schemes$factor$value)
     )
   )
 }
@@ -81,9 +110,12 @@ color.configurations <- function() {
 # color.apply(variable="gc_content", method="Value", scheme="blue_to_brown")
 # color.apply(variable="gc_content", method="Decile", scheme="blue_to_green")
 color.apply <- function(rows = c(), variable, method, scheme) {
-  colorVariable <- data.get(rows, c(variable))[,variable]
+  colorVariable <- unlist(data.get(rows=rows, variables=c(variable), addRows=F))
   colors <- NA
-  if (is.numeric(colorVariable)) {
+
+  if (is.factor(colorVariable)) {
+    colors <- p_color_factor(colorVariable, method, scheme)
+  } else if (is.numeric(colorVariable)) {
     colors <- p_color_numeric(colorVariable, method, scheme)
   } else {
     stop("Unsupported data type")
