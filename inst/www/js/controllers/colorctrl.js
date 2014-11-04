@@ -14,6 +14,8 @@ angular.module('contigBinningApp.controllers')
     function onVariableChange() {
       if ($scope.colorVariable && R.is.numeric($scope.colorVariable.type)) {
         d.methods = d.config.numeric;
+      } else if ($scope.colorVariable && R.is.factor($scope.colorVariable.type)) {
+        d.methods = d.config.factor;
       } else {
         d.methods = undefined;
         $scope.colorMethod = undefined;
@@ -61,7 +63,7 @@ angular.module('contigBinningApp.controllers')
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
       $scope.dataAvailable = true;
       $scope.variables = _.filter(schema, function (variable) {
-        return R.is.numeric(variable.type);
+        return R.is.numeric(variable.type) || R.is.factor(variable.type);
       });
       $scope.colorVariable = undefined;
     });
