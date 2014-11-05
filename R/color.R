@@ -1,4 +1,5 @@
 library(RColorBrewer)
+library(colorspace)
 
 p_schemes <- list(
   numeric = list(
@@ -25,7 +26,9 @@ p_schemes <- list(
       pastel2 = brewer.pal(8, "Pastel2"),
       set1 = brewer.pal(9, "Set1"),
       set2 = brewer.pal(8, "Set2"),
-      set3 = brewer.pal(12, "Set3")
+      set3 = brewer.pal(12, "Set3"),
+	  # the qualitiative set will calulate the number of clusters before application
+	  qualitative_set = rainbow_hcl(30, c = 50, l = 70, start = 0, end = 360*(30-1)/30)
     )
   )
 )
@@ -81,9 +84,16 @@ p_color_numeric <- function(colorVariable, method, scheme) {
 }
 
 p_color_factor_value <- function(colorVariable, scheme) {
-  scheme <- p_schemes$factor$value[[scheme]]
+  if (scheme == "qualitative_set")  {
+	  clusterCount <- length(levels(colorVariable))
+    #p_schemes$factor$value[[scheme]] = colorspace::rainbow_hcl(clusterCount, c = 50, l = 70, start = 0, end = 360*(clusterCount-1)/clusterCount)
+	  p_schemes$factor$value[[scheme]] = colorspace::rainbow_hcl(clusterCount, c = 60, l = 75,)
+  }
+	scheme <- p_schemes$factor$value[[scheme]]
+  
   colorsModulo <- as.integer(colorVariable) %% length(scheme) + 1
-  scheme[colorVariable]
+ 
+  scheme[colorsModulo]
 }
 
 p_color_factor <- function(colorVariable, method, scheme) {
