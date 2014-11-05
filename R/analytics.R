@@ -20,6 +20,20 @@ cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=
   })
 }
 
+cluster.correlation <- function(rows = c(), vars, identifier,pearsonThreshold = 0.9, minClusterSize=2) {
+  clusterData <- data.get(rows, vars)
+  clusterData$row <- NULL
+  Corrclusters <-   as.data.frame(correlationCluster(clusterData))
+  p.db.extend.schema(name = identifier, type = "factor", group = "Analytics",
+                     group_type = "Clusterings")
+  p.db.add.column(column.name = identifier, type = "integer")
+  lapply(levels(Corrclusters$cluster), function(level) {
+    level <- as.numeric(level)
+    rows <- Corrclusters$row[Corrclusters$cluster==level]
+    p.db.store(column.name = identifier, rows = rows, value = level)
+  })
+}
+
 cluster.methods <- function() {
   list("kmeans" = list(
     "man" = "/ocpu/library/stats/man/kmeans/text",
@@ -31,8 +45,18 @@ cluster.methods <- function() {
       "nstart" = list("type"="numeric", "required"=F, default=1),
       "algorithm" = list("type"="character", "required"=F,
                          "values"=c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"))
-    )
-  ))
+		)
+	),
+	"correlation" = list(
+		"man" = "/ocpu/library/stats/man/kmeans/text",
+		"args" = list(
+		"identifier" = list("type" = "character", "required" = T),
+		"vars" = list("type"="schema.numeric", "required"=T),
+		"pearsonThreshold" = list("type"="numeric", "required"=F),
+		"minClusterSize" = list("type"="numeric", "required"=F, "default"=2)      
+		)
+	)
+  )
 }
 
 dimred.methods <- function() {

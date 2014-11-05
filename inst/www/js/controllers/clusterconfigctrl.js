@@ -5,14 +5,15 @@
 
 angular.module('contigBinningApp.controllers')
   .controller('ClusterConfigCtrl', function ($scope, $modalInstance, options) {
+    var previousCentersCount = 30;
 
     function updateControllerState() {
-      $scope.specified.identifier = $scope.options.methods[0].name
-        + '_' + $scope.specified.centers
+      $scope.specified.identifier = $scope.specified.method.name
+        + ($scope.specified.centers !== -1 ? '_' + $scope.specified.centers : "")
         + '_' + ($scope.specified.variables.length || 0);
 
       $scope.configurationInvalid =
-        $scope.specified.clusterCount < 2
+        ($scope.specified.centers < 2 && $scope.specified.centers !== -1)
         || $scope.specified.variables.length < 1;
     }
 
@@ -28,9 +29,22 @@ angular.module('contigBinningApp.controllers')
 
     $scope.$watch('specified.centers', updateControllerState);
     $scope.$watch('specified.variables', updateControllerState);
+    $scope.$watch('specified.method', updateControllerState);
 
     $scope.ok = function () {
       $modalInstance.close($scope.specified);
+    };
+
+    $scope.hideCenters = function () {
+      if ($scope.specified.method.name !== "kmeans") {
+        previousCentersCount = $scope.specified.centers;
+        $scope.specified.centers = -1;
+        return true;
+      }
+      if ($scope.specified.centers === -1) {
+        $scope.specified.centers = previousCentersCount;
+      }
+      return false;
     };
 
     $scope.cancel = function () {

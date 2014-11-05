@@ -27,10 +27,13 @@
     </fieldset>
     <fieldset><!-- TODO: Only show for KMEANS-->
       <div class="form-group">
-        <label class="col-sm-3 control-label" for="inpIdentifier">Cluster count:</label>
+        <label class="col-sm-3 control-label" for="inpIdentifier"
+               ng-hide="hideCenters()">Cluster count:</label>
         <div class="col-sm-9">
           <input class="form-control" placeholder="Cluster count (min: 2, max: #rows)"
-                 type="number" min="2" ng-pattern="/^\d+$/" ng-model="specified.centers">
+                 type="number" min="2" ng-pattern="/^\d+$/" ng-model="specified.centers"
+                 ng-hide="hideCenters()">
+                 <!-- TODO: this hardcoding for kmeans should be repaired. parameter should be those passed from the back end-->
           </input>
         </div>
       </div>
