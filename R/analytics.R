@@ -3,11 +3,13 @@ library(FactoMineR)
 # cluster.kmeans(vars=c("M4", "M20", "M28", "M36", "M40", "M44", "M48"), identifier="kmeans_30_7", centers=30)
 cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=10) {
   clusterData <- data.get(rows, vars)
+  clusterRows <- clusterData$row 
+  clusterData$row <- NULL
 
   if (is.na(centers)) centers <- floor(sqrt(nrow(clusterData)))
 
   clusters <- as.factor(stats::kmeans(clusterData, centers, iter.max)$cluster)
-  clusters <- data.frame(row = clusterData$row, cluster = clusters)
+  clusters <- data.frame(row = clusterRows, cluster = clusters)
 
   p.db.extend.schema(name = identifier, type = "factor", group = "Analytics",
                      group_type = "Clusterings")
@@ -22,6 +24,7 @@ cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=
 
 cluster.correlation <- function(rows = c(), vars, identifier,pearsonThreshold = 0.9, minClusterSize=2) {
   clusterData <- data.get(rows, vars)
+  rownames(clusterData) <- clusterData$row
   clusterData$row <- NULL
   Corrclusters <-   as.data.frame(correlationCluster(clusterData))
   p.db.extend.schema(name = identifier, type = "factor", group = "Analytics",
