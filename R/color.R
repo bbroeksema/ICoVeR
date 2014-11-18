@@ -85,14 +85,12 @@ p_color_numeric <- function(colorVariable, method, scheme) {
 
 p_color_factor_value <- function(colorVariable, scheme) {
   if (scheme == "qualitative_set")  {
-	  clusterCount <- length(levels(colorVariable))
-    #p_schemes$factor$value[[scheme]] = colorspace::rainbow_hcl(clusterCount, c = 50, l = 70, start = 0, end = 360*(clusterCount-1)/clusterCount)
-	  p_schemes$factor$value[[scheme]] = colorspace::rainbow_hcl(clusterCount, c = 60, l = 75,)
+    factorLevels <- length(levels(colorVariable))
+    #p_schemes$factor$value[[scheme]] = colorspace::rainbow_hcl(factorLevels, c = 50, l = 70, start = 0, end = 360*(clusterCount-1)/clusterCount)
+    p_schemes$factor$value[[scheme]] = colorspace::rainbow_hcl(factorLevels, c = 60, l = 75)
   }
-	scheme <- p_schemes$factor$value[[scheme]]
-  
+  scheme <- p_schemes$factor$value[[scheme]]
   colorsModulo <- as.integer(colorVariable) %% length(scheme) + 1
- 
   scheme[colorsModulo]
 }
 
