@@ -55,7 +55,8 @@
           <ul class="nav nav-tabs" role="tablist">
             <li class="active"><a href="#actions" role="tab" data-toggle="tab">Analyze</a></li>
             <li><a href="#appearance" role="tab" data-toggle="tab">Parallel Coordinates</a></li>
-            <li ><a href="#scatterplot" role="tab" data-toggle="tab">Dim. Red. Plot</a></li>
+            <li><a href="#scatterplot" role="tab" data-toggle="tab">Dim. Red. Plot</a></li>
+            <li><a href="#export" role="tab" data-toggle="tab">Export</a></li>
           </ul>
 
           <div class="tab-content">
@@ -70,6 +71,9 @@
             </div>
             <div class="tab-pane container-fluid" id="scatterplot">
               <ng-include src="'js/templates/dimreddisplayctrl.html'"></ng-include>
+            </div>
+            <div class="tab-pane container-fluid" id="export">
+              <ng-include src="'js/templates/exportctrl.html'"></ng-include>
             </div>
           </div>
         </div>
@@ -95,6 +99,7 @@
     <script src="js/controllers/clusterctrl.js"></script>
     <script src="js/controllers/clusterconfigctrl.js"></script>
     <script src="js/controllers/dataindicatorctrl.js"></script>
+    <script src="js/controllers/exportctrl.js"></script>
     <script src="js/controllers/parcoordsctrl.js"></script>
     <script src="js/controllers/parcoordsvarsctrl.js"></script>
     <script src="js/controllers/scatterplotctrl.js"></script>
