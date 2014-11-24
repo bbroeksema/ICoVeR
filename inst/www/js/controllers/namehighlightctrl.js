@@ -29,6 +29,11 @@ angular.module('contigBinningApp.controllers')
     });
     /*jslint unparam: false */
 
+    /*jslint unparam: true */
+    $scope.$on('DataSet::filtered', function (e, schema) {
+      DataSet.get(variables, buildNameHash);
+    });
+    /*jslint unparam: false */
     $scope.highlightRow = function () {
       // called by ng_change directive on the rowName input in the UI
       var highlightIndex = -1;
