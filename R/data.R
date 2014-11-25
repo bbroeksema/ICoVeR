@@ -25,7 +25,7 @@ data.get <- function(rows = c(), variables, addRows=T) {
 }
 
 data.gettotalnumrows <- function() {
-	list(rows=nrow(gData))
+  p.db.rowcount(table="data")
 }
 
 # data.filter(extents=list(kmeans_30_7=c(10,12), gc_content=c(40,50)), method="KEEP")

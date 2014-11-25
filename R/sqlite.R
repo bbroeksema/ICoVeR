@@ -48,7 +48,13 @@ p.db.connection <-function() {
   DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
 }
 
+p.db.rowcount <- function(table) {
+  q <- paste("SELECT COUNT(*) FROM", table, sep=" ")
+
+  con <- p.db.connection()
+  rowcount <- DBI::dbGetQuery(con, q)
   DBI::dbDisconnect(con)
+  as.vector(unlist(rowcount))
 }
 
 p.db.check.column.type <- function(type) {
