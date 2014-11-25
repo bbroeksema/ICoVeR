@@ -5,14 +5,6 @@ gSchema <- cstr.schema;
 gData <- cstr;
 
 data.schema <- function() {
-  # FIXME: For now I assume that this is the first method that's being called
-  #        to make sure that the db is initialized. There are some issues with
-  #        this: a) it's sqlite specific, b) we should not assume that this is
-  #        the first method being called.
-  if (!file.exists(p.db.file.name)) {
-    p.db.init()
-  }
-
   db.select(table="schema")
 }
 

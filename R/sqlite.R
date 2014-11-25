@@ -39,6 +39,15 @@ p.db.init <- function() {
   DBI::dbWriteTable(con, "data", cstr, row.names=F)
   DBI::dbWriteTable(con, "schema", cstr.schema, row.names=F)
   DBI::dbDisconnect(con)
+}
+
+p.db.connection <-function() {
+  if (!file.exists(p.db.file.name)) {
+    p.db.init()
+  }
+  DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+}
+
   DBI::dbDisconnect(con)
 }
 
@@ -54,7 +63,7 @@ p.db.check.column.type <- function(type) {
 p.db.add.column <- function(table="data", column.name, type) {
   type <- p.db.check.column.type(type)
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+  con <- p.db.connection()
   if (!(column.name %in% DBI::dbListFields(con, "cstr"))) {
     q <- paste("ALTER TABLE", table, "ADD COLUMN", column.name, type, sep=" ")
     res <- DBI::dbSendQuery(con, q)
@@ -66,7 +75,7 @@ p.db.add.column <- function(table="data", column.name, type) {
 
 # p.db.extend.schema("kmeans_30_7", "integer", "Analytics", "Clusterings")
 p.db.extend.schema <- function(name, type, group, group_type) {
-  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+  con <- p.db.connection()
   q <- paste("SELECT count(*) FROM schema WHERE name='", name, "'", sep="")
   count <- unlist(DBI::dbGetQuery(con, q))
   if (count == 0) {
@@ -81,7 +90,7 @@ p.db.extend.schema <- function(name, type, group, group_type) {
 # p.db.store(column.name="kmeans_30_7", 1:10, 8)
 p.db.store <- function(column.name, rows = c(), value) {
   # NOTE: for now value is expected to be a numeric value.
-  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+  con <- p.db.connection()
   q <- paste("UPDATE data SET ", column.name, " = ", value, sep="")
 
   if (length(rows) > 0) {
@@ -96,7 +105,7 @@ p.db.store <- function(column.name, rows = c(), value) {
 
 p.db.types <- function(variables) {
   # NOTE: for now value is expected to be a numeric value.
-  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+  con <- p.db.connection()
   q <- paste("SELECT name, type FROM schema WHERE name in (\""
              , paste(variables, collapse="\", \""), "\")", sep="")
   data <- DBI::dbGetQuery(con, q)
@@ -126,7 +135,7 @@ db.select <- function(table="data", vars=c(), rows=c()) {
     q <- paste(q, " WHERE row in (", rows, ")", sep="")
   }
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+  con <- p.db.connection()
   data <- DBI::dbGetQuery(con, q)
   DBI::dbDisconnect(con)
   data
