@@ -3,7 +3,7 @@ library(FactoMineR)
 # cluster.kmeans(vars=c("M4", "M20", "M28", "M36", "M40", "M44", "M48"), identifier="kmeans_30_7", centers=30)
 cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=10) {
   clusterData <- data.get(rows, vars)
-  clusterRows <- clusterData$row 
+  clusterRows <- clusterData$row
   clusterData$row <- NULL
 
   if (is.na(centers)) centers <- floor(sqrt(nrow(clusterData)))
@@ -56,7 +56,7 @@ cluster.methods <- function() {
 		"identifier" = list("type" = "character", "required" = T),
 		"vars" = list("type"="schema.numeric", "required"=T),
 		"pearsonThreshold" = list("type"="numeric", "required"=F),
-		"minClusterSize" = list("type"="numeric", "required"=F, "default"=2)      
+		"minClusterSize" = list("type"="numeric", "required"=F, "default"=2)
 		)
 	)
   )
