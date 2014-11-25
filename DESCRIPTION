@@ -8,3 +8,4 @@ Maintainer: Bertjan Broeksema <broeksem@lippman.lu>
 Description: A simple test project to explore the R/OpenCPU/HTML5 stack.
 License: undecided
 LazyData: true
+Depends: FactoMineR, RColorBrewer, RSQLite, Hmisc, colorspace
