@@ -13,7 +13,7 @@ data.schema <- function() {
     p.db.init()
   }
 
-  db.select(table="cstr_schema")
+  db.select(table="schema")
 }
 
 # data.get(rows = c(1,2,3,5,10), variables = c("gc_content"))
@@ -21,7 +21,7 @@ data.schema <- function() {
 data.get <- function(rows = c(), variables, addRows=T) {
   if (addRows) variables <- c("row", variables)
 
-  data <- db.select(table="cstr", vars=variables, rows=rows)
+  data <- db.select(table="data", vars=variables, rows=rows)
 
   factorVariables <- p.db.types(variables)
   factorVariables <- factorVariables[factorVariables$type == "factor", c('name')]

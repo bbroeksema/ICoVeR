@@ -36,8 +36,9 @@ p.db.init <- function() {
   cstr$row <- as.integer(rownames(cstr))
 
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
-  DBI::dbWriteTable(con, "cstr", cstr, row.names=F)
-  DBI::dbWriteTable(con, "cstr_schema", cstr.schema, row.names=F)
+  DBI::dbWriteTable(con, "data", cstr, row.names=F)
+  DBI::dbWriteTable(con, "schema", cstr.schema, row.names=F)
+  DBI::dbDisconnect(con)
   DBI::dbDisconnect(con)
 }
 
@@ -50,7 +51,7 @@ p.db.check.column.type <- function(type) {
 }
 
 # p.db.add.column(column.name="kmeans_35_M4", type="integer")
-p.db.add.column <- function(table="cstr", column.name, type) {
+p.db.add.column <- function(table="data", column.name, type) {
   type <- p.db.check.column.type(type)
 
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
@@ -66,11 +67,11 @@ p.db.add.column <- function(table="cstr", column.name, type) {
 # p.db.extend.schema("kmeans_30_7", "integer", "Analytics", "Clusterings")
 p.db.extend.schema <- function(name, type, group, group_type) {
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
-  q <- paste("SELECT count(*) FROM cstr_schema WHERE name='", name, "'", sep="")
+  q <- paste("SELECT count(*) FROM schema WHERE name='", name, "'", sep="")
   count <- unlist(DBI::dbGetQuery(con, q))
   if (count == 0) {
     values <- paste("'", c(name, type, group, group_type), "'", sep="", collapse=", ")
-    q <- paste("INSERT INTO cstr_schema VALUES(", values , ")", sep="")
+    q <- paste("INSERT INTO schema VALUES(", values , ")", sep="")
     res <- DBI::dbSendQuery(con, q)
     DBI::dbClearResult(res)
   }
@@ -81,7 +82,7 @@ p.db.extend.schema <- function(name, type, group, group_type) {
 p.db.store <- function(column.name, rows = c(), value) {
   # NOTE: for now value is expected to be a numeric value.
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
-  q <- paste("UPDATE cstr SET ", column.name, " = ", value, sep="")
+  q <- paste("UPDATE data SET ", column.name, " = ", value, sep="")
 
   if (length(rows) > 0) {
     rows <- paste(as.character(rows), collapse=", ")
@@ -96,7 +97,7 @@ p.db.store <- function(column.name, rows = c(), value) {
 p.db.types <- function(variables) {
   # NOTE: for now value is expected to be a numeric value.
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
-  q <- paste("SELECT name, type FROM cstr_schema WHERE name in (\""
+  q <- paste("SELECT name, type FROM schema WHERE name in (\""
              , paste(variables, collapse="\", \""), "\")", sep="")
   data <- DBI::dbGetQuery(con, q)
   DBI::dbDisconnect(con)
@@ -113,7 +114,7 @@ db.reset <- function() {
 }
 
 # db.select(vars=c("M4", "M20"), rows=c(1,2,100,2300))
-db.select <- function(table="cstr", vars=c(), rows=c()) {
+db.select <- function(table="data", vars=c(), rows=c()) {
   vars <- ifelse(length(vars) == 0,
                  "*",
                  paste(unlist(vars), collapse=", "))
