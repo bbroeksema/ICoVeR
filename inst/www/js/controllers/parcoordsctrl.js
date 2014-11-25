@@ -9,7 +9,8 @@ angular.module('contigBinningApp.controllers')
     /// private Controller vars
     var d = {
       parcoords: d3.parcoords()($element[0])
-    };
+    },
+      currentHighlightRow = -1;
 
     /// private controller functions
     function resize() {
@@ -50,6 +51,11 @@ angular.module('contigBinningApp.controllers')
     function loadData(data) {
       d.parcoords.data(data);
       render();
+      // if there is a row currently highlighted and it exists in the new dataset
+      // we want to ensure it is still highlighted
+      if (currentHighlightRow > -1) {
+        d.parcoords.highlight([d.parcoords.data()[currentHighlightRow]]);
+      }
     }
 
     // function to be used as callback when new varaibles
@@ -64,8 +70,9 @@ angular.module('contigBinningApp.controllers')
     }
 
     function highlightRow(itemIndex) {
-      if (itemIndex > -1) {
-        d.parcoords.highlight([d.parcoords.data()[itemIndex]]);
+      currentHighlightRow = itemIndex;
+      if (currentHighlightRow > -1) {
+        d.parcoords.highlight([d.parcoords.data()[currentHighlightRow]]);
       } else {
         d.parcoords.unhighlight();
       }

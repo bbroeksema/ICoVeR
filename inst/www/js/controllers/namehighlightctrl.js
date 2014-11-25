@@ -15,6 +15,9 @@ angular.module('contigBinningApp.controllers')
           nameHash[d[v]] = dataIndex;
         });
       });
+      // if a row is highlighted before the event that caused the rebuild
+      // we still want it to be highlighted after
+      $scope.highlightRow();
     }
 
     /*jslint unparam: true */
@@ -31,6 +34,8 @@ angular.module('contigBinningApp.controllers')
 
     /*jslint unparam: true */
     $scope.$on('DataSet::filtered', function (e, schema) {
+      // remove highlight... it will be reapplied once the filter returns
+      ParCoords.highlightRow(-1);
       DataSet.get(variables, buildNameHash);
     });
     /*jslint unparam: false */
