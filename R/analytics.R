@@ -129,7 +129,7 @@ dimred.ca <- function(rows=c(), vars) {
 
 # dimred.summarize(variableWeights=list(aaaa=c(6.0151, 7.0562), aaat=c(4.7641, 2.7563), aata=c(4.175, 0.851), aatt=c(4.4429, 2.0970), ataa=c(4.1547, 0.8407), atat=c(3.1881, 0.1051), atta=c(4.1958, 0.7357), attt=c(4.7248, 2.7704)))
 dimred.summarize <- function(rows=c(), variableWeights) {
-  data <- data.get(rows, names(variableWeights), addRows=F)
+  data <- data.get(rows, names(variableWeights), addRows=T)
   vars <- names(variableWeights)
   summary <- rep(0, nrow(data))
 
@@ -144,11 +144,6 @@ dimred.summarize <- function(rows=c(), variableWeights) {
   # values. There must be more R-like ways to prevent this from happening.
   summary <- as.list(summary[[1]])
 
-  rows <- if(missing(rows) | length(rows) == 0)
-    attr(gData, "row.names")
-  else
-    rows
-
-  names(summary) <- rows
+  names(summary) <- data$rows
   summary
 }

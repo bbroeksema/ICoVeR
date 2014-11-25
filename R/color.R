@@ -118,42 +118,19 @@ color.configurations <- function() {
 # color.apply(variable="gc_content", method="Value", scheme="blue_to_brown")
 # color.apply(variable="gc_content", method="Decile", scheme="blue_to_green")
 color.apply <- function(rows = c(), variable, method, scheme) {
-  colorVariable <- unlist(data.get(rows=rows, variables=c(variable), addRows=F))
+  colorVariable <- data.get(rows=rows, variables=c(variable), addRows=T)
   colors <- NA
 
-  if (is.factor(colorVariable)) {
-    colors <- p_color_factor(colorVariable, method, scheme)
-  } else if (is.numeric(colorVariable)) {
-    colors <- p_color_numeric(colorVariable, method, scheme)
+  if (is.factor(colorVariable[[variable]])) {
+    colors <- p_color_factor(colorVariable[[variable]], method, scheme)
+  } else if (is.numeric(colorVariable[[variable]])) {
+    colors <- p_color_numeric(colorVariable[[variable]], method, scheme)
   } else {
     stop("Unsupported data type")
   }
-  rows <- if(missing(rows) | length(rows) == 0)
-            attr(gData, "row.names")
-          else
-            rows
+
   # Now, combine row names and the colors in a resulting data frame.
   colors <- as.list(colors)
-  names(colors) <- rows
+  names(colors) <- colorVariable$row
   colors
-}
-
-color.get <- function(colors = NA, rows = c()) {
-  if (missing(colors)) {
-    if (length(rows) == 0) {
-      colors <- as.list(rep("#069", nrow(gData)))
-      names(colors) <- c(1:nrow(gData))
-      colors
-    } else {
-      colors <- as.list(rep("#069", length(rows)))
-      names(colors) <- rows
-      colors
-    }
-  } else {
-    if (length(rows) == 0 ) {
-      colors;
-    } else {
-      colors[rows]
-    }
-  }
 }

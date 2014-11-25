@@ -1,9 +1,3 @@
-data(cstr.schema)
-data(cstr)
-
-gSchema <- cstr.schema;
-gData <- cstr;
-
 data.schema <- function() {
   db.select(table="schema")
 }
