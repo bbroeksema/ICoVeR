@@ -48,12 +48,17 @@ angular.module('contigBinningApp.controllers')
       }
     }
 
+    function onOpacityChange() {
+      Color.opacity($scope.opacity);
+    }
+
     $scope.variables = [];
     $scope.colorMethods = [];
     $scope.colorSchemes = [];
     $scope.colorVariable = undefined;
     $scope.colorMethod = undefined;
     $scope.colorScheme = undefined;
+    $scope.opacity = 0.05;
 
     $scope.applyColoring = function () {
       Color.color($scope.colorVariable.name, $scope.colorMethod, $scope.colorScheme);
@@ -77,4 +82,5 @@ angular.module('contigBinningApp.controllers')
 
     $scope.$watch('colorVariable', onVariableChange);
     $scope.$watch('colorMethod', onMethodChange);
+    $scope.$watch('opacity', onOpacityChange);
   });

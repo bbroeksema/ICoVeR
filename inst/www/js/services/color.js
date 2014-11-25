@@ -29,6 +29,9 @@ angular.module('contigBinningApp.services')
           $rootScope.$broadcast("Colors::changed", colors);
         });
         /*jslint unparam: false */
+      },
+      opacity: function (value) {
+        $rootScope.$broadcast("Opacity::changed", value);
       }
     };
   });

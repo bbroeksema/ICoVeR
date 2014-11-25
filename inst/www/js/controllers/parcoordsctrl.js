@@ -132,5 +132,10 @@ angular.module('contigBinningApp.controllers')
       render();
     });
 
+    $scope.$on("Opacity::changed", function (e, opacity) {
+      d.parcoords.alpha(opacity);
+      render();
+    });
+
     ParCoords.setHighlightFunction(highlightRow);
   });
