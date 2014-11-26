@@ -36,9 +36,7 @@ p.db.init <- function() {
   data(list=list(p.db.dataset, paste(p.db.dataset, ".schema", sep="")))
   mSchema <- .GlobalEnv[[paste(p.db.dataset, ".schema", sep="")]]
   mData <- .GlobalEnv[[p.db.dataset]]
-  # rownames(cstr) returns a vector of character, in the databse we actually
-  # prefer to have it as integer
-  mData$row <- as.integer(rownames(mData))
+  mData$row <- as.integer(1:nrow(mData))
 
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
   DBI::dbWriteTable(con, "data", mData, row.names=F)
