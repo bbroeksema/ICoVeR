@@ -73,7 +73,7 @@ p.db.add.column <- function(table="data", column.name, type) {
   type <- p.db.check.column.type(type)
 
   con <- p.db.connection()
-  if (!(column.name %in% DBI::dbListFields(con, "cstr"))) {
+  if (!(column.name %in% DBI::dbListFields(con, table))) {
     q <- paste("ALTER TABLE", table, "ADD COLUMN", column.name, type, sep=" ")
     res <- DBI::dbSendQuery(con, q)
     DBI::dbClearResult(res)
