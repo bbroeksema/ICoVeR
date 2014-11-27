@@ -11,17 +11,27 @@ angular.module('contigBinningApp.controllers')
       rowIdMap: {}
     };
 
-    $scope.contigIds = "";
+    $scope.idStrings = "";
     $scope.exportMethods = ["all"];
     $scope.exportMethod = $scope.exportMethods[0];
 
     /*jslint unparam: true */
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
-      // FIXME: This is not generic at, but we need something working now.
-      DataSet.get(["contig"], function (data) {
+      var idFields;
+
+      idFields = _.chain(schema)
+        .filter({ 'group_type': 'Id' })
+        .pluck('name')
+        .value();
+
+      DataSet.get(idFields, function (data) {
         d.rowIdMap = {};
-        _.map(data, function (datum) {
-          d.rowIdMap[datum.row] = datum.contig;
+        _.each(data, function (datum) {
+          var idFieldStrings = _.map(idFields, function (field) {
+            return field + ": " + datum[field];
+          });
+          d.rows = data;
+          d.rowIdMap[datum.row] = idFieldStrings.join(', ');
         });
       });
     });
@@ -40,11 +50,11 @@ angular.module('contigBinningApp.controllers')
     /*jslint unparam: false */
 
     $scope.export = function () {
-      var contigIds = "";
+      var idStrings = "";
       _.map(d.rows, function (datum) {
-        contigIds += d.rowIdMap[datum.row] + "\n";
+        idStrings += d.rowIdMap[datum.row] + "\n";
       });
-      $scope.contigIds = contigIds;
+      $scope.idStrings = idStrings;
     };
 
   });
