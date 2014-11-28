@@ -37,11 +37,15 @@ clusterProfiles <- function(X, pearsonThreshold = .9, minClusterSize = 2) {
     }
     clustered <- rbind(clustered, nextcluster)
 
-    X <- X[!correlates,]
-    #print(paste(nrow(X), sum(correlates), clusterId - 1, sep=' '))
+    if (sum(!correlates) < nrow(X)) {
+      X <- X[!correlates,]
+    } else {
+      break # None of the remaining rows correlates with one another.
+    }
+
 
     if (nrow(X) == 0) {
-      break
+      break # None remaining rows left
     }
   }
   clustered
