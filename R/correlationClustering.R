@@ -6,7 +6,12 @@ library(Hmisc)
 # the given PCC threshold.
 hasStrongCorrelation <- function(x, pearson) {
   function (y) {
-    Hmisc::rcorr(as.double(x), as.double(y))$r[1,2] > pearson
+    above <- Hmisc::rcorr(as.double(x), as.double(y))$r[1,2] > pearson
+    if (is.na(above)) {
+      above <- FALSE
+    }
+
+    above
   }
 }
 
