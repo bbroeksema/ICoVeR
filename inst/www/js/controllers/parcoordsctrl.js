@@ -92,8 +92,12 @@ angular.module('contigBinningApp.controllers')
         missingVariables = _.difference(d.parcoords.dimensions(), dims),
         existingVariables =  _.intersection(d.parcoords.dimensions(), dims);
 
-      _.each(dims, function (dim) {
-        types[dim] = "number";
+      _.each(ParCoords.selectedVariables, function (dim) {
+        if (dim.type === "factor") {
+          types[dim.name] = "string";
+        } else {
+          types[dim.name] = "number";
+        }
       });
       // Comparing variable names to existing variables and only requesting new ones
       // and removing absent ones from the parcoords data
