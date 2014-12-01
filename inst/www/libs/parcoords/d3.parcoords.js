@@ -516,7 +516,7 @@ function flipAxisAndUpdatePCP(dimension, i) {
 }
 
 function rotateLabels() {
-  var delta = d3.event.wheelDeltaY;
+  var delta = d3.event.deltaY;
   delta = delta < 0 ? -5 : delta;
   delta = delta > 0 ? 5 : delta;
 
@@ -1086,9 +1086,9 @@ pc.brushMode = function(mode) {
 
       brushed = selected(strums);
       strums.active = undefined;
-      __.brushed = brushed.length === __.data.length ? false : brushed;
-      events.brushend.call(pc, __.brushed);
+      __.brushed = brushed;
       pc.render();
+      events.brushend.call(pc, __.brushed);
     };
   }
 
