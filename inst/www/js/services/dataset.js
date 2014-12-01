@@ -248,7 +248,7 @@ angular.module('contigBinningApp.services')
       // Returns the totalumber of rows in the dataset
       getTotalNumRows: function (callback) {
         OpenCPU.json("data.gettotalnumrows", {}, function (session, returnedNumberOfRows) {
-          callback(returnedNumberOfRows.rows);
+          callback(returnedNumberOfRows);
         });
       },
 
