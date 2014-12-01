@@ -39,55 +39,17 @@ angular.module('contigBinningApp.services')
     });
     // Listen to the analytics service to store the results of various
     // analytical actions.
-    $rootScope.$on("Analytics::dataClustered", function (ev, identifier) {
+    $rootScope.$on("Analytics::dataUpdated", function (ev, identifier) {
       if (!d.backend.schemaIndex.hasOwnProperty(identifier)) {
         OpenCPU.json("data.schema", null, function (session, schema) {
           d.backend.schema = schema;
           d.backend.schemaIndex = _.indexBy(schema, 'name');
           $rootScope.$broadcast("DataSet::schemaLoaded", schema);
-          $rootScope.$broadcast("DataSet::clusterDataAvailable", d.backend.schemaIndex[identifier]);
+          $rootScope.$broadcast("DataSet::analyticsDataAvailable", d.backend.schemaIndex[identifier]);
         });
       } else {
-        $rootScope.$broadcast("DataSet::clusterDataAvailable", d.backend.schemaIndex[identifier]);
+        $rootScope.$broadcast("DataSet::analyticsDataAvailable", d.backend.schemaIndex[identifier]);
       }
-    });
-
-    $rootScope.$on("Analytics::variablesSummarized", function (ev, variableContributions, session) {
-      function sum(array) {
-        return _.reduce(array, function (a, b) { return a + b; }, 0);
-      }
-
-      var variable = {},
-        summaryName = _.chain(variableContributions)
-          .map(function (contribs, variable) {
-            return { variable: variable, contrib: sum(contribs) };
-          })
-          .sortBy('contrib')
-          .reverse()
-          .first(2)
-          .pluck('variable')
-          .join('-')
-          .value();
-
-      // Prepend a distinghuising string, so that we don't inadvertly replace
-      // one of the existing variables.
-      summaryName = "smry-" + summaryName;
-
-      // TODO: When different clustering levels, result in clusters where the
-      //       two most important variables are the same, this will result in an
-      //       earlier calculated summary being replaced.
-      d.backend.analytics.summaries[summaryName] = session;
-      if (!d.backend.schemaIndex.hasOwnProperty(summaryName)) {
-        variable = {
-          "group_type": constants.GT_ANALYTICS,
-          "group": constants.G_SUMMARIES,
-          "name": summaryName,
-          "type": "numeric"
-        };
-        d.backend.schema.push(variable);
-        d.backend.schemaIndex = _.indexBy(d.backend.schema, "name");
-      }
-      $rootScope.$broadcast("DataSet::schemaLoaded", d.backend.schema);
     });
 
     return {
@@ -182,28 +144,6 @@ angular.module('contigBinningApp.services')
             dataReceived(data);
           });
         }
-
-        // For each of the requested summaries, trigger an http get to retrieve
-        // the summary values from their respective ocpu sessions.
-        _.each(_.pluck(varsByGroup.summaryvars), function (smryVariable) {
-          var session = d.backend.analytics.summaries[smryVariable.name];
-          $http({ method: 'GET', url: session.loc + "R/.val/json?auto_unbox=true" })
-            .success(function (data) { // (data, status, headers, config)
-              // This is a row, summary map. E.g.:
-              // { 1: 14, 2: 14, 3: 2, etc}
-              //
-              // Remember, the rows come from R and R indexes start at 1!
-              //
-              // [ { row: 1, smry-aaaa-aaat: 0.023}, {row: 2, smry-aaaa-aaat: 1.2401}, etc]
-              var values = _.map(_.keys(data), function (key) {
-                var value = { row: key };
-                value[smryVariable.name] = data[key];
-                return value;
-              });
-              dataReceived(values);
-            });
-        });
-
 
         // TODO: Implement dr methods in the backend
         // TODO: retrieve and merge results, similar as with clustering results.

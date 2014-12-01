@@ -41,6 +41,8 @@ p.db.init <- function() {
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
   DBI::dbWriteTable(con, "data", mData, row.names=F)
   DBI::dbWriteTable(con, "schema", mSchema, row.names=F)
+  #create index by row to allow for faster lookup / updates
+  DBI::dbSendQuery(con,"CREATE INDEX row_index ON data (row ASC);");
   DBI::dbDisconnect(con)
 }
 
@@ -109,6 +111,25 @@ p.db.store <- function(column.name, rows = c(), value) {
 
   res <- DBI::dbSendQuery(con, q)
   DBI::dbClearResult(res)
+  DBI::dbDisconnect(con)
+}
+
+p.db.storeList <- function(column.name, values) {
+  #Note: list must have the row ids as the item names
+  #connect to DB
+  con <- p.db.connection()
+  #start TXN
+  dbBegin(con)
+  #build update statement for each item in the list, 
+  # using the item name as a row id
+  print(paste("Query Build Start",Sys.time(),sep = " "))
+  queries<-paste("UPDATE data SET ", column.name, " = ", values, " WHERE row =", names(values),sep="")
+  #pass queries to DB
+  for(q in queries) {
+    DBI::dbSendQuery(con, q)    
+  }
+  #commit changes
+  dbCommit(con)
   DBI::dbDisconnect(con)
 }
 

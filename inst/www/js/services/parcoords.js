@@ -68,7 +68,7 @@ angular.module('contigBinningApp.services')
     /*jslint unparam: false */
 
     /*jslint unparam: true */
-    $rootScope.$on('DataSet::clusterDataAvailable', function (e, clusterVariable) {
+    $rootScope.$on('DataSet::analyticsDataAvailable', function (e, clusterVariable) {
       if (!_.any(d.selectedVariables, { name: clusterVariable.name })) {
         d.selectedVariables.push(clusterVariable);
         d.updateSelectedVariables(d.selectedVariables);

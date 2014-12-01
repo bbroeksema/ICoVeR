@@ -128,7 +128,7 @@ dimred.ca <- function(rows=c(), vars) {
 }
 
 # dimred.summarize(variableWeights=list(aaaa=c(6.0151, 7.0562), aaat=c(4.7641, 2.7563), aata=c(4.175, 0.851), aatt=c(4.4429, 2.0970), ataa=c(4.1547, 0.8407), atat=c(3.1881, 0.1051), atta=c(4.1958, 0.7357), attt=c(4.7248, 2.7704)))
-dimred.summarize <- function(rows=c(), variableWeights) {
+dimred.summarize <- function(rows=c(), variableWeights, identifier) {
   data <- data.get(rows, names(variableWeights), addRows=T)
   vars <- names(variableWeights)
   summary <- rep(0, nrow(data))
@@ -138,12 +138,17 @@ dimred.summarize <- function(rows=c(), variableWeights) {
     col <- data[variable]
     summary <<- summary + weights[1] * col + weights[2] * col
   })
-
   # FIXME: apperently summary is a one-itme list. The item is equal to a column
   # name (the first one?), the value of this item is a vector with the summary
   # values. There must be more R-like ways to prevent this from happening.
   summary <- as.list(summary[[1]])
+  #list items names are used as row identifiers
+  names(summary) <- data$row
+  
+  p.db.extend.schema(name = identifier, type = "numeric", group = "Analytics",
+                     group_type = "Summaries")
+  p.db.add.column(column.name = identifier, type = "REAL")
+  p.db.storeList(column.name = identifier, values = summary)
 
-  names(summary) <- data$rows
-  summary
+  #summary
 }
