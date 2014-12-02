@@ -39,8 +39,10 @@ clusterProfiles <- function(X, pearsonThreshold = .9, minClusterSize = 2) {
 
     if (sum(!correlates) < nrow(X)) {
       X <- X[!correlates,]
-    } else {
-      break # None of the remaining rows correlates with one another.
+    } else { # None of the remaining rows correlates with one another.
+      X$cacId <- rep(-1, nrow(X))
+      clustered <- rbind(clustered, X)
+      break
     }
 
 
