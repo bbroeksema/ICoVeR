@@ -22,14 +22,15 @@ cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=
   })
 }
 
-cluster.correlation <- function(rows = c(), vars, identifier,pearsonThreshold = 0.9, minClusterSize=2) {
+cluster.correlation <- function(rows = c(), vars, identifier,
+                                pearsonThreshold = 0.9, minClusterSize=2) {
   # Get the data to cluster and keep track of row numbers.
   clusterData <- data.get(rows, vars)
   rownames(clusterData) <- clusterData$row
 
   # Make sure that the row number is not included in the clustering process
   clusterData$row <- NULL
-  Corrclusters <-   as.data.frame(correlationCluster(clusterData))
+  Corrclusters <- as.data.frame(correlationCluster(clusterData))
 
   # Add a new column to the schema and the data table to store the new
   # clustering variable into.
