@@ -31,6 +31,7 @@ cluster.correlation <- function(rows = c(), vars, identifier,
   # Make sure that the row number is not included in the clustering process
   clusterData$row <- NULL
   Corrclusters <- as.data.frame(correlationCluster(clusterData))
+  Corrclusters$cluster <- as.factor(Corrclusters$cluster)
 
   # Add a new column to the schema and the data table to store the new
   # clustering variable into.
@@ -40,10 +41,11 @@ cluster.correlation <- function(rows = c(), vars, identifier,
 
   # Now, store the clustering levels for each row in the data base per level
   lapply(levels(Corrclusters$cluster), function(level) {
-    level <- as.numeric(level)
-    rows <- Corrclusters$row[Corrclusters$cluster==level]
+    rows <- Corrclusters$row[Corrclusters$cluster == level]
     p.db.store(column.name = identifier, rows = rows, value = level)
   })
+
+  TRUE
 }
 
 cluster.methods <- function() {
