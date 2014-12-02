@@ -47,8 +47,24 @@ angular.module('contigBinningApp.controllers')
         });
       });
 
+    function setDimensions() {
+      var dims = _.pluck(ParCoords.selectedVariables, "name"),
+        types = {};
+      _.each(ParCoords.selectedVariables, function (dim) {
+        if (dim.type === "factor") {
+          types[dim.name] = "string";
+        } else {
+          types[dim.name] = "number";
+        }
+      });
+      d.parcoords
+        .dimensions(dims)
+        .types(types);
+    }
+
     // function to be used as callback when data is requested
     function loadData(data) {
+      setDimensions();
       d.parcoords.data(data);
       render();
       // if there is a row currently highlighted and it exists in the new dataset
@@ -61,6 +77,7 @@ angular.module('contigBinningApp.controllers')
     // function to be used as callback when new varaibles
     // are requested to be added on to existing data
     function loadAdditionalData(data) {
+      setDimensions();
       d.parcoords.data().forEach(function (d, i) {
         _.forEach(data[i], function (val, key) {
           d[key] = val;
@@ -87,18 +104,9 @@ angular.module('contigBinningApp.controllers')
     //meganism.
     $scope.$on("ParCoords::selectedVariablesChanged", function () {
       var dims = _.pluck(ParCoords.selectedVariables, "name"),
-        types = {},
         newVariables = _.difference(dims, d.parcoords.dimensions()),
         missingVariables = _.difference(d.parcoords.dimensions(), dims),
         existingVariables =  _.intersection(d.parcoords.dimensions(), dims);
-
-      _.each(ParCoords.selectedVariables, function (dim) {
-        if (dim.type === "factor") {
-          types[dim.name] = "string";
-        } else {
-          types[dim.name] = "number";
-        }
-      });
       // Comparing variable names to existing variables and only requesting new ones
       // and removing absent ones from the parcoords data
 
@@ -108,15 +116,13 @@ angular.module('contigBinningApp.controllers')
         });
       });
 
-      d.parcoords
-        .dimensions(dims)
-        .types(types);
       if (existingVariables.length === 0) {
         DataSet.get(dims, loadData);
       } else {
         if (newVariables.length > 0) {
           DataSet.get(newVariables, loadAdditionalData);
         } else if (missingVariables.length > 0) {
+          setDimensions();
           render();
         }
       }

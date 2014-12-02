@@ -56,14 +56,21 @@ angular.module('contigBinningApp.services')
 
     /*jslint unparam: true */
     $rootScope.$on('DataSet::schemaLoaded', function (e, schema) {
+      var firstLoad = d.variables.length < 1,
+        previousVariables =  d.selectedVariables,
+        variables = null;
+      // set variables will empty d.selectedVariables
       setVariables(schema);
-
-      var variables = _.filter(d.variables, function (variable) {
-        return R.is.numeric(variable.type) &&
-          (variable.group_type === "Characteristics"
-          || variable.group_type === "TimeSeries");
-      });
-      d.updateSelectedVariables(variables);
+      if (firstLoad) {
+        variables = _.filter(d.variables, function (variable) {
+          return R.is.numeric(variable.type) &&
+            (variable.group_type === "Characteristics"
+            || variable.group_type === "TimeSeries");
+        });
+        d.updateSelectedVariables(variables);
+      } else {
+        d.updateSelectedVariables(previousVariables);
+      }
     });
     /*jslint unparam: false */
 
