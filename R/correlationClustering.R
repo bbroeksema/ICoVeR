@@ -88,7 +88,7 @@ correlationCluster <- function(X, pearsonThreshold = .9, minClusterSize = 2) {
     if (mergeCount == 0) break
   }
 
-  clustering <- cbind(rownames(clustered), clustered$cacId)
+  clustering <- cbind(as.integer(rownames(clustered)), clustered$cacId)
   colnames(clustering) <- c("row", "cluster")
   clustering
 }
