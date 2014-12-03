@@ -150,8 +150,7 @@ angular.module('contigBinningApp.controllers')
     });
 
     $scope.$on("Opacity::changed", function (e, opacity) {
-      d.parcoords.alpha(opacity);
-      render();
+      d.parcoords.alpha(opacity).render();
     });
 
     ParCoords.setHighlightFunction(highlightRow);
