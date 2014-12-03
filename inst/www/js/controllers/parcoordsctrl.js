@@ -13,13 +13,6 @@ angular.module('contigBinningApp.controllers')
       currentHighlightRow = -1;
 
     /// private controller functions
-    function resize() {
-      d.parcoords
-        .width($element[0].clientWidth)
-        .height($element[0].clientHeight)
-        .resize();
-    }
-
     function render() {
       $scope.brushed = [];
       d.parcoords
@@ -27,6 +20,14 @@ angular.module('contigBinningApp.controllers')
         .autoscale()
         .updateAxes()
         .render();
+    }
+
+    function resize() {
+      d.parcoords
+        .width($element[0].clientWidth)
+        .height($element[0].clientHeight)
+        .resize();
+      render();
     }
 
     /// Initialization
