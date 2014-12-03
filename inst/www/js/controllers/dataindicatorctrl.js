@@ -6,6 +6,7 @@
 angular.module('contigBinningApp.controllers')
   .controller('DataIndicatorCtrl', function ($scope, DataSet) {
 
+    var overallRowCount = 0;
     $scope.rowCount = 0;
     $scope.currentRowCount = 0;
     $scope.counts = [];
@@ -23,14 +24,22 @@ angular.module('contigBinningApp.controllers')
     });
     /*jslint unparam: false */
 
+    $scope.changeScale = function () {
+      if ($scope.rowCount === overallRowCount) {
+        $scope.rowCount = $scope.currentRowCount;
+      } else {
+        $scope.rowCount = overallRowCount;
+      }
+    };
+
     // setting the call back  for the total row count
     DataSet.getTotalNumRows(function (rowCount) {
-      $scope.rowCount  = rowCount;
+      overallRowCount = $scope.rowCount = rowCount;
     });
 
     // setting the call back  for the current row count
     DataSet.setCurrentNumRowsCallback(function (currentRowCount) {
-      $scope.currentRowCount = currentRowCount;
+      $scope.rowCount = $scope.currentRowCount = currentRowCount;
       $scope.counts = [{ rows: $scope.currentRowCount, type: "" }];
     });
   });
