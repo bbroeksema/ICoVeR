@@ -164,7 +164,8 @@ angular.module('contigBinningApp.services')
 
         var me = this,
           args = {
-            extents: d.brushExtents,
+            extents: d.brushExtents.extents,
+            categories: d.brushExtents.categories,
             predicate: d.brushPredicate,
             method: filterMethod
           };

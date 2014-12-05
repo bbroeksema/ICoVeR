@@ -28,6 +28,29 @@ angular.module('contigBinningApp.controllers')
         .height($element[0].clientHeight)
         .resize();
       render();
+
+    }
+
+    function transformBrushExtents() {
+      var brushData = {extents: {}, categories: {}},
+        b = null,
+        getDomain = function (item, index) {
+          if (item >= d.parcoords.brushExtents()[b][0] && item <= d.parcoords.brushExtents()[b][1]) {
+            brushData.categories[b].push(d.parcoords.yscale[b].domain()[index]);
+          }
+        };
+
+      for (b in d.parcoords.brushExtents()) {
+        if (d.parcoords.brushExtents().hasOwnProperty(b)) {
+          if (d.parcoords.types()[b] === "string") {
+            brushData.categories[b] = [];
+            d.parcoords.yscale[b].range().forEach(getDomain);
+          } else {
+            brushData.extents[b] = d.parcoords.brushExtents()[b];
+          }
+        }
+      }
+      return brushData;
     }
 
     /// Initialization
@@ -44,7 +67,8 @@ angular.module('contigBinningApp.controllers')
         //       have to wrap it in $scope.$apply to make sure that other
         //       controllers are updated appropriately.
         $scope.$apply(function () {
-          DataSet.brush(d.parcoords.brushExtents(), d.parcoords.brushed());
+          var brushData = transformBrushExtents();
+          DataSet.brush(brushData, d.parcoords.brushed());
         });
       });
 

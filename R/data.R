@@ -22,36 +22,50 @@ data.gettotalnumrows <- function() {
   p.db.rowcount(table="data")
 }
 
-# data.filter(extents=list(kmeans_30_7=c(10,12), gc_content=c(40,50)), method="KEEP")
-data.filter <- function(rows = c(), extents, predicate="AND", method = "KEEP") {
+# data.filter(extents=list(gc_content=c(40,50)), categories=list(kmeans_30_7=c(10,12,15)), method="KEEP")
+data.filter <- function(rows = c(), extents=list(), categories = list(), predicate="AND", method = "KEEP") {
   if (predicate != "AND" && predicate != "OR") {
     stop(paste("Invalid predicate ", predicate, sep=""))
   }
 
-  initialData <- data.get(rows = rows, variables = names(extents))
-
+  allVars <<- c(extents, categories) 
+  initialData <- data.get(rows = rows, variables = names(allVars))
+  tempData <<- initialData
   rows <- nrow(initialData)
   finalSelection <- ifelse(predicate == "AND", rep(TRUE, rows), rep(FALSE, rows))
 
   methods <- list(
     "KEEP" = function(name, extents) {
-      var <- as.numeric(unlist(initialData[name]))
-      select <- var >= extents[1] & var <= extents[2]
+      
+      if(name %in% names(categories)) {
+        # no need for as.numeric here as we ar looking at ranges
+        # also it appears to round down every cluster id by 1
+        var <- unlist(initialData[name])
+        select <-  var %in% extents
+      } else {
+        var <- as.numeric(unlist(initialData[name]))
+       select <- var >= extents[1] & var <= extents[2]
+      }
       if (predicate == "AND")
         finalSelection <<- finalSelection & select
       else # predicate == "OR"
-        finalSelection <<- finalSelection | select
+         finalSelection <<- finalSelection | select
     },
     "REMOVE" = function(name, extents) {
-      var <- as.numeric(unlist(initialData[name]))
-      select <- var < extents[1] | var > extents[2]
+     
+      if(name %in% names(categories)) {
+        var <- unlist(initialData[name])
+        select <-  var %in% extents
+      } else {
+        var <- as.numeric(unlist(initialData[name]))
+        select <- var < extents[1] | var > extents[2]
+      }
       if (predicate == "AND")
         finalSelection <<- finalSelection & select
       else # predicate == "OR"
         finalSelection <<- finalSelection | select
     }
   )
-
-  Map(methods[[method]], names(extents), extents)
+  Map(methods[[method]], names(allVars), allVars)  
   initialData$row[finalSelection]
 }
