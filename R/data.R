@@ -30,7 +30,6 @@ data.filter <- function(rows = c(), extents=list(), categories = list(), predica
 
   allVars <<- c(extents, categories) 
   initialData <- data.get(rows = rows, variables = names(allVars))
-  tempData <<- initialData
   rows <- nrow(initialData)
   finalSelection <- ifelse(predicate == "AND", rep(TRUE, rows), rep(FALSE, rows))
 
