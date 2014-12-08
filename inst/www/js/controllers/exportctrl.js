@@ -17,29 +17,44 @@ angular.module('contigBinningApp.controllers')
 
     /*jslint unparam: true */
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
-      var idFields;
+      var idFields, hasIdFields = true;
 
       idFields = _.chain(schema)
         .filter({ 'group_type': 'Id' })
         .pluck('name')
         .value();
 
+      if (idFields.length === 0) {
+        idFields.push(schema[0].name);
+        hasIdFields = false;
+      }
+
       DataSet.get(idFields, function (data) {
+        d.rows = data;
         d.rowIdMap = {};
-        _.each(data, function (datum) {
-          var idFieldStrings = _.map(idFields, function (field) {
-            return field + ": " + datum[field];
+
+        if (hasIdFields) {
+          _.each(data, function (datum) {
+            var idFieldStrings = _.map(idFields, function (field) {
+              return field + ": " + datum[field];
+            });
+            d.rowIdMap[datum.row] = idFieldStrings.join(', ');
           });
-          d.rows = data;
-          d.rowIdMap[datum.row] = idFieldStrings.join(', ');
-        });
+        } else {
+          _.each(data, function (datum) {
+            d.rowIdMap[datum.row] = "row: " + datum.row;
+          });
+        }
       });
     });
 
     /*jslint unparam: true */
     $rootScope.$on("DataSet::brushed", function (ev, extents, rows) {
+      var nExtents = Object.getOwnPropertyNames(extents.extents).length,
+        categories = Object.getOwnPropertyNames(extents.categories).length;
+
       d.rows = rows;
-      if (Object.getOwnPropertyNames(extents).length > 0) {
+      if ((nExtents + categories) > 0) {
         $scope.exportMethods = ["all", "brushed"];
         $scope.exportMethod = $scope.exportMethods[1];
       } else {
