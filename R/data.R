@@ -28,22 +28,22 @@ data.filter <- function(rows = c(), extents=list(), categories = list(), predica
     stop(paste("Invalid predicate ", predicate, sep=""))
   }
 
-  allVars <<- c(extents, categories) 
+  allVars <<- c(extents, categories)
   initialData <- data.get(rows = rows, variables = names(allVars))
   rows <- nrow(initialData)
   finalSelection <- ifelse(predicate == "AND", rep(TRUE, rows), rep(FALSE, rows))
 
   methods <- list(
     "KEEP" = function(name, extents) {
-      
+
       if(name %in% names(categories)) {
         # no need for as.numeric here as we ar looking at ranges
         # also it appears to round down every cluster id by 1
         var <- unlist(initialData[name])
         select <-  var %in% extents
       } else {
-        var <- as.numeric(unlist(initialData[name]))
-       select <- var >= extents[1] & var <= extents[2]
+        var <- unlist(initialData[name])
+        select <- var >= extents[1] & var <= extents[2]
       }
       if (predicate == "AND")
         finalSelection <<- finalSelection & select
@@ -51,7 +51,7 @@ data.filter <- function(rows = c(), extents=list(), categories = list(), predica
          finalSelection <<- finalSelection | select
     },
     "REMOVE" = function(name, extents) {
-     
+
       if(name %in% names(categories)) {
         var <- unlist(initialData[name])
         select <-  var %in% extents
@@ -65,6 +65,6 @@ data.filter <- function(rows = c(), extents=list(), categories = list(), predica
         finalSelection <<- finalSelection | select
     }
   )
-  Map(methods[[method]], names(allVars), allVars)  
+  Map(methods[[method]], names(allVars), allVars)
   initialData$row[finalSelection]
 }
