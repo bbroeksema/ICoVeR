@@ -28,7 +28,7 @@ data.filter <- function(rows = c(), extents=list(), categories = list(), predica
     stop(paste("Invalid predicate ", predicate, sep=""))
   }
 
-  allVars <<- c(extents, categories)
+  allVars <- c(extents, categories)
   initialData <- data.get(rows = rows, variables = names(allVars))
   rows <- nrow(initialData)
   finalSelection <- ifelse(predicate == "AND", rep(TRUE, rows), rep(FALSE, rows))
