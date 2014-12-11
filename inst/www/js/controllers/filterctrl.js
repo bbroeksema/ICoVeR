@@ -35,7 +35,10 @@ angular.module('contigBinningApp.controllers')
 
     /*jslint unparam: true */
     $scope.$on('DataSet::brushed', function (e, extents) {
-      $scope.itemsBrushed = Object.getOwnPropertyNames(extents).length > 0;
+      var nExtents = Object.getOwnPropertyNames(extents.extents).length,
+        categories = Object.getOwnPropertyNames(extents.categories).length;
+
+      $scope.itemsBrushed = (nExtents + categories) > 0;
     });
     /*jslint unparam: false */
   });
