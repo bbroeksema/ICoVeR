@@ -176,7 +176,7 @@ angular.module('contigBinningApp.services')
 
         ocpu.call("data.filter", args, function (session) {
           d.backend.rows = session; // Keep track of the current state.
-          me.brush({});
+          me.brush({ extents: {}, categories: {} });
           $rootScope.$broadcast("DataSet::filtered", filterMethod);
         });
       },
