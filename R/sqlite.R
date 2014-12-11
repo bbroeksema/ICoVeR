@@ -120,13 +120,13 @@ p.db.storeList <- function(column.name, values) {
   con <- p.db.connection()
   #start TXN
   dbBegin(con)
-  #build update statement for each item in the list, 
+  #build update statement for each item in the list,
   # using the item name as a row id
   print(paste("Query Build Start",Sys.time(),sep = " "))
   queries<-paste("UPDATE data SET ", column.name, " = ", values, " WHERE row =", names(values),sep="")
   #pass queries to DB
   for(q in queries) {
-    DBI::dbSendQuery(con, q)    
+    DBI::dbSendQuery(con, q)
   }
   #commit changes
   dbCommit(con)
