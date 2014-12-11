@@ -4,7 +4,7 @@
 'use strict';
 
 angular.module('contigBinningApp.services')
-  .service('DataSet', function ($rootScope, $http, OpenCPU) {
+  .service('DataSet', function ($rootScope, $http, assert, OpenCPU) {
     var constants = {
         GT_ANALYTICS: "Analytics",
         G_CLUSTERINGS: "Clusterings",
@@ -182,6 +182,9 @@ angular.module('contigBinningApp.services')
       },
 
       brush: function (extents, rows) {
+        assert.strictEqual(typeof extents.extents, "object", "Expected an extents property");
+        assert.strictEqual(typeof extents.categories, "object", "Expected an categories property");
+
         d.brushExtents = extents;
         $rootScope.$broadcast("DataSet::brushed", d.brushExtents, rows);
       },
