@@ -8,9 +8,9 @@ angular.module('contigBinningApp.controllers')
 
     /// private Controller vars
     var d = {
-      parcoords: d3.parcoords()($element[0])
-    },
-      currentHighlightRow = -1;
+      parcoords: d3.parcoords()($element[0]),
+      currentHighlightRow: -1
+    };
 
     /// private controller functions
     function render() {
@@ -94,8 +94,8 @@ angular.module('contigBinningApp.controllers')
       render();
       // if there is a row currently highlighted and it exists in the new dataset
       // we want to ensure it is still highlighted
-      if (currentHighlightRow > -1) {
-        d.parcoords.highlight([d.parcoords.data()[currentHighlightRow]]);
+      if (d.currentHighlightRow > -1) {
+        d.parcoords.highlight([d.parcoords.data()[d.currentHighlightRow]]);
       }
     }
 
@@ -112,9 +112,9 @@ angular.module('contigBinningApp.controllers')
     }
 
     function highlightRow(itemIndex) {
-      currentHighlightRow = itemIndex;
-      if (currentHighlightRow > -1) {
-        d.parcoords.highlight([d.parcoords.data()[currentHighlightRow]]);
+      d.currentHighlightRow = itemIndex;
+      if (d.currentHighlightRow > -1) {
+        d.parcoords.highlight([d.parcoords.data()[d.currentHighlightRow]]);
       } else {
         d.parcoords.unhighlight();
       }
