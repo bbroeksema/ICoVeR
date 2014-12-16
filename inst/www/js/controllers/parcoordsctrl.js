@@ -9,7 +9,8 @@ angular.module('contigBinningApp.controllers')
     /// private Controller vars
     var d = {
       parcoords: d3.parcoords()($element[0]),
-      currentHighlightRow: -1
+      currentHighlightRow: -1,
+      orderedVariables: []
     };
 
     /// private controller functions
@@ -70,11 +71,25 @@ angular.module('contigBinningApp.controllers')
           var brushData = transformBrushExtents();
           DataSet.brush(brushData, d.parcoords.brushed());
         });
+      })
+      .on("axesreorder", function (variables) {
+        d.orderedVariables = variables;
       });
 
     function setDimensions() {
       var dims = _.pluck(ParCoords.selectedVariables, "name"),
         types = {};
+
+      d.orderedVariables = _.filter(d.orderedVariables, function (variable) {
+        return _.contains(dims, variable);
+      });
+
+      _.each(dims, function (variable) {
+        if (!_.contains(d.orderedVariables, variable)) {
+          d.orderedVariables.push(variable);
+        }
+      });
+
       _.each(ParCoords.selectedVariables, function (dim) {
         if (dim.type === "factor") {
           types[dim.name] = "string";
@@ -82,8 +97,9 @@ angular.module('contigBinningApp.controllers')
           types[dim.name] = "number";
         }
       });
+
       d.parcoords
-        .dimensions(dims)
+        .dimensions(d.orderedVariables)
         .types(types);
     }
 
