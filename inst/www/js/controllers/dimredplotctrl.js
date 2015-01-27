@@ -5,7 +5,7 @@
 
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedPlotCtrl', function ($scope, $element, $window, Analytics) {
+  .controller('DimRedPlotCtrl', function ($scope, $element, $window, ParCoords) {
 
     var plot = crpgl.DimRedPlot(),
       data,
@@ -32,18 +32,35 @@ angular.module('contigBinningApp.controllers')
     }
     /*jslint unparam: false */
 
+    function pointClick(values) {
+      // For now, it is assumed that elements in @param values are actual
+      // column names of the table in the back-end. The thing that needs to
+      // happen at this point is that, in the backend a new variable is
+      // generated, that consists of the weighted sum of @param values for
+      // each observation in the original data table.
+      //
+      // NOTE: The summaries are really not understood by our users. Let's get
+      //       rid of the feature for now.
+      //Analytics.summarize(values);
+
+      // We assume no clustering, so values, will always contain *one* variable.
+      var colName = _.keys(values)[0],
+        varIndex = _.findIndex(ParCoords.variables, { "name": colName }),
+        curVarIndex = _.findIndex(ParCoords.selectedVariables, { "name": colName }),
+        selectedVars;
+
+      if (curVarIndex === -1) {
+        selectedVars = ParCoords.selectedVariables;
+        selectedVars.push(ParCoords.variables[varIndex]);
+        ParCoords.updateSelectedVariables(selectedVars);
+      }
+    }
+
     plot
       .originSize(30)
       .originVisible(true)
       .on("rotate", rotate)
-      .on("pointclick", function (values) {
-        // For now, it is assumed that elements in @param values are actual
-        // column names of the table in the back-end. The thing that needs to
-        // happen at this point is that, in the backend a new variable is
-        // generated, that consists of the weighted sum of @param values for
-        // each observation in the original data table.
-        Analytics.summarize(values);
-      });
+      .on("pointclick", pointClick);
 
     function cluster(newClusterCount) {
       var clusteredData = {
