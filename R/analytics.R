@@ -99,19 +99,19 @@ p.plotdata <- function(dim.red.res, column.results) {
   # For each pair, we perfom hierarchical clusterings, and make cuts in the
   # resulting tree to get clusterings with 2,3,4,...,12 clusters. (So eleven
   # clusterings for each pair).
-  pairs <- c(1:(ncol(dim.red.res[[column.results]]$coord) - 1))
-  maxClusterCount <- min(12, nrow(plotdata))
-  mapply(function(pair) {
-    pairData <- plotdata[, c(pair, pair + 1)]
-    pairDistances <- dist(pairData)
-    clusterings <- cutree(hclust(pairDistances), k=c(2:maxClusterCount))
-    cnames <- mapply(function(x) paste("clustering.", pair, ".", x, sep=""), c(2:maxClusterCount))
+  #pairs <- c(1:(ncol(dim.red.res[[column.results]]$coord) - 1))
+  #maxClusterCount <- min(12, nrow(plotdata))
+  #mapply(function(pair) {
+  #  pairData <- plotdata[, c(pair, pair + 1)]
+  #  pairDistances <- dist(pairData)
+  #  clusterings <- cutree(hclust(pairDistances), k=c(2:maxClusterCount))
+  #  cnames <- mapply(function(x) paste("clustering.", pair, ".", x, sep=""), c(2:maxClusterCount))
 
     # Note: the double << are required to assign new values to variables outside
     #       the scope of this mapply.
-    plotdata <<- data.frame(plotdata, clusterings)
-    colNames <<- c(colNames, cnames)
-  }, pairs)
+  #  plotdata <<- data.frame(plotdata, clusterings)
+  #  colNames <<- c(colNames, cnames)
+  #}, pairs)
 
   colnames(plotdata) <- colNames;
   plotdata$label <- rownames(plotdata)
