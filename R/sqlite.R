@@ -42,7 +42,8 @@ p.db.init <- function() {
   DBI::dbWriteTable(con, "data", mData, row.names=F)
   DBI::dbWriteTable(con, "schema", mSchema, row.names=F)
   #create index by row to allow for faster lookup / updates
-  DBI::dbSendQuery(con,"CREATE INDEX row_index ON data (row ASC);");
+  res <- DBI::dbSendQuery(con,"CREATE INDEX row_index ON data (row ASC);");
+  DBI::dbClearResult(res)
   DBI::dbDisconnect(con)
 }
 
