@@ -30,5 +30,6 @@
 
 .dimredplot .variances .bg {
   fill: white;
+  fill-opacity: 0;
   cursor: ns-resize;
 }
