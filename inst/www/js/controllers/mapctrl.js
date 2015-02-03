@@ -53,24 +53,12 @@ angular.module('contigBinningApp.controllers')
     retrieveData.UPDATE_EXTENTS = true;
     retrieveData.KEEP_EXTENTS = false;
 
-    /*jslint unparam: true */
-    $scope.$on('DataSet::schemaLoaded', function (e, schema) {
-      // FIXME: we make a lot of assumptions in this function. For now this is
-      //        just a quick hack to make things work (tm) for some initial
-      //        testing with datasets that have spatial information.
-
-      // For this widget to work, the schema must have a group with the type
-      // Location.*, which must in turn have an x and y variable.
-      function selector(v) {
-        return v.group_type === 'Location.Dense' || v.group_type === 'Location.Sparse';
+    $scope.$parent.$watch('location', function (newLocation) {
+      if (newLocation) {
+        location = newLocation;
+        retrieveData(retrieveData.UPDATE_EXTENTS);
       }
-
-      location = _.groupBy(_.select(schema, selector), 'group');
-      // For now we only support one location, so let's get the first one.
-      location = _.groupBy(location[_.first(_.keys(location))], 'name');
-      retrieveData(retrieveData.UPDATE_EXTENTS);
     });
-    /*jslint unparam: false */
 
     /*jslint unparam: true */
     $scope.$on('DataSet::brushed', function (e, extents, rows) {
