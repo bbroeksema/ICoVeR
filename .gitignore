@@ -3,5 +3,6 @@
 .RData
 data
 *.swp
+data.raw/*
 cstr.db
 /rScratch
