@@ -83,7 +83,17 @@
         </div>
 
         <!-- Scatterplot -->
-        <div id="dimRedPlot" class="col-lg-6" ng-controller="DimRedPlotCtrl">
+        <div id="charts" class="col-lg-6" ng-controller="ChartsCtrl">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="active"><a href="#dimRedPlot" role="tab" data-toggle="tab">Dimensionlity Reduction Plot</a></li>
+            <li><a href="#twodmap" ng-hide="!location" role="tab" data-toggle="tab">2D map</a></li>
+          </ul>
+          <div id="chartsContent" class="tab-content">
+            <div id="dimRedPlot" class="tab-pane container-fluid active" ng-controller="DimRedPlotCtrl">
+            </div>
+            <div id="twodmap" ng-hide="!location" class="tab-pane container-fluid" ng-controller="MapCtrl">
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -95,15 +105,18 @@
     <script src="libs/d3/d3.min.js"></script>
     <script src="libs/parcoords/d3.parcoords.js"></script>
     <script src="libs/dimredplot/dimredplot.js"></script>
+    <script src="libs/mapplot/mapplot.js"></script>
     <script src="libs/angularjs/angular-1.2.21.min.js"></script>
     <script src="libs/ui-bootstrap/ui-bootstrap-tpls-0.11.0.min.js"></script>
 
     <script src="js/app.js"></script>
     <script src="js/controllers/namehighlightctrl.js"></script>
+    <script src="js/controllers/chartsctrl.js"></script>
     <script src="js/controllers/clusterctrl.js"></script>
     <script src="js/controllers/clusterconfigctrl.js"></script>
     <script src="js/controllers/dataindicatorctrl.js"></script>
     <script src="js/controllers/exportctrl.js"></script>
+    <script src="js/controllers/mapctrl.js"></script>
     <script src="js/controllers/parcoordsctrl.js"></script>
     <script src="js/controllers/parcoordsvarsctrl.js"></script>
     <script src="js/controllers/scatterplotctrl.js"></script>

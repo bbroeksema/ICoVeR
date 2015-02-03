@@ -76,7 +76,21 @@ html, body {
   margin-left: 10px;
 }
 
+#charts {
+  height: 100%;
+}
+
+#chartsContent {
+  height: calc(100% - 40px);
+}
+
 #dimRedPlot {
+  height: 100%;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+#twodmap {
   height: 100%;
   padding-left: 0px;
   padding-right: 0px;
