@@ -67,7 +67,7 @@ angular.module('contigBinningApp.services')
       },
 
       // Returns the data values for given variables.
-      // @param variables - a list of strings, containing the names of the 
+      // @param variables - a list of strings, containing the names of the
       //                    variables to be loaded.
       // @param callback -  a function to be executed once data has been successfully loaded
       get: function (variables, callback) {
@@ -150,7 +150,7 @@ angular.module('contigBinningApp.services')
 
         // TODO: Implement dr methods in the backend
         // TODO: retrieve and merge results, similar as with clustering results.
-        // TODO: The parcoords component listens to DataSet::dataLoaded. We 
+        // TODO: The parcoords component listens to DataSet::dataLoaded. We
         //       might want to skip showing rows in the scatterplot at first
         //       and focus on columns first, until we figured out a good way
         //       to deal with this.
