@@ -36,13 +36,17 @@ angular.module('contigBinningApp.controllers')
     };
 
     // setting the call back  for the total row count
-    DataSet.getTotalNumRows(function (rowCount) {
-      overallRowCount = $scope.rowCount = rowCount;
-    });
+    $scope.$on("DataSet::initialized", function () {
+      // Only start hitting the database when it is properly initialized.
 
-    // setting the call back  for the current row count
-    DataSet.setCurrentNumRowsCallback(function (currentRowCount) {
-      $scope.rowCount = $scope.currentRowCount = currentRowCount;
-      $scope.counts = [{ rows: $scope.currentRowCount, type: "" }];
+      DataSet.getTotalNumRows(function (rowCount) {
+        overallRowCount = $scope.rowCount = rowCount;
+      });
+
+      // setting the call back  for the current row count
+      DataSet.setCurrentNumRowsCallback(function (currentRowCount) {
+        $scope.rowCount = $scope.currentRowCount = currentRowCount;
+        $scope.counts = [{ rows: $scope.currentRowCount, type: "" }];
+      });
     });
   });

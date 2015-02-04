@@ -28,29 +28,32 @@ p.db.dataset <- "cstr"
 p.db.file.path <- paste(.Platform$file.sep, paste("tmp", "RParcoords", sep=.Platform$file.sep), sep="")
 p.db.file.name <- paste(p.db.file.path, paste(p.db.dataset, "cache.db", sep="-"), sep=.Platform$file.sep)
 
-p.db.init <- function() {
-  if (!file.exists(p.db.file.path)) {
-    dir.create(p.db.file.path, recursive = T)
+db.init <- function() {
+  if (file.exists(p.db.file.name)) {
+    TRUE
+  } else {
+    if (!file.exists(p.db.file.path)) {
+      dir.create(p.db.file.path, recursive = T)
+    }
+
+    data(list=list(p.db.dataset, paste(p.db.dataset, ".schema", sep="")))
+    mSchema <- .GlobalEnv[[paste(p.db.dataset, ".schema", sep="")]]
+    mData <- .GlobalEnv[[p.db.dataset]]
+    mData$row <- as.integer(1:nrow(mData))
+
+    save(mData, file="/tmp/RParcoords/cstr.rda", compress=T)
+
+    con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
+    stopifnot(DBI::dbWriteTable(con, "data", mData, row.names=F))
+    stopifnot(DBI::dbWriteTable(con, "schema", mSchema, row.names=F))
+    #create index by row to allow for faster lookup / updates
+    res <- DBI::dbSendQuery(con,"CREATE INDEX row_index ON data (row ASC);")
+    DBI::dbClearResult(res)
+    DBI::dbDisconnect(con)
   }
-
-  data(list=list(p.db.dataset, paste(p.db.dataset, ".schema", sep="")))
-  mSchema <- .GlobalEnv[[paste(p.db.dataset, ".schema", sep="")]]
-  mData <- .GlobalEnv[[p.db.dataset]]
-  mData$row <- as.integer(1:nrow(mData))
-
-  con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
-  DBI::dbWriteTable(con, "data", mData, row.names=F)
-  DBI::dbWriteTable(con, "schema", mSchema, row.names=F)
-  #create index by row to allow for faster lookup / updates
-  res <- DBI::dbSendQuery(con,"CREATE INDEX row_index ON data (row ASC);");
-  DBI::dbClearResult(res)
-  DBI::dbDisconnect(con)
 }
 
 p.db.connection <-function() {
-  if (!file.exists(p.db.file.name)) {
-    p.db.init()
-  }
   DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
 }
 

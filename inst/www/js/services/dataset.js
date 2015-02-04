@@ -28,10 +28,13 @@ angular.module('contigBinningApp.services')
                                      // be updated witht he current numebr of row of data
 
     // Initialize the schema as soon as the Dataset service is initialized.
-    OpenCPU.json("data.schema", null, function (session, schema) {
-      d.backend.schema = schema;
-      d.backend.schemaIndex = _.indexBy(schema, 'name');
-      $rootScope.$broadcast("DataSet::schemaLoaded", schema);
+    OpenCPU.json("db.init", null, function () {
+      $rootScope.$broadcast("DataSet::initialized");
+      OpenCPU.json("data.schema", null, function (session, schema) {
+        d.backend.schema = schema;
+        d.backend.schemaIndex = _.indexBy(schema, 'name');
+        $rootScope.$broadcast("DataSet::schemaLoaded", schema);
+      });
     });
 
     $rootScope.$on("ParCoords::brushPredicateChanged", function (ev, predicate) {
