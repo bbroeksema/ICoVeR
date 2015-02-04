@@ -1,4 +1,4 @@
-var crpgl = crpgl || {};
+var crpgl = this.crpgl || {};
 
 crpgl.MapPlot = function() {
 
@@ -8,12 +8,17 @@ crpgl.MapPlot = function() {
       properties = { x: "x", y: "y" },
       scales = { x: d3.scale.linear(), y: d3.scale.linear() };
 
-  function drawItem(context) {
+  function color(d) {
+    return '#069';
+  }
+
+  function drawItem(context, colorFn) {
     var width = scales.x(1) - scales.x(0),
         height = scales.y(1) - scales.y(0);
 
     return function(d) {
       context.beginPath();
+      context.fillStyle = colorFn(d);
       context.fillRect(scales.x(d.x), scales.y(d.y), width, height);
     }
   }
@@ -35,8 +40,7 @@ crpgl.MapPlot = function() {
           .style("position", "absolute");
         context = canvas[0][0].getContext('2d');
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.fillStyle = '#069';
-        renderFn = drawItem(context);
+        renderFn = drawItem(context, color);
         _.each(data, renderFn);
       }
 
@@ -48,14 +52,19 @@ crpgl.MapPlot = function() {
           .style("position", "absolute");
         context = canvas[0][0].getContext('2d');
         context.fillOpacity = 0;
-        context.fillStyle = '#fff';
         context.fillRect(0, 0, canvas.width, canvas.height);
-        context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        renderFn = drawItem(context);
+        renderFn = drawItem(context, function () { return 'rgba(255, 255, 255, 0.5)'; });
         _.each(data.highlighted, renderFn);
       }
     });
   }
+
+  mp.color = function(_) {
+    if (!arguments.length) return color;
+
+    if (typeof _ === 'function') color = _;
+    else color = function () { return _; };
+  };
 
   mp.margins = function(_) {
     if (!arguments.length) return margins;

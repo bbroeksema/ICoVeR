@@ -79,6 +79,16 @@ angular.module('contigBinningApp.controllers')
       render();
     });
 
+    /*jslint unparam: true */
+    $scope.$on("Colors::changed", function (e, colors) {
+      function colorfn(d) {
+        return colors.hasOwnProperty(d.row) ? colors[d.row] : "#000";
+      }
+      plot.color(colorfn);
+      render();
+    });
+    /*jslint unparam: false */
+
     $scope.$watch(
       function () {
         return [$element[0].clientWidth, $element[0].clientHeight].join('x');
