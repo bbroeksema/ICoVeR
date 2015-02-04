@@ -41,8 +41,6 @@ db.init <- function() {
     mData <- .GlobalEnv[[p.db.dataset]]
     mData$row <- as.integer(1:nrow(mData))
 
-    save(mData, file="/tmp/RParcoords/cstr.rda", compress=T)
-
     con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
     stopifnot(DBI::dbWriteTable(con, "data", mData, row.names=F))
     stopifnot(DBI::dbWriteTable(con, "schema", mSchema, row.names=F))
