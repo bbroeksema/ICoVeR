@@ -46,7 +46,7 @@ cluster.correlation <- function(rows = c(), vars, identifier,
   TRUE
 }
 
-cluster.methods <- function() {
+p.cluster.methods <- function() {
   list("kmeans" = list(
     "man" = "/ocpu/library/stats/man/kmeans/text",
     "args" = list(

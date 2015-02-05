@@ -48,8 +48,6 @@ db.init <- function() {
     DBI::dbClearResult(res)
     DBI::dbDisconnect(con)
   }
-
-  db.select(table="schema")
 }
 
 p.db.connection <-function() {

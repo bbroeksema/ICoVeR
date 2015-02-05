@@ -1,14 +1,14 @@
 /*jslint indent: 2, white: false */
 /*global angular */
 
-'use strict';
-
 angular.module('contigBinningApp.services')
   .service('Color', function ($rootScope, DataSet, OpenCPU) {
 
+    'use strict';
+
     /*jslint unparam: true */
-    OpenCPU.json("color.configurations", {}, function (session, config) {
-      $rootScope.$broadcast("Colors::configurationLoaded", config);
+    $rootScope.$on("App::configurationLoaded", function (ev, appConfig) {
+      $rootScope.$broadcast("Colors::configurationLoaded", appConfig.color);
     });
     /*jslint unparam: false */
 

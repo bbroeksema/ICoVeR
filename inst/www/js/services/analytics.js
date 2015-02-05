@@ -1,34 +1,33 @@
-/*jslint todo:true, unparam: true, nomen: true, indent: 2 */
+/*jslint todo:true, nomen: true, indent: 2 */
 /*global angular, ocpu, _ */
 
-'use strict';
-
 angular.module('contigBinningApp.services')
-  .service('Analytics', function ($rootScope, DataSet, OpenCPU) {
+  .service('Analytics', function ($rootScope, DataSet) {
+
+    'use strict';
 
     var d = {
       clusterMethods: [],
       dimRedMethods: []
     };
 
-    OpenCPU.json("cluster.methods", {}, function (session, response) {
-      d.clusterMethods = _.reduce(_.keys(response), function (methods, method) {
-        methods.push({ name: method, args: response[method] });
+    /*jslint unparam: true */
+    $rootScope.$on("App::configurationLoaded", function (ev, appConfig) {
+      d.clusterMethods = _.reduce(_.keys(appConfig.cluster), function (methods, method) {
+        methods.push({ name: method, args: appConfig.cluster[method] });
         return methods;
       }, []);
       $rootScope.$broadcast("Analytics::clusterMethodsAvailable", d.clusterMethods);
-    });
 
-    OpenCPU.json("dimred.methods", {}, function (session, response) {
-      d.dimRedMethods = _.reduce(_.keys(response), function (methods, method) {
-        var cfg = response[method];
+      d.dimRedMethods = _.reduce(_.keys(appConfig.dimred), function (methods, method) {
+        var cfg = appConfig.dimred[method];
         cfg.name = method;
         methods.push(cfg);
         return methods;
       }, []);
       $rootScope.$broadcast("Analytics::dimRedMethodsAvailable", d.dimRedMethods);
     });
-
+    /*jslint unparam: false */
 
     return {
       clusterMethods: function () {
@@ -93,7 +92,7 @@ angular.module('contigBinningApp.services')
         // one of the existing variables.
         summaryName = "smry_" + summaryName;
         fnArgs.identifier = summaryName;
-        ocpu.call("dimred.summarize", fnArgs, function (session) {
+        ocpu.call("dimred.summarize", fnArgs, function () {
           $rootScope.$broadcast("Analytics::dataUpdated", summaryName);
         });
       }

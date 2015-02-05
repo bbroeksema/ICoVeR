@@ -102,7 +102,7 @@ p_color_factor <- function(colorVariable, method, scheme) {
   }
 }
 
-color.configurations <- function() {
+p.color.configurations <- function() {
   list(
     numeric = list(
       "Value" = names(p_schemes$numeric$value),

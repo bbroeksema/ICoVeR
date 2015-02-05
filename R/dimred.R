@@ -1,4 +1,4 @@
-dimred.methods <- function() {
+p.dimred.methods <- function() {
   list(
     "pca" = list(
       "restrict" = list("type"="schema.numeric", "group_type"="!Frequencies")

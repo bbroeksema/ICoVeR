@@ -1,10 +1,11 @@
 /*jslint todo:true, nomen: true, white: false, indent: 2, unparam: true */
 /*global angular, _, ocpu*/
 
-'use strict';
-
 angular.module('contigBinningApp.services')
   .service('DataSet', function ($rootScope, $http, assert, OpenCPU) {
+
+    'use strict';
+
     var constants = {
         GT_ANALYTICS: "Analytics",
         G_CLUSTERINGS: "Clusterings",
@@ -27,11 +28,13 @@ angular.module('contigBinningApp.services')
       currentNumRowsCallback = null; // if defined is sued as a callback so a controller can
                                      // be updated witht he current numebr of row of data
 
-    // Initialize the schema as soon as the Dataset service is initialized.
-    OpenCPU.json("db.init", null, function (session, schema) {
-      d.backend.schema = schema;
-      d.backend.schemaIndex = _.indexBy(schema, 'name');
-      $rootScope.$broadcast("DataSet::schemaLoaded", schema);
+    // Initialize the application as soon as the Dataset service is initialized and receive
+    // the required information to configure and further bootstrap the front end.
+    OpenCPU.json("app.init", null, function (session, cfg) {
+      d.backend.schema = cfg.schema;
+      d.backend.schemaIndex = _.indexBy(cfg.schema, 'name');
+      $rootScope.$broadcast("DataSet::schemaLoaded", cfg.schema);
+      $rootScope.$broadcast("App::configurationLoaded", cfg);
     });
 
     $rootScope.$on("ParCoords::brushPredicateChanged", function (ev, predicate) {
