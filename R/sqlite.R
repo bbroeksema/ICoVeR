@@ -29,9 +29,8 @@ p.db.file.path <- paste(.Platform$file.sep, paste("tmp", "RParcoords", sep=.Plat
 p.db.file.name <- paste(p.db.file.path, paste(p.db.dataset, "cache.db", sep="-"), sep=.Platform$file.sep)
 
 db.init <- function() {
-  if (file.exists(p.db.file.name)) {
-    TRUE
-  } else {
+  if (!file.exists(p.db.file.name)) {
+
     if (!file.exists(p.db.file.path)) {
       dir.create(p.db.file.path, recursive = T)
     }
@@ -49,6 +48,8 @@ db.init <- function() {
     DBI::dbClearResult(res)
     DBI::dbDisconnect(con)
   }
+
+  db.select(table="schema")
 }
 
 p.db.connection <-function() {
