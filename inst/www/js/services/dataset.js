@@ -6,12 +6,7 @@ angular.module('contigBinningApp.services')
 
     'use strict';
 
-    var constants = {
-        GT_ANALYTICS: "Analytics",
-        G_CLUSTERINGS: "Clusterings",
-        G_SUMMARIES: "Summaries"
-      },
-      d = {
+    var d = {
         id: undefined,
         data: undefined,
         brushed: [],
@@ -24,9 +19,7 @@ angular.module('contigBinningApp.services')
             summaries: {}
           }
         }
-      },
-      currentNumRowsCallback = null; // if defined is sued as a callback so a controller can
-                                     // be updated witht he current numebr of row of data
+      };
 
     function updateSchema(schema) {
       d.backend.schema = schema;
@@ -75,89 +68,16 @@ angular.module('contigBinningApp.services')
       //                    variables to be loaded.
       // @param callback -  a function to be executed once data has been successfully loaded
       get: function (variables, callback) {
-        var args = {},
-          schemaIndex = d.backend.schemaIndex,
-          varsByGroup = { clustervars: [], datavars: [], summaryvars: [] },
-          varsLoaded = {},
-          varsData;
+        var args = {
+          variables: variables,
+          rows: d.backend.rows
+        };
 
-        // Some helper functions we need for processing the get request.
-        function loaded(name) {
-          return varsLoaded[name];
-        }
-
-        // When we retrieve requested data, we have to update the variables
-        // that have been loaded, and we need to merge the already loaded
-        // data with the data we just received.
-        function dataReceived(data) {
-          // Mark the currently retrieved variables as loaded.
-          _.each(_.keys(data[0]), function (variable) {
-            varsLoaded[variable] = true;
-          });
-
-          // Merge the currently loaded variabels with the ones already loaded.
-          if (varsData === undefined) {
-            varsData = data;
-          } else {
-            // TODO: verify that the cluster results are in the same order, for
-            //       now I assume this (and think they actually are). Otherwise
-            //       they can be merged using the row attribute on objects in
-            //       both arrays.
-            _.each(varsData, function (dataItem, index) {
-              _.extend(dataItem, data[index]);
-            });
-          }
-
-          // Verify if we're done loading'
-          if (_.every(variables, loaded)) {
-            if (currentNumRowsCallback) {
-              currentNumRowsCallback(data.length);
-            }
-            callback(varsData);
-          }
-        }
-
-        // Now the actual processing of the request...
-
-        // First, we mark all requested variables as unloaded and split the
-        // requested variables in the appropriate groups. Because, we cannot
-        // get all of them straightforward from the backend.
-        _.each(variables, function (name) {
-          varsLoaded[name] = false;
-
-          var variable = schemaIndex[name];
-          switch (variable.group) {
-          case constants.G_SUMMARIES:
-            varsByGroup.summaryvars.push(variable);
-            break;
-          // TODO:
-          // case constants.G_DIMRED:
-          //   varsByGroup.dimredvars.push(variable);
-          //   break;
-          default:
-            varsByGroup.datavars.push(variable);
-            break;
-          }
-        });
-
-        // Get the data variables from the backend.
-        args.variables = _.pluck(varsByGroup.datavars, "name");
-        args.rows = d.backend.rows;
-        // Request data from back end, but only
-        // if there are non dnamic / clustering variables
-        // being requested
         if (args.variables.length > 0) {
           OpenCPU.json("data.get", args, function (session, data) {
-            dataReceived(data);
+            callback(data);
           });
         }
-
-        // TODO: Implement dr methods in the backend
-        // TODO: retrieve and merge results, similar as with clustering results.
-        // TODO: The parcoords component listens to DataSet::dataLoaded. We
-        //       might want to skip showing rows in the scatterplot at first
-        //       and focus on columns first, until we figured out a good way
-        //       to deal with this.
       },
 
       filter: function (filterMethod) {
