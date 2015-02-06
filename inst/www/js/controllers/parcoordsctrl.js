@@ -1,10 +1,10 @@
 /*jslint browser:true, unparam: true, indent: 2, nomen: true */
 /*global angular, d3, $, _*/
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ParcoordsCtrl', function ($scope, $window, $element, DataSet, ParCoords) {
+
+    'use strict';
 
     /// private Controller vars
     var d = {
@@ -32,6 +32,7 @@ angular.module('contigBinningApp.controllers')
 
     }
 
+    /*
     function transformBrushExtents() {
       var brushData = {extents: {}, categories: {}},
         b = null,
@@ -53,6 +54,7 @@ angular.module('contigBinningApp.controllers')
       }
       return brushData;
     }
+    */
 
     /// Initialization
     d.parcoords
@@ -68,8 +70,14 @@ angular.module('contigBinningApp.controllers')
         //       have to wrap it in $scope.$apply to make sure that other
         //       controllers are updated appropriately.
         $scope.$apply(function () {
-          var brushData = transformBrushExtents();
-          DataSet.brush(brushData, d.parcoords.brushed());
+          var brushed = d.parcoords.brushed();
+
+          // d3.parcoords.js returns the full data set when no brush is set.
+          // This can't be changed in the component for legacy reasons. However,
+          // when no brushes are set, no data is brushed, so let's work around
+          // this issue here.
+          brushed = brushed.length === d.parcoords.data().length ? [] : brushed;
+          DataSet.brush(brushed);
         });
       })
       .on("axesreorder", function (variables) {

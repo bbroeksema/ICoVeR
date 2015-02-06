@@ -5,9 +5,14 @@ app.init <- function() {
   db.init()
 
   schema <- p.db.select(table="schema");
+
+  data = list(
+    schema = schema,
+    dimensions = list(rows = p.db.rowcount(table = "data"), cols = nrow(schema))
+  )
   cluster <- p.cluster.methods()
   dimred <- p.dimred.methods()
   color <- p.color.configurations()
 
-  list(schema = schema, cluster = cluster, dimred = dimred)
+  list(data = data, cluster = cluster, dimred = dimred)
 }

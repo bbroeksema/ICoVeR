@@ -1,10 +1,11 @@
 /*jslint indent: 2, nomen: true */
 /*global angular, _*/
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ExportCtrl', function (DataSet, $rootScope, $scope) {
+
+    'use strict';
+
     var d = {
       rows: [],
       variables: [],
@@ -49,12 +50,9 @@ angular.module('contigBinningApp.controllers')
     });
 
     /*jslint unparam: true */
-    $rootScope.$on("DataSet::brushed", function (ev, extents, rows) {
-      var nExtents = Object.getOwnPropertyNames(extents.extents).length,
-        categories = Object.getOwnPropertyNames(extents.categories).length;
-
+    $rootScope.$on("DataSet::brushed", function (ev, rows) {
       d.rows = rows;
-      if ((nExtents + categories) > 0) {
+      if (rows.length > 0) {
         $scope.exportMethods = ["all", "brushed"];
         $scope.exportMethod = $scope.exportMethods[1];
       } else {
@@ -65,8 +63,10 @@ angular.module('contigBinningApp.controllers')
     /*jslint unparam: false */
 
     $scope.export = function () {
-      var idStrings = "";
-      _.map(d.rows, function (datum) {
+      var idStrings = "",
+        rows = d.rows.length > 0 ? d.rows : _.keys(d.rowIdMap);
+
+      _.map(rows, function (datum) {
         idStrings += d.rowIdMap[datum.row] + "\n";
       });
       $scope.idStrings = idStrings;

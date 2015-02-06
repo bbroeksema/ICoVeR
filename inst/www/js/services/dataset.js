@@ -13,8 +13,8 @@ angular.module('contigBinningApp.services')
       },
       d = {
         id: undefined,
-        brushExtents: {},
-        brushPredicate: undefined,
+        data: undefined,
+        brushed: [],
         backend: {
           schema: undefined,
           schemaIndex: undefined,
@@ -37,7 +37,8 @@ angular.module('contigBinningApp.services')
     // Initialize the application as soon as the Dataset service is initialized and receive
     // the required information to configure and further bootstrap the front end.
     OpenCPU.json("app.init", null, function (session, cfg) {
-      updateSchema(cfg.schema);
+      d.data = cfg.data;
+      updateSchema(cfg.data.schema);
       $rootScope.$broadcast("App::configurationLoaded", cfg);
     });
 
@@ -159,8 +160,6 @@ angular.module('contigBinningApp.services')
         //       to deal with this.
       },
 
-      // TODO: filter will not work at the moment when analytical variables are
-      //       included.
       filter: function (filterMethod) {
         if (filterMethod === this.FilterMethod.RESET) {
           d.backend.rows = undefined;
@@ -168,43 +167,27 @@ angular.module('contigBinningApp.services')
           return;
         }
 
-        var me = this,
-          args = {
-            extents: d.brushExtents.extents,
-            categories: d.brushExtents.categories,
-            predicate: d.brushPredicate,
-            method: filterMethod
-          };
+        if (d.brushed.length === 0) { throw "ERROR, filtering while nothing is brushed"; }
 
-        if (d.backend.rows !== undefined) {
-          args.rows = d.backend.rows;
+        if (filterMethod === this.FilterMethod.KEEP) {
+          d.backend.rows = _.pluck(d.brushed, "row");
+        } else {
+          var toRemove = _.indexBy(_.pluck(d.brushed, "row")),
+            rowCount = d.data.dimensions.rows;
+
+          d.backend.rows = d.backend.rows || Array.apply(null, { length: rowCount }).map(Number.call, Number);
+          d.backend.rows = _.filter(d.backend.rows, function (d) {
+            return toRemove[d] === undefined;
+          });
         }
 
-        ocpu.call("data.filter", args, function (session) {
-          d.backend.rows = session; // Keep track of the current state.
-          me.brush({ extents: {}, categories: {} });
-          $rootScope.$broadcast("DataSet::filtered", filterMethod);
-        });
+        d.brushed = [];
+        $rootScope.$broadcast("DataSet::filtered", filterMethod);
       },
 
-      brush: function (extents, rows) {
-        assert.strictEqual(typeof extents.extents, "object", "Expected an extents property");
-        assert.strictEqual(typeof extents.categories, "object", "Expected an categories property");
-
-        d.brushExtents = extents;
-        $rootScope.$broadcast("DataSet::brushed", d.brushExtents, rows);
-      },
-
-      // Returns the totalumber of rows in the dataset
-      getTotalNumRows: function (callback) {
-        OpenCPU.json("data.gettotalnumrows", {}, function (session, returnedNumberOfRows) {
-          callback(returnedNumberOfRows);
-        });
-      },
-
-      //Set callback function for updating the current data set size
-      setCurrentNumRowsCallback: function (callback) {
-        currentNumRowsCallback = callback;
+      brush: function (rows) {
+        d.brushed = rows;
+        $rootScope.$broadcast("DataSet::brushed", rows);
       }
 
     };
