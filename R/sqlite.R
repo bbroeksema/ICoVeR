@@ -153,8 +153,8 @@ db.reset <- function() {
   p.db.init()
 }
 
-# db.select(vars=c("M4", "M20"), rows=c(1,2,100,2300))
-db.select <- function(table="data", vars=c(), rows=c()) {
+# p.db.select(vars=c("M4", "M20"), rows=c(1,2,100,2300))
+p.db.select <- function(table="data", vars=c(), rows=c()) {
   vars <- ifelse(length(vars) == 0,
                  "*",
                  paste(unlist(vars), collapse=", "))

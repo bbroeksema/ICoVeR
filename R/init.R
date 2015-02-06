@@ -4,7 +4,7 @@ app.init <- function() {
 
   db.init()
 
-  schema <- db.select(table="schema")
+  schema <- p.db.select(table="schema");
   cluster <- p.cluster.methods()
   dimred <- p.dimred.methods()
   color <- p.color.configurations()
