@@ -5,6 +5,10 @@ angular.module('contigBinningApp.services')
   .service('OpenCPU', function ($http) {
     'use strict';
 
+    // For testing without having to re-install the R-plugin over and over again
+    // enable the following line, adjust the path, and run:
+    // rparcoords/inst/www $ python -m SimpleHTTPServer
+    //ocpu.seturl("//localhost/ocpu/user/bertjan/library/RParcoords/R");
 
     function asJson(callback) {
       return function (session) {
