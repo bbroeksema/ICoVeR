@@ -1,10 +1,10 @@
 /*jslint white: false, indent: 2, nomen: true */
 /*global angular, ocpu, _ */
 
-'use strict';
-
 angular.module('contigBinningApp.services')
   .service('OpenCPU', function ($http) {
+    'use strict';
+
 
     function asJson(callback) {
       return function (session) {
