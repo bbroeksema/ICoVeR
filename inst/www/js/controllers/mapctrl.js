@@ -61,7 +61,7 @@ angular.module('contigBinningApp.controllers')
     });
 
     /*jslint unparam: true */
-    $scope.$on('DataSet::brushed', function (e, extents, rows) {
+    $scope.$on('DataSet::brushed', function (e, rows) {
       if (rows && rows.length > 0 && rows.length < data.length) {
         highlighted = _.map(rows, function (row) {
           return index[row.row];

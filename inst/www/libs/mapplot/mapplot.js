@@ -50,10 +50,10 @@ crpgl.MapPlot = function() {
           .attr("width", size.width)
           .attr("height", size.height)
           .style("position", "absolute");
+
         context = canvas[0][0].getContext('2d');
-        context.fillOpacity = 0;
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        renderFn = drawItem(context, function () { return 'rgba(255, 255, 255, 0.5)'; });
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        renderFn = drawItem(context, function () { return 'rgba(255, 255, 255, 0.6)'; });
         _.each(data.highlighted, renderFn);
       }
     });
