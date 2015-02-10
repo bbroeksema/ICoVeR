@@ -102,19 +102,6 @@ p_color_factor <- function(colorVariable, method, scheme) {
   }
 }
 
-p.color.configurations <- function() {
-  list(
-    numeric = list(
-      "Value" = names(p_schemes$numeric$value),
-      "Decile" = names(p_schemes$numeric$decile)
-      #"Z-score" = c("RedToBlue", "Spectral")
-    ),
-    factor = list(
-      "Value" = names(p_schemes$factor$value)
-    )
-  )
-}
-
 # color.apply(variable="gc_content", method="Value", scheme="blue_to_brown")
 # color.apply(variable="gc_content", method="Decile", scheme="blue_to_green")
 color.apply <- function(rows = c(), variable, method, scheme) {

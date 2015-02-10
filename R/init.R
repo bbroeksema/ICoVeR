@@ -12,7 +12,6 @@ app.init <- function() {
   )
   cluster <- p.cluster.methods()
   dimred <- p.dimred.methods()
-  color <- p.color.configurations()
 
-  list(data = data, cluster = cluster, dimred = dimred, color = color)
+  list(data = data, cluster = cluster, dimred = dimred)
 }

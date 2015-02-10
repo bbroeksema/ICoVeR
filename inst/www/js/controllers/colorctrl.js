@@ -7,26 +7,8 @@ angular.module('contigBinningApp.controllers')
     'use strict';
 
     var d = {
-      config: {},
       methods: undefined
     };
-
-    function onVariableChange() {
-      if ($scope.colorVariable && R.is.numeric($scope.colorVariable.type)) {
-        d.methods = d.config.numeric;
-      } else if ($scope.colorVariable && R.is.factor($scope.colorVariable.type)) {
-        d.methods = d.config.factor;
-      } else {
-        d.methods = undefined;
-        $scope.colorMethod = undefined;
-      }
-
-      $scope.colorMethods = _.keys(d.methods);
-      if ($scope.colorMethod === undefined
-          || !_.contains($scope.colorMethods, $scope.colorMethod)) {
-        $scope.colorMethod = $scope.colorMethods[0];
-      }
-    }
 
     function onMethodChange() {
       if (d.methods === undefined) {
@@ -45,6 +27,25 @@ angular.module('contigBinningApp.controllers')
       if ($scope.colorScheme === undefined
           || !_.contains($scope.colorSchemes, $scope.colorScheme)) {
         $scope.colorScheme = $scope.colorSchemes[0];
+      }
+    }
+
+    function onVariableChange() {
+      if ($scope.colorVariable && R.is.numeric($scope.colorVariable.type)) {
+        d.methods = Color.configuration().numeric;
+      } else if ($scope.colorVariable && R.is.factor($scope.colorVariable.type)) {
+        d.methods = Color.configuration().factor;
+      } else {
+        d.methods = undefined;
+        $scope.colorMethod = undefined;
+      }
+
+      $scope.colorMethods = _.keys(d.methods);
+      if ($scope.colorMethod === undefined
+          || !_.contains($scope.colorMethods, $scope.colorMethod)) {
+        $scope.colorMethod = $scope.colorMethods[0];
+      } else {
+        onMethodChange();
       }
     }
 
@@ -71,12 +72,6 @@ angular.module('contigBinningApp.controllers')
         return R.is.numeric(variable.type) || R.is.factor(variable.type);
       });
       $scope.colorVariable = undefined;
-    });
-    /*jslint unparam: false */
-
-    /*jslint unparam: true */
-    $scope.$on("Colors::configurationLoaded", function (e, config) {
-      d.config = config;
     });
     /*jslint unparam: false */
 
