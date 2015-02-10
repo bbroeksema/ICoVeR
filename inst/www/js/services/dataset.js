@@ -141,7 +141,7 @@ angular.module('contigBinningApp.services')
 
           OpenCPU.json("data.get", args, function (session, data) {
             processReceivedData(data);
-            callback(d.data.full);
+            callback(currentDataSet());
           });
         }
       },
