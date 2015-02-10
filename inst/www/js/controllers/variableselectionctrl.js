@@ -1,10 +1,10 @@
 /*jslint indent: 2 */
 /*global angular */
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('VariableSelectionCtrl', function ($scope, $modalInstance, variables, selected) {
+
+    'use strict';
 
     $scope.variables = variables;
     // https://stackoverflow.com

@@ -1,10 +1,10 @@
 /*jslint browser: true, todo:true, nomen: true, indent: 2 */
 /*global angular, crpgl, d3, ocpu, _, $*/
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('MapCtrl', function ($scope, $element, $window, DataSet) {
+
+    'use strict';
 
     var plot = crpgl.MapPlot(),
       location,

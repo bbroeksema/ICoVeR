@@ -1,10 +1,10 @@
 /*jslint indent: 2*/
 /*global angular */
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ParCoordsVarsCtrl', function ($modal, $scope, ParCoords) {
+
+    'use strict';
 
     $scope.parcoords = ParCoords;
     $scope.brushPredicate = $scope.parcoords.brushPredicates[0];

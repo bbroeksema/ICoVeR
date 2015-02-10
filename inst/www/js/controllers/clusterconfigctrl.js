@@ -1,10 +1,11 @@
 /*jslint indent: 2 */
 /*global angular */
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ClusterConfigCtrl', function ($scope, $modalInstance, options) {
+
+    'use strict';
+
     var previousCentersCount = 30;
 
     function updateControllerState() {

@@ -1,10 +1,11 @@
 /*jslint indent: 2 */
 /*global angular */
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('NameHighlightCtrl', function ($scope, DataSet, ParCoords) {
+
+    'use strict';
+
     var nameHash = {},
       variables = [];
 

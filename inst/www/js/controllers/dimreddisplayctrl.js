@@ -1,10 +1,11 @@
 /*jslint indent: 2, todo:true, nomen:true */
 /*global angular, d3, _ */
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('DimRedDisplayCtrl', function ($scope, $rootScope) {
+
+    'use strict';
+
     $scope.clusters = [];
     $scope.cluster = undefined;
 

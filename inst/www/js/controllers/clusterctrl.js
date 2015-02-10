@@ -1,10 +1,11 @@
 /*jslint indent: 2, nomen: true */
 /*global angular, _ */
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ClusterCtrl', function ($scope, $modal, Analytics, R) {
+
+    'use strict';
+
     var d = {
       schema: undefined
     };

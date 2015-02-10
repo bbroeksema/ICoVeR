@@ -1,10 +1,11 @@
 /*jslint indent: 2, nomen: true */
 /*global angular, document, d3, ScatterPlot, _, $ */
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ScatterplotCtrl', function ($scope, $modal, $window, $element) {
+
+    'use strict';
+
     var loadFromFile_DEBUG = true,
       sp = new ScatterPlot("#scatterplotDiv"),
       sWidth = $element[0].clientWidth,

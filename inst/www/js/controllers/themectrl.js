@@ -1,10 +1,10 @@
 /*jslint indent: 2 */
 /*global angular, $ */
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ThemeCtrl', function ($scope) {
+
+    'use strict';
 
     var link = $('#maincss');
 

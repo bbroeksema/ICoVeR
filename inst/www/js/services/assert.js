@@ -1,10 +1,10 @@
 /*jslint todo:true, unparam: true, nomen: true, indent: 2 */
 /*global angular */
 
-'use strict';
-
 angular.module('contigBinningApp.services')
   .service('assert', function () {
+
+    'use strict';
 
     return {
       strictEqual: function (actual, expected, message) {

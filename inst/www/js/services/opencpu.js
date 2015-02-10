@@ -3,6 +3,7 @@
 
 angular.module('contigBinningApp.services')
   .service('OpenCPU', function ($http) {
+
     'use strict';
 
     // For testing without having to re-install the R-plugin over and over again

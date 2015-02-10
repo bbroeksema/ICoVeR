@@ -1,10 +1,11 @@
 /*jslint browser: true, todo:true, nomen: true, indent: 2 */
 /*global angular, crpgl, d3, ocpu, _, $*/
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ChartsCtrl', function ($scope) {
+
+    'use strict';
+
     $scope.location = false;
 
     /*jslint unparam: true */

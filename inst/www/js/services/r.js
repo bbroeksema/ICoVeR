@@ -1,10 +1,11 @@
 /*jslint white: false, indent: 2 */
 /*global angular */
 
-'use strict';
-
 angular.module('contigBinningApp.services')
   .service('R', function () {
+
+    'use strict';
+
     return {
       is: {
         factor: function (typestr) {

@@ -1,10 +1,10 @@
 /*jslint indent: 2, nomen: true */
 /*global angular, _*/
 
-'use strict';
-
 angular.module('contigBinningApp.controllers')
   .controller('ColorCtrl', function ($scope, R, Color) {
+
+    'use strict';
 
     var d = {
       config: {},

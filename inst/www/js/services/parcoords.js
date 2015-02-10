@@ -1,13 +1,14 @@
 /*jslint white: false, indent: 2, nomen: true */
 /*global angular, _ */
 
-'use strict';
-
 // This service is meant to share state betweem the parcoords visualization and
 // the various control widgets
 
 angular.module('contigBinningApp.services')
   .service('ParCoords', function ($rootScope, R) {
+
+    'use strict';
+
     var d = {
         variables: [],         // List of variables that can be displayed in parcoords.
         selectedVariables: [], // List of variables currently displayed in parcoords.
