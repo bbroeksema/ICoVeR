@@ -19,10 +19,10 @@
         </div>
 
         <form class="navbar-form navbar-right form-inline">
-        <div class="form-group" ng-controller="NameHighlightCtrl">
-        <label class="control-label col-lg-4" for="rowNameHighlight">Highlight</label>
-        <input type="text" id="rowNameHighlight" class = "col-lg-5 input-sm"  ng-model="rowName" ng-change="highlightRow()">
-        </div>
+          <div class="form-group" ng-controller="NameHighlightCtrl" ng-hide="noHighlightAvailable">
+            <label class="control-label col-lg-4" for="rowNameHighlight">Highlight</label>
+            <input type="text" id="rowNameHighlight" class = "col-lg-5 input-sm"  ng-model="rowName" ng-change="highlightRow()">
+          </div>
           <div class="form-group" ng-controller="DataIndicatorCtrl">
             <progress ng-click="changeScale()" max="1" animate="false">
               <bar ng-repeat="bar in counts track by $index"
