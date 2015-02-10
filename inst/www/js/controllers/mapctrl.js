@@ -78,7 +78,10 @@ angular.module('contigBinningApp.controllers')
     $scope.$on('DataSet::filtered', function (e, filteredData) {
       data = filteredData;
       index = _.indexBy(data, 'row');
-      render();
+      // Reset highlight but make sure that the previous highlight, if any, is
+      // removed.
+      highlighted = [];
+      render({ data: true, highlight: true });
     });
     /*jslint unparam: false */
 
