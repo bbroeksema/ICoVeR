@@ -53,6 +53,8 @@ angular.module('contigBinningApp.services')
     });
 
     function processReceivedData(data) {
+      d.data.filtered = undefined; // Reset filtered data.
+
       if (d.data.full === undefined) {
         d.data.full = data;
         d.data.full.index = {};
@@ -83,16 +85,22 @@ angular.module('contigBinningApp.services')
       }
     }
 
-    function currentDataSet() {
-      var data = [];
+    function dataFiltered() {
+      return d.backend.rows !== undefined && d.backend.rows.length > 0;
+    }
 
-      if (d.backend.rows !== undefined && d.backend.rows.length > 0) {
+    function currentDataSet() {
+      var data = d.data.full,
+        filtered = d.data.filtered || [];
+
+      if (dataFiltered() && d.data.filtered === undefined) {
+        // Recreate the filtered set of rows
         _.each(d.backend.rows, function (row) {
-          var index = d.data.full.index[row];
-          data.push(d.data.full[index]);
+          var index = data.index[row];
+          filtered.push(data[index]);
         });
-      } else {
-        data = d.data.full;
+
+        d.data.filtered = data = filtered;
       }
 
       return data;
@@ -116,7 +124,7 @@ angular.module('contigBinningApp.services')
 
       get: function (variables, callback) {
         var args = {},
-          requested;
+          availableVariables;
 
         // TODO: Create a unique id for each requests. When a new request comes
         //       in, check if there is an ongoing requests which encompasses all
@@ -127,10 +135,9 @@ angular.module('contigBinningApp.services')
         //       variables. The callback is called only when the remaining
         //       variables are loaded.
         // @see _.uniqueId
-
         if (d.data.full !== undefined && d.data.full.length > 0) {
-          requested = _.keys(d.data.full[0]);
-          variables = _.difference(variables, requested);
+          availableVariables = _.keys(d.data.full[0]);
+          variables = _.difference(variables, availableVariables);
         }
 
         if (variables.length > 0) {
@@ -143,6 +150,9 @@ angular.module('contigBinningApp.services')
             processReceivedData(data);
             callback(currentDataSet());
           });
+        } else {
+          // All variables are alread there, just directly return the data.
+          callback(currentDataSet());
         }
       },
 
@@ -167,6 +177,7 @@ angular.module('contigBinningApp.services')
         }
 
         d.brushed = [];
+        d.data.filtered = undefined;
         $rootScope.$broadcast("DataSet::filtered", currentDataSet());
       },
 
