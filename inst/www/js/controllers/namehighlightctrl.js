@@ -33,10 +33,10 @@ angular.module('contigBinningApp.controllers')
     /*jslint unparam: false */
 
     /*jslint unparam: true */
-    $scope.$on('DataSet::filtered', function (e, schema) {
+    $scope.$on('DataSet::filtered', function (e, filteredData) {
       // remove highlight... it will be reapplied once the filter returns
       ParCoords.highlightRow(-1);
-      DataSet.get(variables, buildNameHash);
+      buildNameHash(filteredData);
     });
     /*jslint unparam: false */
     $scope.highlightRow = function () {
@@ -49,4 +49,3 @@ angular.module('contigBinningApp.controllers')
     };
 
   });
-

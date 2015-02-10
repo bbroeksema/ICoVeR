@@ -74,10 +74,13 @@ angular.module('contigBinningApp.controllers')
     });
     /*jslint unparam: false */
 
-    $scope.$on('DataSet::filtered', function () {
-      retrieveData(retrieveData.KEEP_EXTENTS);
+    /*jslint unparam: true */
+    $scope.$on('DataSet::filtered', function (e, filteredData) {
+      data = filteredData;
+      index = _.indexBy(data, 'row');
       render();
     });
+    /*jslint unparam: false */
 
     /*jslint unparam: true */
     $scope.$on("Colors::changed", function (e, colors) {

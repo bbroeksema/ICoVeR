@@ -52,6 +52,52 @@ angular.module('contigBinningApp.services')
       }
     });
 
+    function processReceivedData(data) {
+      if (d.data.full === undefined) {
+        d.data.full = data;
+        d.data.full.index = {};
+        _.each(data, function (datum, i) {
+          d.data.full.index[datum.row] = i;
+        });
+      } else {
+        // For each item we retrieved
+        _.each(data, function (datum) {
+          // If the item doesn't exist yet in the full data set, we'll have to
+          // add it.
+          if (d.data.full.index[datum.row] === undefined) {
+            d.data.full.index[datum.row] = d.data.full.length;
+            d.data.full.push(datum);
+          }
+
+          // Update the item in the full data set.
+          var index = d.data.full.index[datum.row],
+            dataItem = d.data.full[index],
+            keys = _.keys(datum);
+
+          _.each(keys, function (key) {
+            dataItem[key] = datum[key];
+          });
+
+          d.data.full[index] = dataItem; // Not sure if this is required
+        });
+      }
+    }
+
+    function currentDataSet() {
+      var data = [];
+
+      if (d.backend.rows !== undefined && d.backend.rows.length > 0) {
+        _.each(d.backend.rows, function (row) {
+          var index = d.data.full.index[row];
+          data.push(d.data.full[index]);
+        });
+      } else {
+        data = d.data.full;
+      }
+
+      return data;
+    }
+
     return {
       FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE', RESET: 'RESET' },
 
@@ -67,15 +113,35 @@ angular.module('contigBinningApp.services')
       // @param variables - a list of strings, containing the names of the
       //                    variables to be loaded.
       // @param callback -  a function to be executed once data has been successfully loaded
-      get: function (variables, callback) {
-        var args = {
-          variables: variables,
-          rows: d.backend.rows
-        };
 
-        if (args.variables.length > 0) {
+      get: function (variables, callback) {
+        var args = {},
+          requested;
+
+        // TODO: Create a unique id for each requests. When a new request comes
+        //       in, check if there is an ongoing requests which encompasses all
+        //       variables in the new request. If so, add the callback to the
+        //       list of callbacks for this request. Otherwise, remove already
+        //       requested variables from the list (they will come in with the
+        //       ongoing request) and place a new request with the remaining
+        //       variables. The callback is called only when the remaining
+        //       variables are loaded.
+        // @see _.uniqueId
+
+        if (d.data.full !== undefined && d.data.full.length > 0) {
+          requested = _.keys(d.data.full[0]);
+          variables = _.difference(variables, requested);
+        }
+
+        if (variables.length > 0) {
+          args.variables = variables;
+          // Always get the full column to avoid synchronization problems
+          // related to filtering
+          //args.rows = d.backend.rows;
+
           OpenCPU.json("data.get", args, function (session, data) {
-            callback(data);
+            processReceivedData(data);
+            callback(d.data.full);
           });
         }
       },
@@ -83,7 +149,7 @@ angular.module('contigBinningApp.services')
       filter: function (filterMethod) {
         if (filterMethod === this.FilterMethod.RESET) {
           d.backend.rows = undefined;
-          $rootScope.$broadcast("DataSet::filtered", filterMethod);
+          $rootScope.$broadcast("DataSet::filtered", currentDataSet());
           return;
         }
 
@@ -92,17 +158,20 @@ angular.module('contigBinningApp.services')
         if (filterMethod === this.FilterMethod.KEEP) {
           d.backend.rows = _.pluck(d.brushed, "row");
         } else {
-          var toRemove = _.indexBy(_.pluck(d.brushed, "row")),
-            rowCount = d.data.dimensions.rows;
+          var toRemove = _.indexBy(_.pluck(d.brushed, "row"));
 
-          d.backend.rows = d.backend.rows || Array.apply(null, { length: rowCount }).map(Number.call, Number);
+          d.backend.rows = d.backend.rows || _.pluck(d.data.full, "row");
           d.backend.rows = _.filter(d.backend.rows, function (d) {
             return toRemove[d] === undefined;
           });
         }
 
         d.brushed = [];
-        $rootScope.$broadcast("DataSet::filtered", filterMethod);
+        $rootScope.$broadcast("DataSet::filtered", currentDataSet());
+      },
+
+      filtered: function () {
+        return d.backend.rows && d.backend.rows.length > 0;
       },
 
       brush: function (rows) {

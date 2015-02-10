@@ -26,12 +26,10 @@ angular.module('contigBinningApp.controllers')
 
     $scope.$on('DataSet::loaded', function () { $scope.dataFiltered = false; });
 
-    /*jslint unparam: true */
-    $scope.$on('DataSet::filtered', function (e, method) {
+    $scope.$on('DataSet::filtered', function () {
       $scope.filteringInProgress = false;
-      $scope.dataFiltered = method !== DataSet.FilterMethod.RESET;
+      $scope.dataFiltered = DataSet.filtered();
     });
-    /*jslint unparam: false */
 
     /*jslint unparam: true */
     $scope.$on('DataSet::brushed', function (e, rows) {

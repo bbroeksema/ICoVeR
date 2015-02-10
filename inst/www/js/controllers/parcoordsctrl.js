@@ -186,8 +186,8 @@ angular.module('contigBinningApp.controllers')
       render();
     });
 
-    $scope.$on("DataSet::filtered", function (ev, filterMethod) {
-      DataSet.get(d.parcoords.dimensions(), loadData);
+    $scope.$on("DataSet::filtered", function (ev, filteredData) {
+      loadData(filteredData);
     });
 
     $scope.$on("Colors::changed", function (e, colors) {

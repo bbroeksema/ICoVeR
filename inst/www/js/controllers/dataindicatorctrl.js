@@ -29,19 +29,8 @@ angular.module('contigBinningApp.controllers')
     /*jslint unparam: false */
 
     /*jslint unparam: true */
-    $scope.$on("DataSet::filtered", function (ev, method) {
-      switch (method) {
-      case "KEEP":
-        currentRowCount = brushedRowCount;
-        break;
-      case "REMOVE":
-        currentRowCount = currentRowCount - brushedRowCount;
-        break;
-      case "RESET":
-        currentRowCount = overallRowCount;
-        break;
-      }
-
+    $scope.$on("DataSet::filtered", function (ev, rows) {
+      currentRowCount = rows.length;
       brushedRowCount = 0;
       if ($scope.rowCount === overallRowCount) {
         $scope.counts = [{ rows: currentRowCount, type: "" }];
