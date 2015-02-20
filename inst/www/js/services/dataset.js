@@ -121,7 +121,6 @@ angular.module('contigBinningApp.services')
       // @param variables - a list of strings, containing the names of the
       //                    variables to be loaded.
       // @param callback -  a function to be executed once data has been successfully loaded
-
       get: function (variables, callback) {
         var args = {},
           availableVariables;
