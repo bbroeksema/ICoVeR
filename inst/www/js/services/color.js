@@ -86,19 +86,33 @@ angular.module('contigBinningApp.services')
       });
     }
 
+    // Puts 10 percent of the data items, ordered by color variabel in the same
+    // bin.
     function colorNumericDecile(colorVariable, colorScheme) {
       DataSet.get([colorVariable], function (data) {
-        var color = d3.scale.quantile(),
-          domain = d3.extent(data, function (datum) { return datum[colorVariable]; }),
-          colored = {};
+        var colored = {},
+          binSize = Math.round(data.length / 10),
+          currentBin = 0,
+          currentBinSize = 0,
+          lastValue;
+
+        data.sort(function (a, b) {
+          return +a[colorVariable] - +b[colorVariable];
+        });
 
         colorScheme = d.schemes.numeric.decile[colorScheme];
-        color
-          .domain(domain)
-          .range(_.range(0, 10));
 
         _.each(data, function (datum) {
-          colored[datum.row] = colorScheme[color(datum[colorVariable])];
+          var value = datum[colorVariable];
+
+          if (currentBinSize >= binSize && currentBin < 9 && value !== lastValue) {
+            currentBin = currentBin + 1;
+            currentBinSize = 0;
+          }
+
+          colored[datum.row] = colorScheme[currentBin];
+          currentBinSize = currentBinSize + 1;
+          lastValue = value;
         });
 
         $rootScope.$broadcast("Colors::changed", colored);
