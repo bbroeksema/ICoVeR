@@ -105,10 +105,10 @@ angular.module('contigBinningApp.services')
     function currentDataSet() {
       if (dataFiltered()) {
         if (!d.data.filtered) { d.data.filtered = filterData(); }
-        return d.data.filtered;
+        return d.data.filtered.slice();
       }
 
-      return d.data.full;
+      return d.data.full.slice();
     }
 
     return {
