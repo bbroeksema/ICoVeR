@@ -89,21 +89,26 @@ angular.module('contigBinningApp.services')
       return d.backend.rows !== undefined && d.backend.rows.length > 0;
     }
 
+    function filterData() {
+      if (!dataFiltered) { throw "Trying to filter unfiltered data."; }
+
+      var filtered = d.data.filtered || [];
+
+      // Recreate the filtered set of rows
+      _.each(d.backend.rows, function (row) {
+        var index = d.data.full.index[row];
+        filtered.push(d.data.full[index]);
+      });
+      return filtered;
+    }
+
     function currentDataSet() {
-      var data = d.data.full,
-        filtered = d.data.filtered || [];
-
-      if (dataFiltered() && d.data.filtered === undefined) {
-        // Recreate the filtered set of rows
-        _.each(d.backend.rows, function (row) {
-          var index = data.index[row];
-          filtered.push(data[index]);
-        });
-
-        d.data.filtered = data = filtered;
+      if (dataFiltered()) {
+        if (!d.data.filtered) { d.data.filtered = filterData(); }
+        return d.data.filtered;
       }
 
-      return data;
+      return d.data.full;
     }
 
     return {
