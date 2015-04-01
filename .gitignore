@@ -4,5 +4,6 @@
 data
 *.swp
 data.raw/*
+data/*
 cstr.db
 /rScratch
