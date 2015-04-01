@@ -21,6 +21,7 @@ angular.module('contigBinningApp.controllers')
         .autoscale()
         .updateAxes()
         .render();
+      DataSet.brush($scope.brushed);
     }
 
     function resize() {
