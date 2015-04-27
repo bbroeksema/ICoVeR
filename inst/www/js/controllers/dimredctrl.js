@@ -122,6 +122,7 @@ angular.module('contigBinningApp.controllers')
       var drMethod = $scope.selectedDimRedMethod.name,
         vars = _.pluck($scope.selectedVariables, 'name');
 
+      $scope.configurationInvalid = true;
       Analytics.reduce(drMethod, vars);
     };
   });
