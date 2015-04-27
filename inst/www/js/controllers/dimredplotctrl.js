@@ -201,8 +201,6 @@ angular.module('contigBinningApp.controllers')
             selectedVariables[stateKey] = selections.variable[stateKey];
           }
         }
-
-        //setDimensions(selectedVariables);
       });
 
 
