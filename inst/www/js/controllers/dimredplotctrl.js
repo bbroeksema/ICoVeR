@@ -2,7 +2,7 @@
 /*global angular, crpgl, list, d3, ocpu, _, $*/
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedPlotCtrl', function ($scope, $element, $window, ParCoords) {
+  .controller('DimRedPlotCtrl', function ($scope, $rootScope, $element, $window, ParCoords) {
     'use strict';
     /*jslint unparam:true*/
 
@@ -151,7 +151,9 @@ angular.module('contigBinningApp.controllers')
 
     function changeVariableSelection(drp) {
       var buttonDisabled = "disabled",
-        stateKey;
+        stateKey,
+        colours = {},
+        globalSelection;
 
       selections.variable = drp.variableSelections();
 
@@ -173,6 +175,25 @@ angular.module('contigBinningApp.controllers')
         }
         d.individualInfluences(influences.individual);
       });
+
+      _.forEach(influences.individual, function (val, key) {
+        colours[key] = d3.interpolateLab("steelblue", "red")(val);
+      });
+
+      $rootScope.$broadcast("Colors::changed", colours);
+
+      globalSelection = ParCoords.selectedVariables;
+      _.forEach(selections.variable, function (selection, variableName) {
+        if (selection === list.selected.NONE || _.findIndex(globalSelection, {"name": variableName}) !== -1) {
+          return;
+        }
+
+        console.log(variableName);
+
+        globalSelection.push(ParCoords.variables[_.findIndex(ParCoords.variables, {"name": variableName})]);
+      });
+      console.log(ParCoords.variables);
+      ParCoords.updateSelectedVariables(globalSelection);
 
       changeSelection(drp);
     }
