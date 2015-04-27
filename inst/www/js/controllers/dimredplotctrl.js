@@ -277,6 +277,22 @@ angular.module('contigBinningApp.controllers')
     $(document).ready(resize);
 
 
+    $scope.$on("DataSet::brushed", function (ev, rows) {
+      /*jslint unparam: true*/
+      rows.forEach(function (row) {
+        selections.individual[row.row] = list.selected.BAR;
+      });
+
+      updateStates("variable", "individual", true);
+
+      dimredplot.forEach(function (d) {
+        d.individualSelections(selections.individual);
+        d.variableInfluences(influences.variable);
+      });
+
+      changeSelection(dimredplot[0]);
+    });
+
     $scope.$on("Analytics::dimensionalityReduced", function (ev, method, session) {
       /*jslint unparam: true */
       session.getObject(updatePlot);
