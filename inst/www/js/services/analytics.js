@@ -62,39 +62,6 @@ angular.module('contigBinningApp.services')
         ocpu.call("dimred." + method, fnArgs, function (session) {
           $rootScope.$broadcast("Analytics::dimensionalityReduced", method, session);
         });
-      },
-
-      summarize: function (variableWeights) {
-        var fnArgs = { variableWeights: variableWeights },
-          summaryName = "";
-
-        if (DataSet.rows()) {
-          fnArgs.rows = DataSet.rows();
-        }
-
-        // creating summary columne name
-        function sum(array) {
-          return _.reduce(array, function (a, b) { return a + b; }, 0);
-        }
-
-        summaryName = _.chain(variableWeights)
-          .map(function (contribs, variable) {
-            return { variable: variable, contrib: sum(contribs) };
-          })
-          .sortBy('contrib')
-          .reverse()
-          .first(2)
-          .pluck('variable')
-          .join('_')
-          .value();
-
-        // Prepend a distinghuising string, so that we don't inadvertly replace
-        // one of the existing variables.
-        summaryName = "smry_" + summaryName;
-        fnArgs.identifier = summaryName;
-        ocpu.call("dimred.summarize", fnArgs, function () {
-          $rootScope.$broadcast("Analytics::dataUpdated", summaryName);
-        });
       }
     };
 

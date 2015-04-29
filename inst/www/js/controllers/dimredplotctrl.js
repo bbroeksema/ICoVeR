@@ -32,16 +32,6 @@ angular.module('contigBinningApp.controllers')
     /*jslint unparam: false */
 
     function pointClick(values) {
-      // For now, it is assumed that elements in @param values are actual
-      // column names of the table in the back-end. The thing that needs to
-      // happen at this point is that, in the backend a new variable is
-      // generated, that consists of the weighted sum of @param values for
-      // each observation in the original data table.
-      //
-      // NOTE: The summaries are really not understood by our users. Let's get
-      //       rid of the feature for now.
-      //Analytics.summarize(values);
-
       // We assume no clustering, so values, will always contain *one* variable.
       var colName = _.keys(values)[0],
         varIndex = _.findIndex(ParCoords.variables, { "name": colName }),
