@@ -1,4 +1,4 @@
-data.schema <- function() {
+data.schema <- function(timestamp = Sys.time()) {
   p.db.select(table="schema")
 }
 
