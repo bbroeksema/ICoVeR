@@ -11,7 +11,9 @@ p.dimred.methods <- function() {
 
 p.plotdata <- function(dim.red.res, column.results) {
   # Now wrangle the result in a format suitable for plotting.
-  factors <- 1:(nrow(dim.red.res[[column.results]]$coord) - 1)
+  # Make sure that we don't select too much variables when #row < #vars
+  factors <- min(nrow(dim.red.res[[column.results]]$coord) - 1, length(dim.red.res$row$inertia) - 1)
+  factors <- 1:factors
   plotdata <- data.frame(dim.red.res[[column.results]]$coord[ ,factors],
                          dim.red.res[[column.results]]$contrib[, factors])
 
@@ -55,6 +57,7 @@ dimred.pca <- function(rows=c(), vars) {
 }
 
 # dimred.ca(vars=c("aaaa","aaac","aaag","aaat","aaca","aacc","aacg","aact","aaga","aagc","aagg","aagt","aata","aatc","aatg","aatt","acaa","acac","acag","acat","acca","accc","accg","acct","acga","acgc","acgg","acgt","acta","actc","actg","actt","agaa","agac","agag","agat","agca","agcc","agcg","agct","agga","aggc","aggg","aggt","agta","agtc","agtg","agtt","ataa","atac","atag","atat","atca","atcc","atcg","atct","atga","atgc","atgg","atgt","atta","attc","attg","attt","caaa","caac","caag","caat","caca","cacc","cacg","cact","caga","cagc","cagg","cagt","cata","catc","catg","catt","ccaa","ccac","ccag","ccat","ccca","cccc","cccg","ccct","ccga","ccgc","ccgg","ccgt","ccta","cctc","cctg","cctt","cgaa","cgac","cgag","cgat","cgca","cgcc","cgcg","cgct","cgga","cggc","cggg","cggt","cgta","cgtc","cgtg","cgtt","ctaa","ctac","ctag","ctat","ctca","ctcc","ctcg","ctct","ctga","ctgc","ctgg","ctgt","ctta","cttc","cttg","cttt"))
+# dimred.ca(rows=c(19, 33, 36, 75, 81, 118, 169, 203, 218, 234, 236, 299, 380, 449, 457, 570, 572, 575, 579, 594, 595, 647, 679, 724, 736, 763, 764, 820, 833, 837, 1000, 1043, 1119, 1170, 1306, 1492, 1564, 1729, 1832, 1895, 2329, 2369, 2629, 2853, 3006, 3010, 3309, 3513, 3833, 5691, 6382, 6905, 7890, 10252, 13658), vars=c("aaaa","aaac","aaag","aaat","aaca","aacc","aacg","aact","aaga","aagc","aagg","aagt","aata","aatc","aatg","aatt","acaa","acac","acag","acat","acca","accc","accg","acct","acga","acgc","acgg","acgt","acta","actc","actg","actt","agaa","agac","agag","agat","agca","agcc","agcg","agct","agga","aggc","aggg","aggt","agta","agtc","agtg","agtt","ataa","atac","atag","atat","atca","atcc","atcg","atct","atga","atgc","atgg","atgt","atta","attc","attg","attt","caaa","caac","caag","caat","caca","cacc","cacg","cact","caga","cagc","cagg","cagt","cata","catc","catg","catt","ccaa","ccac","ccag","ccat","ccca","cccc","cccg","ccct","ccga","ccgc","ccgg","ccgt","ccta","cctc","cctg","cctt","cgaa","cgac","cgag","cgat","cgca","cgcc","cgcg","cgct","cgga","cggc","cggg","cggt","cgta","cgtc","cgtg","cgtt","ctaa","ctac","ctag","ctat","ctca","ctcc","ctcg","ctct","ctga","ctgc","ctgg","ctgt","ctta","cttc","cttg","cttt"))
 dimred.ca <- function(rows=c(), vars) {
   # TODO: Instead of this matrix use the burt matrix where rows represent
   #       columns as well. It must be something ling: data x data^T. Its size
