@@ -1,5 +1,5 @@
 html, body {
-  height: calc(100% - 50px);
+  height: calc(100% - 35px);
 }
 .form-control.ng-invalid {
   border: 2px solid red;
@@ -70,10 +70,6 @@ html, body {
 #parcoords {
   width: 100%;
   height: 100%;
-}
-
-#controls {
-  margin-left: 10px;
 }
 
 #charts {

@@ -188,11 +188,9 @@ angular.module('contigBinningApp.controllers')
           return;
         }
 
-        console.log(variableName);
-
         globalSelection.push(ParCoords.variables[_.findIndex(ParCoords.variables, {"name": variableName})]);
       });
-      console.log(ParCoords.variables);
+
       ParCoords.updateSelectedVariables(globalSelection);
 
       changeSelection(drp);
@@ -225,10 +223,11 @@ angular.module('contigBinningApp.controllers')
       });
 
 
+
     function resize() {
       d3.select($element[0]).selectAll("div.dimredplot")
-        .style("width", $element[0].clientWidth / dimredplot.length)
-        .style("height", $element[0].clientHeight)
+        .style("width", 100 / dimredplot.length + "%")
+        .style("height", "100%")
         .each(function (d, i) {
           /*jslint unparam:true*/
           dimredplot[i]
@@ -278,16 +277,7 @@ angular.module('contigBinningApp.controllers')
         .append("div")
         .attr("class", "dimredplot");
 
-      div
-        .style("width", $element[0].clientWidth / data.analyses.length)
-        .style("height", $element[0].clientHeight)
-        .each(function (d, i) {
-          /*jslint unparam:true*/
-          dimredplot[i]
-            .width($element[0].clientWidth / data.analyses.length)
-            .height($element[0].clientHeight);
-          dimredplot[i](d3.select(this));
-        });
+      resize();
 
       div.exit().remove();
     }

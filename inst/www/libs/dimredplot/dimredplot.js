@@ -194,7 +194,7 @@ list.DimRedPlot = function () {
       colorSelect2 = d3.select("select#color2"),
       individualsPresent = data.individualProjections !== undefined,
       variablesPresent = data.variableProjections !== undefined,
-      scatterplotWidth = size.width * parts.scatterplot.width,
+      scatterplotWidth = parts.scatterplot.width,
       plotdata = [
         {
           title: "Projected individuals/rows",
@@ -339,7 +339,7 @@ list.DimRedPlot = function () {
 
     scatterPlot
       .height(size.height * parts.scatterplot.height)
-      .width(scatterplotWidth)
+      .width(size.width * scatterplotWidth)
       .originVisible(parts.scatterplot.origin.visible)
       .originSize(parts.scatterplot.origin.size)
       .on("selectionEnd", select)
@@ -354,8 +354,8 @@ list.DimRedPlot = function () {
       .attr("class", "scatterplot");
     scatterPlotDiv
       .style("float", "left")
-      .style("width", scatterplotWidth + "px")
-      .style("height", size.height * parts.scatterplot.height + "px")
+      .style("width", 100 * scatterplotWidth + "%")
+      .style("height", 100 * parts.scatterplot.height + "%")
       .style("outline-style", "solid")
       .style("outline-width", "1px")
       .style("outline-color", "#ddd")
@@ -423,7 +423,18 @@ list.DimRedPlot = function () {
       totalSum = 0.0,
       selectionSortCheck,
       checkboxLabel,
-      plotHeight = size.height * parts.contributions.height;
+      controlDiv;
+
+    // Create a div containing all the Barplots, this is necessary to keep everything sized correctly
+    div = div.selectAll("div.barplots").data([true]);
+    div.enter()
+      .append("div")
+      .attr("class", "barplots")
+      .style("position", "relative")
+      .style("float", "left");
+    div
+      .style("width", 100 * parts.contributions.width + "%")
+      .style("height", 100 * parts.contributions.height + "%");
 
     plotdata[3].variance = 100 - plotdata[0].variance - plotdata[1].variance;
 
@@ -483,14 +494,22 @@ list.DimRedPlot = function () {
 
 
     // Add the controls that control the sorting
-    selectionSortCheck = div.selectAll("input#selectionSort").data([true]);
+    controlDiv = div.selectAll("div.sortcontrol").data([true]);
+    controlDiv.enter()
+      .append("div")
+      .attr("class", "sortcontrol")
+      .style("position", "absolute")
+      .style("bottom", 0)
+      .style("left", 0);
+
+    selectionSortCheck = controlDiv.selectAll("input#selectionSort").data([true]);
     selectionSortCheck.enter()
       .append("input")
       .attr("id", "selectionSort")
       .attr("type", "checkbox")
       .style("vertical-align", "middle");
 
-    checkboxLabel = div.selectAll("label#selectionSortLabel").data([true]);
+    checkboxLabel = controlDiv.selectAll("label#selectionSortLabel").data([true]);
     checkboxLabel.enter()
       .append("label")
       .attr("id", "selectionSortLabel")
@@ -499,10 +518,7 @@ list.DimRedPlot = function () {
       .style("font-size", "10px")
       .style("vertical-align", "middle");
 
-    plotHeight -= Math.abs(selectionSortCheck.node().offsetTop - checkboxLabel.node().offsetTop) +
-                  Math.max(selectionSortCheck.node().offsetHeight, checkboxLabel.node().offsetHeight);
-
-    sortSelect = div.selectAll("select#sort").data([true]);
+    sortSelect = controlDiv.selectAll("select#sort").data([true]);
     sortSelect.enter()
       .append("select")
       .attr("id", "sort")
@@ -515,9 +531,6 @@ list.DimRedPlot = function () {
         elem.append("option").attr("value", "error").text("Sort on other axes");
         elem.append("option").attr("value", "total").text("Sort on total");
       });
-    plotHeight -= sortSelect.node().offsetHeight;
-    // TODO: make this somehow generic
-    plotHeight -= 5;
 
     function sortEvent() {
       resetContributionBrushExtents();
@@ -581,19 +594,19 @@ list.DimRedPlot = function () {
     }
 
     barplot
-      .height(plotHeight / plotdata.length)
+      .height((size.height * parts.contributions.height) / (plotdata.length + 1))
       .width(size.width * parts.contributions.width)
       .on("brushEnd", brushed);
 
     barplotDiv = div.selectAll("div.barplot").data(plotdata);
     barplotDiv
       .enter()
-      .insert("div", "input#selectionSort")
-      .attr("class", "barplot");
+      .insert("div", "div.sortcontrol")
+      .attr("class", "barplot")
+      .style("float", "left");
     barplotDiv
-      .style("float", "left")
-      .style("width", size.width * parts.contributions.width + "px")
-      .style("height", plotHeight / plotdata.length + "px")
+      .style("width", "100%")
+      .style("height", 100 / (plotdata.length + 1) + "%")
       .call(barplot);
 
     barplotDiv.exit().remove();
@@ -610,8 +623,8 @@ list.DimRedPlot = function () {
       barPlotDiv;
 
     barPlot
-      .height(size.height * parts.variancepercentage.height)
       .width(size.width * parts.variancepercentage.width)
+      .height(size.height * parts.variancepercentage.height)
       .on("rotate", function (drp, direction) {
         /*jslint unparam:true*/
         var update = false,
@@ -677,11 +690,13 @@ list.DimRedPlot = function () {
       .attr("class", "variancepercentageplot");
     barPlotDiv
       .style("float", "left")
-      .style("width", size.width * parts.variancepercentage.width + "px")
-      .style("height", size.height * parts.variancepercentage.height + "px")
+      .style("width", 100 * parts.variancepercentage.width + "%")
+      .style("height", 100 * parts.variancepercentage.height + "%")
       .style("outline-style", "solid")
       .style("outline-width", "1px")
-      .style("outline-color", "#ddd")
+      .style("outline-color", "#ddd");
+
+    barPlotDiv
       .call(barPlot);
 
     barPlotDiv.exit().remove();
