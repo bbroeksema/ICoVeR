@@ -46,7 +46,7 @@ p.plotdata <- function(dim.red.res, column.results) {
 
   list(
     projections=plotdata,
-    explainedVariance=dim.red.res$eig$"percentage of variance"[1:(nrow(plotdata) - 1)]
+    explainedVariance=dim.red.res$eig$"percentage of variance"[factors]
   )
 }
 
