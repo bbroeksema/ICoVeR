@@ -150,22 +150,18 @@ angular.module('contigBinningApp.controllers')
     }
 
     function changeVariableSelection(drp) {
-      var buttonDisabled = "disabled",
+      var variablesSelected = false,
         stateKey,
-        colours = {},
         globalSelection;
 
       selections.variable = drp.variableSelections();
 
       for (stateKey in selections.variable) {
         if (selections.variable.hasOwnProperty(stateKey) && selections.variable[stateKey] !== list.selected.NONE) {
-          buttonDisabled = null;
+          variablesSelected = true;
           break;
         }
       }
-
-      d3.select("button#changeParcoordsVariables")
-        .attr("disabled", buttonDisabled);
 
       updateStates("individual", "variable", false);
 
@@ -176,11 +172,11 @@ angular.module('contigBinningApp.controllers')
         d.individualInfluences(influences.individual);
       });
 
-      _.forEach(influences.individual, function (val, key) {
-        colours[key] = d3.interpolateLab("steelblue", "red")(val);
-      });
-
-      $rootScope.$broadcast("Colors::changed", colours);
+      if (variablesSelected) {
+        $rootScope.$broadcast("ParCoords::influenceAdded", influences.individual);
+      } else {
+        $rootScope.$broadcast("ParCoords::influenceRemoved");
+      }
 
       globalSelection = ParCoords.selectedVariables;
       _.forEach(selections.variable, function (selection, variableName) {

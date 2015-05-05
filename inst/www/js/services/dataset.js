@@ -39,6 +39,32 @@ angular.module('contigBinningApp.services')
       d.brushPredicate = predicate;
     });
 
+    $rootScope.$on('ParCoords::influenceAdded', function (e, influences) {
+      var influenceSchema = {name: "influence", type: "numeric", group: "Analytics", group_type: "Influences"};
+
+      if (d.backend.schemaIndex.influence === undefined) {
+        d.backend.schema.push(influenceSchema);
+        d.backend.schemaIndex.influence = influenceSchema;
+      }
+
+      d.data.full.forEach(function (datum, idx) {
+        d.data.full[idx].influence = influences[datum.row];
+      });
+      if (d.data.filtered !== undefined) {
+        d.data.filtered.forEach(function (datum, idx) {
+          d.data.filtered[idx].influence = influences[datum.row];
+        });
+      }
+
+      $rootScope.$broadcast('DataSet::influenceLoaded', d.backend.schema);
+    });
+
+    $rootScope.$on('ParCoords::influenceRemoved', function () {
+      delete d.backend.schemaIndex.influence;
+
+      $rootScope.$broadcast('DataSet::influenceLoaded', d.backend.schema);
+    });
+
     // Listen to the analytics service to store the results of various
     // analytical actions.
     $rootScope.$on("Analytics::dataUpdated", function (ev, identifier) {

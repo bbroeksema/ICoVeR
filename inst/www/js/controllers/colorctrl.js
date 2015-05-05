@@ -65,13 +65,36 @@ angular.module('contigBinningApp.controllers')
       Color.color($scope.colorVariable.name, $scope.colorMethod, $scope.colorScheme);
     };
 
-    /*jslint unparam: true */
-    $scope.$on('DataSet::schemaLoaded', function (e, schema) {
+    function updateVariables(schema) {
       $scope.dataAvailable = true;
       $scope.variables = _.filter(schema, function (variable) {
         return R.is.numeric(variable.type) || R.is.factor(variable.type);
       });
+
+    }
+
+    /*jslint unparam: true */
+    $scope.$on('DataSet::schemaLoaded', function (e, schema) {
+      updateVariables(schema);
       $scope.colorVariable = undefined;
+    });
+
+    $scope.$on('DataSet::influenceLoaded', function (e, schema) {
+      updateVariables(schema);
+
+      var influenceSchemaIdx = _.findIndex(schema, {name: "influence"});
+
+      // This check is here to see if influence has been added or removed
+      if (influenceSchemaIdx !== -1) {
+        if ($scope.colorVariable === undefined) {
+          $scope.colorVariable = schema[influenceSchemaIdx];
+          $scope.colorMethod = "Value";
+          $scope.colorScheme = "blue_to_brown";
+        }
+        if ($scope.colorVariable.name === "influence") {
+          $scope.applyColoring();
+        }
+      }
     });
     /*jslint unparam: false */
 
