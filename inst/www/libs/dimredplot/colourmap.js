@@ -30,7 +30,7 @@ list.ColourMap = function () {
   render.colormap = function (element) {
     var minRange = Math.min(scale.range()[0], scale.range()[1]),
       maxRange = Math.max(scale.range()[0], scale.range()[1]),
-      numColors = Math.floor(maxRange - minRange - 2),
+      numColors = Math.floor(maxRange - minRange - 1),
       colorData = [],
       frame,
       colors,
@@ -40,7 +40,7 @@ list.ColourMap = function () {
       idx;
 
     for (idx = 0; idx !== numColors; idx += 1) {
-      colorData.push(idx / (numColors - 1));
+      colorData.push(idx);
     }
 
     axis = d3.svg.axis()
@@ -89,16 +89,18 @@ list.ColourMap = function () {
     colors
       .attr("x1", 1)
       .attr("y1", function (d) {
-        return 1 + (1 - d) * colorData.length;
+        return 1 + d;
       })
       .attr("x2", size.width - 1)
       .attr("y2", function (d) {
-        return 1 + (1 - d) * colorData.length;
+        return 1 + d;
       })
       .style("stroke-width", "2px");
 
     colors
-      .style("stroke", colourFunction);
+      .style("stroke", function (d) {
+        return colourFunction(scale.invert(d));
+      });
   };
 
   render.colormapBrush = function (element) {

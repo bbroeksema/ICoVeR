@@ -512,7 +512,9 @@ list.ScatterPlot = function () {
       .extent(data.brushExtent)
       .scale(scales.colormap)
       .axisSide("right")
-      .colourFunction(colormap[data.colormap])
+      .colourFunction(function (datum) {
+        return colormap[data.colormap](scales.color(datum));
+      })
       .on("brush", brush)
       .on("brushEnd", brushEnd);
 
