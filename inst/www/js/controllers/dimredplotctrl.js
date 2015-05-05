@@ -184,7 +184,15 @@ angular.module('contigBinningApp.controllers')
 
       globalSelection = ParCoords.selectedVariables;
       _.forEach(selections.variable, function (selection, variableName) {
-        if (selection === list.selected.NONE || _.findIndex(globalSelection, {"name": variableName}) !== -1) {
+        var currentVarPosition = _.findIndex(globalSelection, {"name": variableName});
+
+        if (selection === list.selected.NONE) {
+          if (currentVarPosition !== -1) {
+            globalSelection.splice(currentVarPosition, 1);
+          }
+          return;
+        }
+        if (currentVarPosition !== -1) {
           return;
         }
 
