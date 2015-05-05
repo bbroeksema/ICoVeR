@@ -63,7 +63,7 @@ angular.module('contigBinningApp.services')
           colored[datum.row] = color(datum[colorVariable]);
         });
 
-        $rootScope.$broadcast("Colors::changed", colored);
+        $rootScope.$broadcast("Colors::changed", colored, color, colorVariable, domain);
       });
     }
 
@@ -82,7 +82,7 @@ angular.module('contigBinningApp.services')
           colored[datum.row] = color(datum[colorVariable]);
         });
 
-        $rootScope.$broadcast("Colors::changed", colored);
+        $rootScope.$broadcast("Colors::changed", colored, color, colorVariable, domain);
       });
     }
 
@@ -92,6 +92,7 @@ angular.module('contigBinningApp.services')
       DataSet.get([colorVariable], function (data) {
         var colored = {},
           binSize = Math.round(data.length / 10),
+          domain = d3.extent(data, function (datum) { return datum[colorVariable]; }),
           currentBin = 0,
           currentBinSize = 0,
           lastValue;
@@ -102,7 +103,7 @@ angular.module('contigBinningApp.services')
 
         colorScheme = d.schemes.numeric.decile[colorScheme];
 
-        _.each(data, function (datum) {
+        function colorFunction(datum) {
           var value = datum[colorVariable];
 
           if (currentBinSize >= binSize && currentBin < 9 && value !== lastValue) {
@@ -113,9 +114,14 @@ angular.module('contigBinningApp.services')
           colored[datum.row] = colorScheme[currentBin];
           currentBinSize = currentBinSize + 1;
           lastValue = value;
+          return colorScheme[currentBin];
+        }
+
+        _.each(data, function (datum) {
+          colored[datum.row] = colorFunction(datum);
         });
 
-        $rootScope.$broadcast("Colors::changed", colored);
+        $rootScope.$broadcast("Colors::changed", colored, colorFunction, colorVariable, domain);
       });
     }
 
@@ -162,7 +168,7 @@ angular.module('contigBinningApp.services')
         } else if (R.is.numeric(type)) {
           colorNumeric(variable, colorMethod, colorScheme);
         } else {
-          throw "Unsoppoerted data type";
+          throw type + " is an unsupported data type";
         }
       },
 

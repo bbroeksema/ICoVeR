@@ -46,7 +46,13 @@
     <div id="main" class="container-fluid">
       <!-- Top half of the sceen -->
       <div id="top" class="row">
-        <div id="parcoords" class="parcoords" ng-controller="ParcoordsCtrl">
+        <div id="colourmap"  class="col-lg-1">
+          <div class="colourmap" ng-controller="ColourmapCtrl" ng-show="renderColourmap">
+          </div>
+        </div>
+        <div id="parcoords" class="col-lg-11">
+          <div class="parcoords" ng-controller="ParcoordsCtrl">
+          </div>
         </div>
       </div>
 
@@ -134,6 +140,7 @@
     <script src="js/controllers/themectrl.js"></script>
     <script src="js/controllers/variableselectionctrl.js"></script>
     <script src="js/controllers/dimreddisplayctrl.js"></script>
+    <script src="js/controllers/colourmapctrl.js"></script>
     <script src="js/services/analytics.js"></script>
     <script src="js/services/assert.js"></script>
     <script src="js/services/color.js"></script>

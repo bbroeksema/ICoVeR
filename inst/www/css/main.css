@@ -59,7 +59,6 @@ html, body {
 
 #top {
   height: 60%;
-  margin: 0px;
   margin-bottom: 10px;
 }
 
@@ -67,8 +66,10 @@ html, body {
   height: 40%;
 }
 
-#parcoords {
-  width: 100%;
+#parcoords,
+#colourmap,
+#parcoords div,
+#colourmap div {
   height: 100%;
 }
 
