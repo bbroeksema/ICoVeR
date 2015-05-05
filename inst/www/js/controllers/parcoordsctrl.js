@@ -64,7 +64,7 @@ angular.module('contigBinningApp.controllers')
       .alpha(0.05)
       .render()
       .createAxes()
-      .brushMode("1D-axes")
+      .brushMode("1D-axes-multi")
       .reorderable()
       .on("brushend", function () {
         // NOTE: the brushend event from parcoords is "outside" angular, so we

@@ -17,7 +17,7 @@ d3.parcoords = function(config) {
     alpha: 0.7,
     bundlingStrength: 0.5,
     bundleDimension: null,
-    smoothness: 0.25,
+    smoothness: 0.0,
     showControlPoints: false,
     hideAxis : []
   };
@@ -113,9 +113,6 @@ getset(pc, __, events);
 // expose events
 d3.rebind(pc, events, "on");
 
-// tick formatting
-d3.rebind(pc, axis, "ticks", "orient", "tickValues", "tickSubdivide", "tickSize", "tickPadding", "tickFormat");
-
 // getter/setter with event firing
 function getset(obj,state,events)  {
   d3.keys(state).forEach(function(key) {
@@ -146,15 +143,33 @@ pc.autoscale = function() {
   // yscale
   var defaultScales = {
     "date": function(k) {
+      var extent = d3.extent(__.data, function(d) {
+        return d[k] ? d[k].getTime() : null;
+      });
+
+      // special case if single value
+      if (extent[0] === extent[1]) {
+        return d3.scale.ordinal()
+          .domain([extent[0]])
+          .rangePoints([h()+1, 1]);
+      }
+
       return d3.time.scale()
-        .domain(d3.extent(__.data, function(d) {
-          return d[k] ? d[k].getTime() : null;
-        }))
+        .domain(extent)
         .range([h()+1, 1]);
     },
     "number": function(k) {
+      var extent = d3.extent(__.data, function(d) { return +d[k]; });
+
+      // special case if single value
+      if (extent[0] === extent[1]) {
+        return d3.scale.ordinal()
+          .domain([extent[0]])
+          .rangePoints([h()+1, 1]);
+      }
+
       return d3.scale.linear()
-        .domain(d3.extent(__.data, function(d) { return +d[k]; }))
+        .domain(extent)
         .range([h()+1, 1]);
     },
     "string": function(k) {
@@ -188,15 +203,6 @@ pc.autoscale = function() {
   __.hideAxis.forEach(function(k) {
     yscale[k] = defaultScales[__.types[k]](k);
   });
-
-  // hack to remove ordinal dimensions with many values
-  pc.dimensions(pc.dimensions().filter(function(p,i) {
-    var uniques = yscale[p].domain().length;
-    if (__.types[p] == "string" && (uniques > 60 || uniques < 2)) {
-      return false;
-    }
-    return true;
-  }));
 
   // xscale
   xscale.rangePoints([0, w()], 1);
@@ -266,7 +272,8 @@ pc.commonScale = function(global, type) {
 	}
 
 	return this;
-};pc.detectDimensions = function() {
+};
+pc.detectDimensions = function() {
   pc.types(pc.detectDimensionTypes(__.data));
   pc.dimensions(d3.keys(pc.types()));
   return this;
@@ -307,6 +314,7 @@ pc.render = function() {
 
 pc.render['default'] = function() {
   pc.clear('foreground');
+  pc.clear('highlight');
   if (__.brushed) {
     __.brushed.forEach(path_foreground);
     __.highlighted.forEach(path_highlight);
@@ -459,10 +467,10 @@ function single_curve(d, ctx) {
 function color_path(d, i, ctx) {
 	ctx.strokeStyle = d3.functor(__.color)(d, i);
 	ctx.beginPath();
-	if (__.bundleDimension === null || (__.bundlingStrength === 0 && __.smoothness == 0)) {
-		single_path(d, ctx);
-	} else {
+	if ((__.bundleDimension !== null && __.bundlingStrength > 0) || __.smoothness > 0) {
 		single_curve(d, ctx);
+	} else {
+		single_path(d, ctx);
 	}
 	ctx.stroke();
 };
@@ -472,10 +480,10 @@ function paths(data, ctx) {
 	ctx.clearRect(-1, -1, w() + 2, h() + 2);
 	ctx.beginPath();
 	data.forEach(function(d) {
-		if (__.bundleDimension === null || (__.bundlingStrength === 0 && __.smoothness == 0)) {
-			single_path(d, ctx);
-		} else {
+		if ((__.bundleDimension !== null && __.bundlingStrength > 0) || __.smoothness > 0) {
 			single_curve(d, ctx);
+		} else {
+			single_path(d, ctx);
 		}
 	});
 	ctx.stroke();
@@ -502,6 +510,8 @@ pc.clear = function(layer) {
   ctx[layer].clearRect(0,0,w()+2,h()+2);
   return this;
 };
+d3.rebind(pc, axis, "ticks", "orient", "tickValues", "tickSubdivide", "tickSize", "tickPadding", "tickFormat");
+
 function flipAxisAndUpdatePCP(dimension) {
   var g = pc.svg.selectAll(".dimension");
 
@@ -990,22 +1000,27 @@ pc.brushMode = function(mode) {
     // should be allowed.
     return function() {
       var p = d3.mouse(strumRect[0][0]),
-          dims = dimensionsForPoint(p),
-          strum = {
-            p1: p,
-            dims: dims,
-            minX: xscale(dims.left),
-            maxX: xscale(dims.right),
-            minY: 0,
-            maxY: h()
-          };
+          dims,
+          strum;
+
+      p[0] = p[0] - __.margin.left;
+      p[1] = p[1] - __.margin.top;
+
+      dims = dimensionsForPoint(p),
+      strum = {
+        p1: p,
+        dims: dims,
+        minX: xscale(dims.left),
+        maxX: xscale(dims.right),
+        minY: 0,
+        maxY: h()
+      };
 
       strums[dims.i] = strum;
       strums.active = dims.i;
 
       // Make sure that the point is within the bounds
       strum.p1[0] = Math.min(Math.max(strum.minX, p[0]), strum.maxX);
-      strum.p1[1] = p[1] - __.margin.top;
       strum.p2 = strum.p1.slice();
     };
   }
@@ -1016,7 +1031,7 @@ pc.brushMode = function(mode) {
           strum = strums[strums.active];
 
       // Make sure that the point is within the bounds
-      strum.p2[0] = Math.min(Math.max(strum.minX + 1, ev.x), strum.maxX);
+      strum.p2[0] = Math.min(Math.max(strum.minX + 1, ev.x - __.margin.left), strum.maxX);
       strum.p2[1] = Math.min(Math.max(strum.minY, ev.y - __.margin.top), strum.maxY);
       drawStrum(strum, 1);
     };
@@ -1212,6 +1227,157 @@ pc.brushMode = function(mode) {
 
 }());
 
+// brush mode: 1D-Axes with multiple extents
+// requires d3.svg.multibrush
+
+(function() {
+  if (typeof d3.svg.multibrush !== 'function') {
+	  console.log("multibrush requires d3.svg.multibrush");
+	  return;
+  }
+  var brushes = {};
+
+  function is_brushed(p) {
+    return !brushes[p].empty();
+  }
+
+  // data within extents
+  function selected() {
+    var actives = __.dimensions.filter(is_brushed),
+        extents = actives.map(function(p) { return brushes[p].extent(); });
+
+    // We don't want to return the full data set when there are no axes brushed.
+    // Actually, when there are no axes brushed, by definition, no items are
+    // selected. So, let's avoid the filtering and just return false.
+    //if (actives.length === 0) return false;
+
+    // Resolves broken examples for now. They expect to get the full dataset back from empty brushes
+    if (actives.length === 0) return __.data;
+
+    // test if within range
+    var within = {
+      "date": function(d,p,dimension,b) {
+        return b[0] <= d[p] && d[p] <= b[1]
+      },
+      "number": function(d,p,dimension,b) {
+        return b[0] <= d[p] && d[p] <= b[1]
+      },
+      "string": function(d,p,dimension,b) {
+        return b[0] <= yscale[p](d[p]) && yscale[p](d[p]) <= b[1]
+      }
+    };
+
+    return __.data
+    .filter(function(d) {
+      switch(brush.predicate) {
+      case "AND":
+        return actives.every(function(p, dimension) {
+          return extents[dimension].some(function(b) {
+          	return within[__.types[p]](d,p,dimension,b);
+          });
+        });
+      case "OR":
+        return actives.some(function(p, dimension) {
+      	  return extents[dimension].some(function(b) {
+            	return within[__.types[p]](d,p,dimension,b);
+            });
+        });
+      default:
+        throw "Unknown brush predicate " + __.brushPredicate;
+      }
+    });
+  };
+
+  function brushExtents() {
+    var extents = {};
+    __.dimensions.forEach(function(d) {
+      var brush = brushes[d];
+      if (!brush.empty()) {
+        var extent = brush.extent();
+        extents[d] = extent;
+      }
+    });
+    return extents;
+  }
+
+  function brushFor(axis) {
+    var brush = d3.svg.multibrush();
+
+    brush
+      .y(yscale[axis])
+      .on("brushstart", function() { d3.event.sourceEvent.stopPropagation() })
+      .on("brush", function() {
+        brushUpdated(selected());
+      })
+      .on("brushend", function() {
+    	// d3.svg.multibrush clears extents just before calling 'brushend'
+    	// so we have to update here again.
+    	// This fixes issue #103 for now, but should be changed in d3.svg.multibrush
+    	// to avoid unnecessary computation.
+    	brushUpdated(selected());
+        events.brushend.call(pc, __.brushed);
+      })
+      .extentAdaption(function(selection) {
+    	  selection
+    	  .style("visibility", null)
+          .attr("x", -15)
+          .attr("width", 30);
+      })
+      .resizeAdaption(function(selection) {
+    	 selection
+    	   .selectAll("rect")
+    	   .attr("x", -15)
+    	   .attr("width", 30);
+      });
+
+    brushes[axis] = brush;
+    return brush;
+  }
+
+  function brushReset(dimension) {
+    __.brushed = false;
+    if (g) {
+      g.selectAll('.brush')
+        .each(function(d) {
+          d3.select(this).call(
+            brushes[d].clear()
+          );
+        });
+      pc.render();
+    }
+    return this;
+  };
+
+  function install() {
+    if (!g) pc.createAxes();
+
+    // Add and store a brush for each axis.
+    g.append("svg:g")
+      .attr("class", "brush")
+      .each(function(d) {
+        d3.select(this).call(brushFor(d));
+      })
+      .selectAll("rect")
+        .style("visibility", null)
+        .attr("x", -15)
+        .attr("width", 30);
+
+    pc.brushExtents = brushExtents;
+    pc.brushReset = brushReset;
+    return pc;
+  }
+
+  brush.modes["1D-axes-multi"] = {
+    install: install,
+    uninstall: function() {
+      g.selectAll(".brush").remove();
+      brushes = {};
+      delete pc.brushExtents;
+      delete pc.brushReset;
+    },
+    selected: selected
+  }
+})();
 pc.interactive = function() {
   flags.interactive = true;
   return this;
@@ -1284,7 +1450,7 @@ function position(d) {
   var v = dragging[d];
   return v == null ? xscale(d) : v;
 }
-pc.version = "0.5.0";
+pc.version = "0.6.0";
   // this descriptive text should live with other introspective methods
   pc.toString = function() { return "Parallel Coordinates: " + __.dimensions.length + " dimensions (" + d3.keys(__.data[0]).length + " total) , " + __.data.length + " rows"; };
 
