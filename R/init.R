@@ -4,7 +4,7 @@ app.init <- function() {
 
   db.init()
 
-  schema <- p.db.select(table="schema");
+  schema <- data.schema();
 
   data = list(
     schema = schema,
