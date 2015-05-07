@@ -423,16 +423,17 @@ list.DimRedPlot = function () {
       totalSum = 0.0,
       selectionSortCheck,
       checkboxLabel,
-      controlDiv;
+      controlDiv,
+      barplotsDiv;
 
     // Create a div containing all the Barplots, this is necessary to keep everything sized correctly
-    div = div.selectAll("div.barplots").data([true]);
-    div.enter()
+    barplotsDiv = div.selectAll("div.barplots").data([true]);
+    barplotsDiv.enter()
       .append("div")
       .attr("class", "barplots")
       .style("position", "relative")
       .style("float", "left");
-    div
+    barplotsDiv
       .style("width", 100 * parts.contributions.width + "%")
       .style("height", 100 * parts.contributions.height + "%");
 
@@ -494,7 +495,7 @@ list.DimRedPlot = function () {
 
 
     // Add the controls that control the sorting
-    controlDiv = div.selectAll("div.sortcontrol").data([true]);
+    controlDiv = barplotsDiv.selectAll("div.sortcontrol").data([true]);
     controlDiv.enter()
       .append("div")
       .attr("class", "sortcontrol")
@@ -598,7 +599,7 @@ list.DimRedPlot = function () {
       .width(size.width * parts.contributions.width)
       .on("brushEnd", brushed);
 
-    barplotDiv = div.selectAll("div.barplot").data(plotdata);
+    barplotDiv = barplotsDiv.selectAll("div.barplot").data(plotdata);
     barplotDiv
       .enter()
       .insert("div", "div.sortcontrol")
