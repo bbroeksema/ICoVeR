@@ -352,6 +352,7 @@ list.DimRedPlot = function () {
       .enter()
       .append("div")
       .attr("class", "scatterplot");
+    scatterPlotDiv.exit().remove();
     scatterPlotDiv
       .style("float", "left")
       .style("width", 100 * scatterplotWidth + "%")
@@ -605,6 +606,7 @@ list.DimRedPlot = function () {
       .insert("div", "div.sortcontrol")
       .attr("class", "barplot")
       .style("float", "left");
+    barplotDiv.exit().remove();
     barplotDiv
       .style("width", "100%")
       .style("height", 100 / (plotdata.length + 1) + "%")
@@ -689,6 +691,7 @@ list.DimRedPlot = function () {
       .enter()
       .append("div")
       .attr("class", "variancepercentageplot");
+    barPlotDiv.exit().remove();
     barPlotDiv
       .style("float", "left")
       .style("width", 100 * parts.variancepercentage.width + "%")

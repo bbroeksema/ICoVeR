@@ -86,6 +86,7 @@ list.ColourMap = function () {
     colors.enter()
       .append("line")
       .attr("class", "color");
+    colors.exit().remove();
     colors
       .attr("x1", 1)
       .attr("y1", function (d) {

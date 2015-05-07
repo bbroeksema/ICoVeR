@@ -156,8 +156,8 @@ list.ScatterPlot = function () {
         render.interactionOverlay(svg, data, scales, selectCircleRadius);
       }
 
-      render.selectionOnColormap(svg, data, scales);
       render.colormap(svg, data, scales);
+      render.selectionOnColormap(svg, data, scales);
       render.colorPoints(svg, data, scales);
     });
   }
@@ -229,6 +229,8 @@ list.ScatterPlot = function () {
         return "rotate(" + Math.atan2(yContribution, -xContribution) / Math.PI * 180 + ")";
       });
 
+    ellipse.exit().remove();
+
     return ellipse.select("ellipse");
   };
 
@@ -272,6 +274,8 @@ list.ScatterPlot = function () {
 
         return "rotate(" + Math.atan2(yContribution, -xContribution) / Math.PI * 180 + ")";
       });
+
+    ellipse.exit().remove();
 
     return ellipse.select("ellipse");
   };
@@ -600,6 +604,8 @@ list.ScatterPlot = function () {
       .style("visibility", function (d) {
         return d.selected !== list.selected.NONE ? "visible" : "hidden";
       });
+
+    colors.exit().remove();
   };
 
   // Sets the color of the points, this is separated from the points function because sometimes a recolour is
@@ -670,6 +676,7 @@ list.ScatterPlot = function () {
           .attr("pointer-events", "none")
           .attr("class", "pointlabel");
       });
+    group.exit().remove();
 
     group.style("visibility", "hidden");
 

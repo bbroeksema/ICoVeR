@@ -143,6 +143,7 @@ list.BarPlot = function () {
     bars
       .enter()
       .append("rect");
+    bars.exit().remove();
     bars
       .attr("width", barWidth)
       .attr("height", function (d) {return barHeight(d.contribution); })

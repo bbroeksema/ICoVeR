@@ -71,8 +71,10 @@ list.VariancePercentagePlot = function () {
 
     rect = gVariances.selectAll("rect.variance").data(data.variances);
     rect.enter().append("rect");
+    rect.exit().remove();
     text = gVariances.selectAll("text.text").data(data.variances);
     text.enter().append("text").attr("class", "text");
+    text.exit().remove();
 
     rect
       .transition()
@@ -163,8 +165,6 @@ list.VariancePercentagePlot = function () {
         }
       })
       .on("mouseup", mouseUp);
-
-    rect.exit().remove();
   };
 
   vpp.width = function (_) {
