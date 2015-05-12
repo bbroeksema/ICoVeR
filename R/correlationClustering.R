@@ -57,6 +57,14 @@ correlationCluster <- function(X, pearsonThreshold = .9, minClusterSize = 2) {
   # First step, cluster profiles based on pearsonThreshold
   clustered <- clusterProfiles(X, pearsonThreshold, minClusterSize)
 
+  # Deal with the case that no items where clustered together, because no two
+  # items had a correlatation >= pearsonThreshold
+  if (sum(clustered$cacId) == nrow(clustered) * -1) {
+    clustering <- cbind(as.integer(rownames(clustered)), -1)
+    colnames(clustering) <- c("row", "cluster")
+    return(clustering)
+  }
+
   # Next step: merge clusters based on average profiles and PCC.
   # For this we only look at the data that have a cluster ID != -1, because -1
   # represents data with no strong correlations among each other.
