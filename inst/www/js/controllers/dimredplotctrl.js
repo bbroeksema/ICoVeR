@@ -54,16 +54,18 @@ angular.module('contigBinningApp.controllers')
           .originSize(30)
           .originVisible(true)
           .on("changeVariableSelection", function (drp) {
-            DimRedPlot.changeVariableSelection(datum.method, drp.variableSelections());
+            $scope.$apply(function () {
+              DimRedPlot.changeVariableSelection(datum.method, drp.variableSelections());
 
-            dimredplot.forEach(function (plot) {
-              if (plot !== drp) {
-                plot.variableSelections(DimRedPlot.selections.variable);
-              }
-              plot.individualInfluences(DimRedPlot.influences.individual);
+              dimredplot.forEach(function (plot) {
+                if (plot !== drp) {
+                  plot.variableSelections(DimRedPlot.selections.variable);
+                }
+                plot.individualInfluences(DimRedPlot.influences.individual);
+              });
+
+              changeSelection();
             });
-
-            changeSelection();
           })
           .on("changeIndividualSelection", function (drp) {
             $scope.$apply(function () {

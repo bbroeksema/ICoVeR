@@ -103,8 +103,6 @@ angular.module('contigBinningApp.controllers')
       });
 
       updateSelectedVariables(variables);
-
-      $scope.$apply();
     });
 
     /*jslint unparam: true */
