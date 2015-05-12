@@ -48,13 +48,13 @@ angular.module('contigBinningApp.controllers')
       dimredplot = [];
       DimRedPlot.data.flags = {pointsChanged: true};
 
-      DimRedPlot.data.analyses.forEach(function () {
+      DimRedPlot.data.analyses.forEach(function (datum) {
         var chart = list.DimRedPlot();
         chart
           .originSize(30)
           .originVisible(true)
           .on("changeVariableSelection", function (drp) {
-            DimRedPlot.changeVariableSelection(drp.variableSelections());
+            DimRedPlot.changeVariableSelection(datum.method, drp.variableSelections());
 
             dimredplot.forEach(function (plot) {
               if (plot !== drp) {
@@ -66,7 +66,7 @@ angular.module('contigBinningApp.controllers')
             changeSelection();
           })
           .on("changeIndividualSelection", function (drp) {
-            DimRedPlot.changeIndividualSelection(drp.individualSelections());
+            DimRedPlot.changeIndividualSelection(datum.method, drp.individualSelections());
 
             dimredplot.forEach(function (plot) {
               if (plot !== drp) {

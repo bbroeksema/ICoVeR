@@ -85,7 +85,7 @@ dimred.pca <- function(rows=c(), vars) {
   processedData$name <- rownames(data)
   rownames(processedData) <- NULL
 
-  p.plotdata(FactoMineR::PCA(data, ncp=length(vars), graph=F), processedData = processedData, type = "PCA")
+  p.plotdata(FactoMineR::PCA(data, ncp=length(vars), graph=F), processedData = processedData, type = "pca")
 }
 
 # dimred.ca(vars=c("aaaa","aaac","aaag","aaat","aaca","aacc","aacg","aact","aaga","aagc","aagg","aagt","aata","aatc","aatg","aatt","acaa","acac","acag","acat","acca","accc","accg","acct","acga","acgc","acgg","acgt","acta","actc","actg","actt","agaa","agac","agag","agat","agca","agcc","agcg","agct","agga","aggc","aggg","aggt","agta","agtc","agtg","agtt","ataa","atac","atag","atat","atca","atcc","atcg","atct","atga","atgc","atgg","atgt","atta","attc","attg","attt","caaa","caac","caag","caat","caca","cacc","cacg","cact","caga","cagc","cagg","cagt","cata","catc","catg","catt","ccaa","ccac","ccag","ccat","ccca","cccc","cccg","ccct","ccga","ccgc","ccgg","ccgt","ccta","cctc","cctg","cctt","cgaa","cgac","cgag","cgat","cgca","cgcc","cgcg","cgct","cgga","cggc","cggg","cggt","cgta","cgtc","cgtg","cgtt","ctaa","ctac","ctag","ctat","ctca","ctcc","ctcg","ctct","ctga","ctgc","ctgg","ctgt","ctta","cttc","cttg","cttt"))
@@ -107,7 +107,7 @@ dimred.ca <- function(rows=c(), vars) {
   processedData$name <- rownames(processedData)
   rownames(processedData) <- NULL
 
-  p.plotdata(CAres, processedData = processedData, type = "CA")
+  p.plotdata(CAres, processedData = processedData, type = "ca")
 }
 
 # dimred.summarize(variableWeights=list(aaaa=c(6.0151, 7.0562), aaat=c(4.7641, 2.7563), aata=c(4.175, 0.851), aatt=c(4.4429, 2.0970), ataa=c(4.1547, 0.8407), atat=c(3.1881, 0.1051), atta=c(4.1958, 0.7357), attt=c(4.7248, 2.7704)))

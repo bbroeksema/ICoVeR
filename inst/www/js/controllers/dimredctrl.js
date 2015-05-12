@@ -1,8 +1,8 @@
 /*jslint indent: 2, nomen: true */
-/*global angular, _ */
+/*global angular, _, list */
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedCtrl', function ($scope, $modal, Analytics, R) {
+  .controller('DimRedCtrl', function ($scope, $modal, Analytics, R, DimRedPlot) {
 
     'use strict';
 
@@ -85,6 +85,26 @@ angular.module('contigBinningApp.controllers')
     $scope.$watch('selectedDimRedMethod', function (newMethod) {
       if (newMethod === undefined) { return; }
       setVariables();
+    });
+
+    $scope.$on('DimRedPlot::variablesSelected', function (e, dimRedMethod) {
+      /*jslint unparam: true*/
+      $scope.selectedDimRedMethod = _.find($scope.dimRedMethods, 'name', dimRedMethod);
+
+      setVariables();
+
+      var variables = [];
+
+      _.forEach($scope.variables, function (variable) {
+        var variableSelection = DimRedPlot.selections.variable[variable.name];
+        if (variableSelection !== undefined && variableSelection !== list.selected.NONE) {
+          variables.push(variable);
+        }
+      });
+
+      updateSelectedVariables(variables);
+
+      $scope.$apply();
     });
 
     /*jslint unparam: true */

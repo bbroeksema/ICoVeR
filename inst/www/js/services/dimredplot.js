@@ -140,7 +140,7 @@ angular.module('contigBinningApp.services')
       }
     }
 
-    d.changeVariableSelection = function (variableSelection) {
+    d.changeVariableSelection = function (method, variableSelection) {
       var variablesSelected = false,
         stateKey,
         globalSelection;
@@ -182,7 +182,8 @@ angular.module('contigBinningApp.services')
       ParCoords.updateSelectedVariables(globalSelection);
     };
 
-    d.changeIndividualSelection = function (individualSelection) {
+    d.changeIndividualSelection = function (method, individualSelection) {
+      /*jslint unparam:true*/
       d.selections.individual = individualSelection;
       updateStates("variable", "individual", true);
     };
