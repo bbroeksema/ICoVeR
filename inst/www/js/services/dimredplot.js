@@ -260,7 +260,15 @@ angular.module('contigBinningApp.services')
         globalSelection.push(ParCoords.variables[_.findIndex(ParCoords.variables, {"name": variableName})]);
       });
 
-      ParCoords.updateSelectedVariables(globalSelection);
+      /*jslint todo:true*/
+      //TODO: change this to a broadcast, this logic should be handled by ParCoords
+      if (globalSelection.length === 0) {
+        ParCoords.resetSelectedVariables();
+      } else {
+        ParCoords.updateSelectedVariables(globalSelection);
+      }
+
+      $rootScope.$broadcast("DimRedPlot::variablesSelected", method);
     };
 
     d.changeIndividualSelection = function (method, individualSelection) {

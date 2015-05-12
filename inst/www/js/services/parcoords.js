@@ -51,6 +51,19 @@ angular.module('contigBinningApp.services')
     d.changeBrushed = function (brushed) {
       $rootScope.$broadcast("ParCoords::brushed", brushed);
     };
+
+    d.resetSelectedVariables = function () {
+      d.selectedVariables = [];
+
+      var variables = _.filter(d.variables, function (variable) {
+        return R.is.numeric(variable.type) &&
+          (variable.group_type === "Characteristics"
+          || variable.group_type === "TimeSeries");
+      });
+
+      d.updateSelectedVariables(variables);
+    };
+
     d.updateBrushPredicate = function (newPredicate) {
       if (d.brushPredicate !== newPredicate) {
         d.brushPredicate = newPredicate;
@@ -61,17 +74,11 @@ angular.module('contigBinningApp.services')
     /*jslint unparam: true */
     $rootScope.$on('DataSet::schemaLoaded', function (e, schema) {
       var firstLoad = d.variables.length < 1,
-        previousVariables =  d.selectedVariables,
-        variables = null;
+        previousVariables =  d.selectedVariables;
       // set variables will empty d.selectedVariables
       setVariables(schema);
       if (firstLoad) {
-        variables = _.filter(d.variables, function (variable) {
-          return R.is.numeric(variable.type) &&
-            (variable.group_type === "Characteristics"
-            || variable.group_type === "TimeSeries");
-        });
-        d.updateSelectedVariables(variables);
+        d.resetSelectedVariables();
       } else {
         d.updateSelectedVariables(previousVariables);
       }
