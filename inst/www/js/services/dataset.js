@@ -49,10 +49,21 @@ angular.module('contigBinningApp.services')
     $rootScope.$on('DimRedPlot::influenceAdded', function (e, influences) {
       var variableName = "influence",
         analyticsSchema = {name: variableName, type: "numeric", group: "Analytics", group_type: "Analytics", analysable: false};
+    function changeBrushed(rows) {
+      d.brushed = rows;
+      $rootScope.$broadcast("DataSet::brushed", rows);
+    }
 
       if (d.backend.schemaIndex.influence === undefined) {
         d.backend.schema.push(influenceSchema);
         d.backend.schemaIndex.influence = influenceSchema;
+    $rootScope.$on("ParCoords::brushed", function (ev, brushed) {
+      changeBrushed(brushed);
+    });
+
+    $rootScope.$on("DimRedPlot::brushed", function (ev, brushed) {
+      changeBrushed(brushed);
+    });
       }
 
       d.data.full.forEach(function (datum, idx) {
@@ -161,6 +172,11 @@ angular.module('contigBinningApp.services')
         return d.backend.rows;
       },
 
+      /**
+       * Returns the full data set as it is currently loaded, this takes filtering into account.
+       */
+      data: currentDataSet,
+
       // Returns the data values for given variables.
       // @param variables - a list of strings, containing the names of the
       //                    variables to be loaded.
@@ -228,11 +244,7 @@ angular.module('contigBinningApp.services')
         return d.backend.rows && d.backend.rows.length > 0;
       },
 
-      brush: function (rows) {
-        d.brushed = rows;
-        $rootScope.$broadcast("DataSet::brushed", rows);
-      }
-
+      brush: changeBrushed
     };
 
   });

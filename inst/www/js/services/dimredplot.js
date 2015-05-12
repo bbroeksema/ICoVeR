@@ -185,10 +185,26 @@ angular.module('contigBinningApp.services')
     d.changeIndividualSelection = function (method, individualSelection) {
       /*jslint unparam:true*/
       d.selections.individual = individualSelection;
+
+      // BAR selection indicates a selection by ParCoords. Those selections are now removed.
+      _.forEach(d.selections.individual, function (val, key) {
+        if (val === list.selected.BAR) {
+          d.selections.individual[key] = list.selected.NONE;
+        } else if (val === list.selected.BOTH) {
+          d.selections.individual[key] = list.selected.POINT;
+        }
+      });
+
       updateStates("variable", "individual", true);
+
+      var brushed = DataSet.data().filter(function (row) {
+        return d.selections.individual[row.row] !== list.selected.NONE;
+      });
+
+      $rootScope.$broadcast("DimRedPlot::brushed", brushed);
     };
 
-    $rootScope.$on("DataSet::brushed", function (ev, rows) {
+    $rootScope.$on("ParCoords::brushed", function (ev, rows) {
       /*jslint unparam: true*/
       if (d.data === null) {
         return;

@@ -81,7 +81,7 @@ angular.module('contigBinningApp.controllers')
           // when no brushes are set, no data is brushed, so let's work around
           // this issue here.
           brushed = brushed.length === d.parcoords.data().length ? [] : brushed;
-          DataSet.brush(brushed);
+          ParCoords.changeBrushed(brushed);
         });
       })
       .on("axesreorder", function (variables) {
@@ -179,6 +179,16 @@ angular.module('contigBinningApp.controllers')
           render();
         }
       }
+    });
+
+    $scope.$on("DimRedPlot::brushed", function (ev, brushed) {
+      d.parcoords.brushReset();
+
+      if (brushed.length === 0) {
+        brushed = d.parcoords.data();
+      }
+      d.parcoords.brushed(brushed);
+      d.parcoords.render();
     });
 
     $scope.$on("ParCoords::brushPredicateChanged", function () {
