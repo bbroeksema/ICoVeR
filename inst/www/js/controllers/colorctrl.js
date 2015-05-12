@@ -77,20 +77,6 @@ angular.module('contigBinningApp.controllers')
       /*jslint unparam: true */
       updateVariables(schema);
       $scope.colorVariable = undefined;
-
-      var influenceSchemaIdx = _.findIndex(schema, {name: "influence"});
-
-      // This check is here to see if influence has been added or removed
-      if (influenceSchemaIdx !== -1) {
-        if ($scope.colorVariable === undefined) {
-          $scope.colorVariable = schema[influenceSchemaIdx];
-          $scope.colorMethod = "Value";
-          $scope.colorScheme = "blue_to_brown";
-        }
-        if ($scope.colorVariable.name === "influence") {
-          $scope.applyColoring();
-        }
-      }
     });
 
     $scope.$watch('colorVariable', onVariableChange);

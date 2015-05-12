@@ -5,7 +5,7 @@
 // the various control widgets
 
 angular.module('contigBinningApp.services')
-  .service('DimRedPlot', function ($rootScope, ParCoords) {
+  .service('DimRedPlot', function ($rootScope, ParCoords, DataSet) {
 
     'use strict';
 
@@ -18,6 +18,18 @@ angular.module('contigBinningApp.services')
       influences: {
         variable: {},
         individual: {}
+      },
+      selectedMeans: {
+        individual: {}
+      },
+      totalMeans: {
+        individual: {}
+      },
+      notSelectedMeans: {
+        individual: {}
+      },
+      meanDifferences: {
+        individual: {}
       }
     };
 
@@ -26,10 +38,17 @@ angular.module('contigBinningApp.services')
       d.selections.individual = {};
       d.influences.variable = {};
       d.influences.individual = {};
+      d.selectedMeans.individual = {};
+      d.totalMeans.individual = {};
+      d.notSelectedMeans.individual = {};
+      d.meanDifferences.individual = {};
 
       d.data.processedData.forEach(function (row) {
         d.selections.individual[row.name] = list.selected.NONE;
         d.influences.individual[row.name] = 0;
+        d.selectedMeans.individual[row.name] = 0;
+        d.totalMeans.individual[row.name] = 0;
+        d.notSelectedMeans[row.name] = 0;
       });
 
       var colName;
@@ -140,6 +159,60 @@ angular.module('contigBinningApp.services')
       }
     }
 
+    function updateMeans() {
+      var variables = [],
+        selectionCount = 0;
+
+      _.forEach(d.selections.variable, function (val, key) {
+        if (key === "name") {
+          return;
+        }
+
+        variables.push(key);
+
+        if (val !== list.selected.NONE) {
+          selectionCount += 1;
+        }
+      });
+
+      variables.push("row");
+
+      DataSet.get(variables, function (data) {
+        data.forEach(function (row) {
+          var totalMean = 0,
+            selectedMean = 0,
+            notSelectedMean = 0;
+
+          _.forEach(row, function (val, key) {
+            if (d.selections.variable[key] === undefined) {
+              return;
+            }
+
+            totalMean += val;
+            if (d.selections.variable[key] === list.selected.NONE) {
+              notSelectedMean += val;
+            } else {
+              selectedMean += val;
+            }
+          });
+
+          totalMean /= variables.length - 1;
+          if (selectedMean !== 0) {
+            selectedMean /= selectionCount;
+          }
+          if (notSelectedMean !== 0) {
+            notSelectedMean /= variables.length - 1 - selectionCount;
+          }
+
+          d.totalMeans.individual[row.row] = totalMean;
+          d.selectedMeans.individual[row.row] = selectedMean;
+          d.notSelectedMeans.individual[row.row] = notSelectedMean;
+          d.meanDifferences.individual[row.row] = Math.abs(selectedMean - notSelectedMean);
+
+        });
+      });
+    }
+
     d.changeVariableSelection = function (method, variableSelection) {
       var variablesSelected = false,
         stateKey,
@@ -155,13 +228,21 @@ angular.module('contigBinningApp.services')
       }
 
       updateStates("individual", "variable", false);
+      updateMeans();
 
       if (variablesSelected) {
-        $rootScope.$broadcast("DimRedPlot::influenceAdded", d.influences.individual);
+        $rootScope.$broadcast("DimRedPlot::analyticsAdded", "influence", d.influences.individual);
+        //$rootScope.$broadcast("DimRedPlot::analyticsAdded", "mean", d.selectedMeans.individual);
+        //$rootScope.$broadcast("DimRedPlot::analyticsAdded", "mean_difference", d.meanDifferences.individual);
       } else {
-        $rootScope.$broadcast("DimRedPlot::influenceRemoved");
+        $rootScope.$broadcast("DimRedPlot::analyticsRemoved", "influence");
+        //$rootScope.$broadcast("DimRedPlot::analyticsRemoved", "mean");
+        //$rootScope.$broadcast("DimRedPlot::analyticsRemoved", "mean_difference");
       }
 
+      /*jslint todo:true*/
+      //TODO: look into this: when both a PCA and a CA plot have been made,
+      //      currentVarPosition will never be -1, e.g., d.selections.variable will contain all variables.
       globalSelection = ParCoords.selectedVariables;
       _.forEach(d.selections.variable, function (selection, variableName) {
         var currentVarPosition = _.findIndex(globalSelection, {"name": variableName});

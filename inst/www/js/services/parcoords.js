@@ -76,25 +76,23 @@ angular.module('contigBinningApp.services')
         d.updateSelectedVariables(previousVariables);
       }
     });
-    /*jslint unparam: false */
 
-    /*jslint unparam: true */
     $rootScope.$on('DataSet::analyticsDataAvailable', function (e, clusterVariable) {
       if (!_.any(d.selectedVariables, { name: clusterVariable.name })) {
         d.selectedVariables.push(clusterVariable);
         d.updateSelectedVariables(d.selectedVariables);
       }
     });
-    /*jslint unparam: false */
 
-    $rootScope.$on("DimRedPlot::influenceRemoved", function () {
-      var influenceIdx = _.findIndex(d.selectedVariables, { name: "influence" });
+    $rootScope.$on("DimRedPlot::analyticsRemoved", function (ev, variableName) {
+      var variableIdx = _.findIndex(d.selectedVariables, { name: variableName });
 
-      if (influenceIdx !== -1) {
-        d.selectedVariables.splice(influenceIdx, 1);
+      if (variableIdx !== -1) {
+        d.selectedVariables.splice(variableIdx, 1);
         d.updateSelectedVariables(d.selectedVariables);
       }
     });
+    /*jslint unparam: false */
 
     d.setHighlightFunction = function (highlightFunc) {
       d.highlightFunction = highlightFunc;

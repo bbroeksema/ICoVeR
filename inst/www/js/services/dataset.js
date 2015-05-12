@@ -46,17 +46,11 @@ angular.module('contigBinningApp.services')
       d.brushPredicate = predicate;
     });
 
-    $rootScope.$on('DimRedPlot::influenceAdded', function (e, influences) {
-      var variableName = "influence",
-        analyticsSchema = {name: variableName, type: "numeric", group: "Analytics", group_type: "Analytics", analysable: false};
     function changeBrushed(rows) {
       d.brushed = rows;
       $rootScope.$broadcast("DataSet::brushed", rows);
     }
 
-      if (d.backend.schemaIndex.influence === undefined) {
-        d.backend.schema.push(influenceSchema);
-        d.backend.schemaIndex.influence = influenceSchema;
     $rootScope.$on("ParCoords::brushed", function (ev, brushed) {
       changeBrushed(brushed);
     });
@@ -64,27 +58,34 @@ angular.module('contigBinningApp.services')
     $rootScope.$on("DimRedPlot::brushed", function (ev, brushed) {
       changeBrushed(brushed);
     });
+
+    $rootScope.$on('DimRedPlot::analyticsAdded', function (e, variableName, analytics) {
+      var analyticsSchema = {name: variableName, type: "numeric", group: "Analytics", group_type: "Analytics", analysable: false};
+
+      if (d.backend.schemaIndex[variableName] === undefined) {
+        d.backend.schema.push(analyticsSchema);
+        d.backend.schemaIndex[variableName] = analyticsSchema;
       }
 
       d.data.full.forEach(function (datum, idx) {
-        d.data.full[idx].influence = influences[datum.row];
+        d.data.full[idx][variableName] = analytics[datum.row];
       });
       if (d.data.filtered !== undefined) {
         d.data.filtered.forEach(function (datum, idx) {
-          d.data.filtered[idx].influence = influences[datum.row];
+          d.data.filtered[idx][variableName] = analytics[datum.row];
         });
       }
 
       $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
-      $rootScope.$broadcast("DataSet::analyticsDataAvailable", influenceSchema);
+      $rootScope.$broadcast("DataSet::analyticsDataAvailable", analyticsSchema);
     });
 
-    $rootScope.$on('DimRedPlot::influenceRemoved', function () {
-      var influenceIdx = _.findIndex(d.backend.schema, {name: "influence"});
+    $rootScope.$on('DimRedPlot::analyticsRemoved', function (e, variableName) {
+      var variableIdx = _.findIndex(d.backend.schema, {name: variableName});
 
-      if (influenceIdx !== -1) {
-        d.backend.schema.splice(influenceIdx, 1);
-        delete d.backend.schemaIndex.influence;
+      if (variableIdx !== -1) {
+        d.backend.schema.splice(variableIdx, 1);
+        delete d.backend.schemaIndex[variableName];
         $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
       }
     });
