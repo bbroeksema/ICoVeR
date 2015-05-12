@@ -23,6 +23,13 @@ angular.module('contigBinningApp.services')
 
     function updateSchema(schema) {
       d.backend.schema = schema;
+
+      // This adds a property that determines whether the variable is analysable in the R backend. This is necessary
+      // because some variables are only calculated in the Javascript.
+      _.forEach(d.backend.schema, function (variable) {
+        variable.analysable = true;
+      });
+
       d.backend.schemaIndex = _.indexBy(schema, 'name');
       $rootScope.$broadcast("DataSet::schemaLoaded", schema);
     }
@@ -40,7 +47,8 @@ angular.module('contigBinningApp.services')
     });
 
     $rootScope.$on('DimRedPlot::influenceAdded', function (e, influences) {
-      var influenceSchema = {name: "influence", type: "numeric", group: "Analytics", group_type: "Influences"};
+      var variableName = "influence",
+        analyticsSchema = {name: variableName, type: "numeric", group: "Analytics", group_type: "Analytics", analysable: false};
 
       if (d.backend.schemaIndex.influence === undefined) {
         d.backend.schema.push(influenceSchema);

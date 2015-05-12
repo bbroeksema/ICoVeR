@@ -12,7 +12,7 @@ angular.module('contigBinningApp.controllers')
 
     function setVariables() {
       $scope.options.variables = _.filter(d.schema, function (variable) {
-        return R.is.numeric(variable.type);
+        return R.is.numeric(variable.type) && variable.analysable;
       });
     }
 

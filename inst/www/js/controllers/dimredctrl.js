@@ -65,6 +65,9 @@ angular.module('contigBinningApp.controllers')
 
         $scope.variables = _.filter(d.schema, matchesGroupRestriction);
         $scope.variables = _.filter($scope.variables, matchesTypeRestriction);
+        $scope.variables = _.filter($scope.variables, function (variable) {
+          return variable.analysable;
+        });
         $scope.selectedVariables = [];
         updateSelectedVariables([]);
       }
