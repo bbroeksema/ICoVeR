@@ -30,6 +30,11 @@ angular.module('contigBinningApp.controllers')
           return R.is.numeric(variable.type);
         };
       }
+      if (restriction === 'schema.factor') {
+        return function (variable) {
+          return R.is.factor(variable.type);
+        };
+      }
 
       throw ('Unsupported type restriction');
     }
@@ -89,17 +94,28 @@ angular.module('contigBinningApp.controllers')
 
     $scope.$on('DimRedPlot::variablesSelected', function (e, dimRedMethod) {
       /*jslint unparam: true*/
-      $scope.selectedDimRedMethod = _.find($scope.dimRedMethods, 'name', dimRedMethod);
+      $scope.dimRedMethods.some(function (method) {
+        if (method.name === dimRedMethod) {
+          $scope.selectedDimRedMethod = method;
+          return true;
+        }
+        return false;
+      });
 
       setVariables();
 
-      var variables = [];
+      var variables = [],
+        selectedVariables = DimRedPlot.selectedVariables();
 
-      _.forEach($scope.variables, function (variable) {
-        var variableSelection = DimRedPlot.selections.variable[variable.name];
-        if (variableSelection !== undefined && variableSelection !== list.selected.NONE) {
-          variables.push(variable);
-        }
+      _.forEach(selectedVariables, function (variable) {
+
+        $scope.variables.some(function (schemaVariable) {
+          if (schemaVariable.name === variable) {
+            variables.push(schemaVariable);
+            return true;
+          }
+          return false;
+        });
       });
 
       updateSelectedVariables(variables);

@@ -159,7 +159,16 @@ angular.module('contigBinningApp.services')
       }
     }
 
-    function updateMeans() {
+    function variableName(variable) {
+      var splitIndex = variable.indexOf(":");
+
+      if (splitIndex !== -1) {
+        return variable.substring(0, splitIndex);
+      }
+      return variable;
+    }
+
+    /*function updateMeans() {
       var variables = [],
         selectionCount = 0;
 
@@ -168,7 +177,7 @@ angular.module('contigBinningApp.services')
           return;
         }
 
-        variables.push(key);
+        variables.push(variableName(key));
 
         if (val !== list.selected.NONE) {
           selectionCount += 1;
@@ -186,9 +195,10 @@ angular.module('contigBinningApp.services')
           _.forEach(row, function (val, key) {
             if (d.selections.variable[key] === undefined) {
               return;
-            }
-
-            totalMean += val;
+            }*/
+    /*jslint todo:true*/
+            //TODO: fix
+            /*totalMean += val;
             if (d.selections.variable[key] === list.selected.NONE) {
               notSelectedMean += val;
             } else {
@@ -211,12 +221,27 @@ angular.module('contigBinningApp.services')
 
         });
       });
-    }
+    }*/
+
+    d.selectedVariables = function () {
+      var selection = [];
+
+      _.forEach(d.selections.variable, function (selected, variable) {
+        if (selected === list.selected.NONE) {
+          return;
+        }
+
+        selection.push(variableName(variable));
+      });
+
+      return _.uniq(selection);
+    };
 
     d.changeVariableSelection = function (method, variableSelection) {
       var variablesSelected = false,
         stateKey,
-        globalSelection;
+        globalSelection,
+        selectedVariables = [];
 
       d.selections.variable = variableSelection;
 
@@ -228,7 +253,7 @@ angular.module('contigBinningApp.services')
       }
 
       updateStates("individual", "variable", false);
-      updateMeans();
+      //updateMeans();
 
       if (variablesSelected) {
         $rootScope.$broadcast("DimRedPlot::analyticsAdded", "influence", d.influences.individual);
@@ -244,8 +269,13 @@ angular.module('contigBinningApp.services')
       //TODO: look into this: when both a PCA and a CA plot have been made,
       //      currentVarPosition will never be -1, e.g., d.selections.variable will contain all variables.
       globalSelection = ParCoords.selectedVariables;
-      _.forEach(d.selections.variable, function (selection, variableName) {
-        var currentVarPosition = _.findIndex(globalSelection, {"name": variableName});
+
+      _.forEach(d.selections.variable, function (selection, variable) {
+        var currentVarPosition;
+
+        variable = variableName(variable);
+
+        currentVarPosition = _.findIndex(globalSelection, {"name": variable});
 
         if (selection === list.selected.NONE) {
           if (currentVarPosition !== -1) {
@@ -257,7 +287,13 @@ angular.module('contigBinningApp.services')
           return;
         }
 
-        globalSelection.push(ParCoords.variables[_.findIndex(ParCoords.variables, {"name": variableName})]);
+        selectedVariables.push(ParCoords.variables[_.findIndex(ParCoords.variables, {"name": variable})]);
+      });
+
+      // We add the variables here because when we use MCA d.selections.variable contain categories,
+      // so if we add the variables in the previous loop they might be removed again by the splice.
+      selectedVariables.forEach(function (variable) {
+        globalSelection.push(variable);
       });
 
       /*jslint todo:true*/
@@ -265,6 +301,7 @@ angular.module('contigBinningApp.services')
       if (globalSelection.length === 0) {
         ParCoords.resetSelectedVariables();
       } else {
+
         ParCoords.updateSelectedVariables(globalSelection);
       }
 

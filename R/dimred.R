@@ -5,6 +5,9 @@ p.dimred.methods <- function() {
     ),
     "ca" = list(
       "restrict" = list("type"="schema.numeric", "group_type"="Frequencies")
+    ),
+    "mca" = list(
+      "restrict" = list("type"="schema.factor", "group_type"="Characteristics")
     )
   )
 }
@@ -108,6 +111,70 @@ dimred.ca <- function(rows=c(), vars) {
   rownames(processedData) <- NULL
 
   p.plotdata(CAres, processedData = processedData, type = "ca")
+}
+
+# Processes the result of a ca::mjca analysis, we pass nd along because mjca ignores
+# the parameter and gives us too many dimensions
+p.mca.plotdata <- function(dim.red.res, processedData, nd) {
+  variableProjections <- data.frame(matrix(NA, nrow=nrow(dim.red.res$colcoord), ncol=4))
+  variableProjections$label <- dim.red.res$levelnames
+  variableProjections$mass <- dim.red.res$colmass
+  variableProjections$coord <- dim.red.res$colcoord[,1:nd]
+  variableProjections$contrib <- dim.red.res$colctr[,1:nd]
+
+  individualProjections <- data.frame(matrix(NA, nrow=nrow(dim.red.res$rowcoord), ncol=4))
+  individualProjections$label <- processedData$name
+  individualProjections$mass <- rep(1 / nrow(processedData), nrow(processedData))
+  individualProjections$coord <- dim.red.res$rowcoord[,1:nd]
+  individualProjections$contrib <- dim.red.res$rowcoord[,1:nd]^2
+
+  # If we have a large number of individuals the JSON will be too big and the visualisation will fail.
+  # TODO: fine-tune the 1000 individuals threshold
+  includeIndividuals <- nrow(processedData) < 1000
+  if (!includeIndividuals) {
+    individualProjections <- NULL
+  }
+
+  analysis = list(
+    variableProjections = variableProjections,
+    individualProjections = individualProjections,
+    explainedVariance = dim.red.res$inertia.e[1:nd] * 100,
+    method = "mca"
+  )
+
+  if (!includeIndividuals) {
+    analysis$individualProjections <- NULL
+  }
+
+  # TODO: optimise processedData storage, currently it is a data.frame,
+  #       which means that every column name is present in every row
+  list(
+    processedData = processedData,
+    analyses = list(analysis)
+  )
+}
+
+#dimred.mca(vars=c("Exposition", "Max_Lithol", "Max_Permea", "Max_Zumste", "climatic_class", "Geologie", "Soil", "Bodenzustand", "GrAndigkeit", "Lage_im_Relief", "Durchwurzelung", "WAlbung", "Tiefe_cm_A", "Horizont_A", "Bodenart_A", "Bodenfarbe_A", "Zeilung", "Bodenpflegesystem", "Art_der_Begrunung", "Unterstockbodenpflege", "Festigkeit_A", "Tiefe_cm_B", "Horizont_B", "Bodenart_B", "Bodenfarbe_B", "Festigkeit_B", "Unterlage", "Klon", "Bodenart"))
+dimred.mca <- function(rows=c(), vars) {
+  data <- data.get(rows, vars, addRows=T)
+
+  # The database calls the column with row names "row" instead of R's "row.names"
+  rownames(data) <- data$row
+  data$row <- NULL
+
+  # MJCA is used because it produces much nicer names for the generated variables
+  MCAres <- ca::mjca(data, nd = NA, lambda = "indicator", reti=TRUE)
+
+  # Prepare the binary matrix as processedData
+  MCAres$indmat <- as.data.frame(MCAres$indmat)
+
+  colnames(MCAres$indmat) <- MCAres$levelnames
+  MCAres$indmat$name <- rownames(data)
+  rownames(MCAres$indmat) <- NULL
+
+  # For some reason MJCA gives a lot of very small PC's, here we indicate how many we really want.
+  nd <- length(which(MCAres$inertia.e > 0.01))
+  p.mca.plotdata(MCAres, MCAres$indmat, nd = nd)
 }
 
 # dimred.summarize(variableWeights=list(aaaa=c(6.0151, 7.0562), aaat=c(4.7641, 2.7563), aata=c(4.175, 0.851), aatt=c(4.4429, 2.0970), ataa=c(4.1547, 0.8407), atat=c(3.1881, 0.1051), atta=c(4.1958, 0.7357), attt=c(4.7248, 2.7704)))

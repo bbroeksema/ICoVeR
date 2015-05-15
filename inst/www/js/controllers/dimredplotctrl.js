@@ -55,7 +55,7 @@ angular.module('contigBinningApp.controllers')
           .originVisible(true)
           .on("changeVariableSelection", function (drp) {
             $scope.$apply(function () {
-              DimRedPlot.changeVariableSelection(datum.method, drp.variableSelections());
+              DimRedPlot.changeVariableSelection(datum.method[0], drp.variableSelections());
 
               dimredplot.forEach(function (plot) {
                 if (plot !== drp) {
@@ -69,7 +69,7 @@ angular.module('contigBinningApp.controllers')
           })
           .on("changeIndividualSelection", function (drp) {
             $scope.$apply(function () {
-              DimRedPlot.changeIndividualSelection(datum.method, drp.individualSelections());
+              DimRedPlot.changeIndividualSelection(datum.method[0], drp.individualSelections());
 
               dimredplot.forEach(function (plot) {
                 if (plot !== drp) {
