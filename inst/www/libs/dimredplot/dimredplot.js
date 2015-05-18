@@ -263,17 +263,23 @@ list.DimRedPlot = function () {
         yContributionSum = 0;
 
       fillData.forEach(function (d) {
-        var influence = influences[component][d.label];
+        var influence = influences[component][d.id],
+          label = d.id;
+
+        if (d.label !== undefined) {
+          label = d.label;
+        }
 
         plotData.points.push({
           x: d.coord[actives[0].idx],
           y: d.coord[actives[1].idx],
           xContribution: d.contrib[actives[0].idx],
           yContribution: d.contrib[actives[1].idx],
-          label: d.label,
+          label: label,
+          id: d.id,
           mass: d.mass,
           wrappedLabel: d.wrappedLabel,
-          selected: selections[component][d.label],
+          selected: selections[component][d.id],
           influence: influence
         });
         if (influence > 0) {
@@ -318,9 +324,9 @@ list.DimRedPlot = function () {
 
       plotdata[idx].points.forEach(function (point, pointIdx) {
         if (selected[pointIdx]) {
-          list.selectByPoint(states, point.label);
+          list.selectByPoint(states, point.id);
         } else {
-          list.deselectByPoint(states, point.label);
+          list.deselectByPoint(states, point.id);
         }
       });
 
@@ -445,7 +451,13 @@ list.DimRedPlot = function () {
       var contributions,
         contributionsSum,
         contribution1,
-        contribution2;
+        contribution2,
+        label = projection.id;
+
+      if (projection.label !== undefined) {
+        label = projection.label;
+      }
+
 
       contributions = projection.contrib.map(function (contribution, contributionIdx) {
         return contribution * data.explainedVariance[contributionIdx];
@@ -467,8 +479,8 @@ list.DimRedPlot = function () {
         xyContribution: contribution1 + contribution2,
         errorContribution: contributionsSum - contribution1 - contribution2,
         totalContribution: contributionsSum,
-        selected: selections.variable[projection.label],
-        label: projection.label
+        selected: selections.variable[projection.id],
+        label: label
       });
     });
 
@@ -502,7 +514,8 @@ list.DimRedPlot = function () {
       .attr("class", "sortcontrol")
       .style("position", "absolute")
       .style("bottom", 0)
-      .style("left", 0);
+      .style("left", 0)
+      .style("width", "100%");
 
     selectionSortCheck = controlDiv.selectAll("input#selectionSort").data([true]);
     selectionSortCheck.enter()
@@ -524,7 +537,7 @@ list.DimRedPlot = function () {
     sortSelect.enter()
       .append("select")
       .attr("id", "sort")
-      .style("width", size.width * parts.contributions.width)
+      .style("width", "100%")
       .each(function () {
         var elem = d3.select(this);
         elem.append("option").attr("value", "x").text("Sort on x");
@@ -586,9 +599,9 @@ list.DimRedPlot = function () {
 
       data.variableProjections.forEach(function (point, pointIdx) {
         if (selected[pointIdx]) {
-          list.selectByBar(selections.variable, point.label);
+          list.selectByBar(selections.variable, point.id);
         } else {
-          list.deselectByBar(selections.variable, point.label);
+          list.deselectByBar(selections.variable, point.id);
         }
       });
 

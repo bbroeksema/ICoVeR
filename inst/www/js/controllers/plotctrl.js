@@ -39,7 +39,11 @@ angular.module('contigBinningApp.controllers')
         var textLength,
           string,
           desiredStringLength,
+          label = d.id;
+
+        if (d.label !== undefined) {
           label = d.label;
+        }
 
         testText.text(label);
         textLength = testText.node().offsetWidth;
