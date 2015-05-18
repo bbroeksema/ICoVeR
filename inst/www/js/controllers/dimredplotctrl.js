@@ -35,8 +35,18 @@ angular.module('contigBinningApp.controllers')
       /*jslint unparam:true*/
       if (method !== $scope.analysis.method[0]) {
         dimredplot.individualSelections(DimRedPlot.selections.individual);
-        changeSelection();
       }
+      dimredplot.variableInfluences(DimRedPlot.influences.variable);
+      changeSelection();
+    });
+
+    $scope.$on("DimRedPlot::variablesSelected", function (ev, method) {
+      /*jslint unparam:true*/
+      if (method !== $scope.analysis.method[0]) {
+        dimredplot.variableSelections(DimRedPlot.selections.variable);
+      }
+      dimredplot.individualInfluences(DimRedPlot.influences.individual);
+      changeSelection();
     });
 
     $scope.$on("DimRedPlot::selectionUpdated", function () {
@@ -56,15 +66,11 @@ angular.module('contigBinningApp.controllers')
         .on("changeVariableSelection", function (drp) {
           $scope.$apply(function () {
             DimRedPlot.changeVariableSelection($scope.analysis.method[0], drp.variableSelections());
-            dimredplot.individualInfluences(DimRedPlot.influences.individual);
-            changeSelection();
           });
         })
         .on("changeIndividualSelection", function (drp) {
           $scope.$apply(function () {
             DimRedPlot.changeIndividualSelection($scope.analysis.method[0], drp.individualSelections());
-            dimredplot.variableInfluences(DimRedPlot.influences.variable);
-            changeSelection();
           });
         })
         .individualSelections(DimRedPlot.selections.individual)
