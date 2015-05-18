@@ -36,7 +36,7 @@ p.projections <- function(dim.red.res, column.results) {
 p.plotdata <- function(dim.red.res, processedData, type) {
   varName <- "var"
   indName <- "ind"
-  if (type == "CA") {
+  if (type == "ca") {
     varName <- "col"
     indName <- "row"
   }
