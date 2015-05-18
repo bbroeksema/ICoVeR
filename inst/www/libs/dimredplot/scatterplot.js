@@ -127,6 +127,16 @@ list.ScatterPlot = function () {
         render.points(svg, data, scales);
         //render.colormap(svg, data, scales);
         render.axes(svg, scales);
+
+        render.origin(svg, scales);
+        render.interactionOverlay(svg, data, scales, selectCircleRadius);
+      }
+
+      render.colormap(svg, data, scales);
+      render.selectionOnColormap(svg, data, scales);
+      render.colorPoints(svg, data, scales);
+
+      if (data.flags.pointsChanged) {
         // The creation of the label groups happens here because the labels need to be created after the points
         group = svg.select("g.points").selectAll("g.pointlabel").data(sortedPoints);
         group.enter()
@@ -152,13 +162,7 @@ list.ScatterPlot = function () {
 
         group.exit().remove();
         //render.clusteredLabels(svg, data.points, scales);
-        render.origin(svg, scales);
-        render.interactionOverlay(svg, data, scales, selectCircleRadius);
       }
-
-      render.colormap(svg, data, scales);
-      render.selectionOnColormap(svg, data, scales);
-      render.colorPoints(svg, data, scales);
     });
   }
 
@@ -914,8 +918,8 @@ list.ScatterPlot = function () {
         }
       });
 
-    if (boundingBox.x1 < maxLeftTextWidth + 20) { leftDisplay = false; }
-    if (scales.x.range()[1] - boundingBox.x2 < maxRightTextWidth + 20) { rightDisplay = false; }
+    if (boundingBox.x1 + svgMargins.left < maxLeftTextWidth + 20) { leftDisplay = false; }
+    if (scales.x.range()[1] - boundingBox.x2 + svgMargins.right < maxRightTextWidth + 20) { rightDisplay = false; }
 
     // This makes sure that there is no overflow of labels of the page. In case of overflow only the points with
     // the heighest contributions are shown.
