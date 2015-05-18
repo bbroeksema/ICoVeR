@@ -10,7 +10,7 @@ angular.module('contigBinningApp.services')
     'use strict';
 
     var d = {
-      data: null,
+      processedData: null,
       selections: {
         variable: {},
         individual: {}
@@ -34,16 +34,16 @@ angular.module('contigBinningApp.services')
     };
 
     function resetStates() {
-      d.selections.variable = {};
-      d.selections.individual = {};
-      d.influences.variable = {};
-      d.influences.individual = {};
-      d.selectedMeans.individual = {};
-      d.totalMeans.individual = {};
-      d.notSelectedMeans.individual = {};
-      d.meanDifferences.individual = {};
+      if (d.processedData.length === 0) {
+        return;
+      }
 
-      d.data.processedData.forEach(function (row) {
+      d.processedData.forEach(function (row) {
+        // Row selection should only be updated when they are not already added earlier
+        if (d.selections.individual[row.name] !== undefined) {
+          return;
+        }
+
         d.selections.individual[row.name] = list.selected.NONE;
         d.influences.individual[row.name] = 0;
         d.selectedMeans.individual[row.name] = 0;
@@ -53,52 +53,12 @@ angular.module('contigBinningApp.services')
 
       var colName;
 
-      if (d.data.processedData.length === 0) {
-        return;
-      }
-
-      for (colName in d.data.processedData[0]) {
-        if (d.data.processedData[0].hasOwnProperty(colName)) {
+      for (colName in d.processedData[0]) {
+        if (d.processedData[0].hasOwnProperty(colName) && d.selections.variable[colName] === undefined) {
           d.selections.variable[colName] = list.selected.NONE;
           d.influences.variable[colName] = 0;
         }
       }
-    }
-
-    // Makes sure that the labels of points are no longer than 80px
-    function createWrappedLabels(points) {
-      var testText = d3.select("body").append("div").style("float", "left");
-
-      testText.style("font-size", "8px");
-
-      function wrap(d, i) {
-        /*jslint unparam:true*/
-        var textLength,
-          string,
-          desiredStringLength;
-
-        testText.text(d.label);
-        textLength = testText.node().offsetWidth;
-
-        string = d.label;
-        desiredStringLength = Math.ceil(80 / textLength * string.length);
-
-        string = string.slice(0, desiredStringLength);
-        testText.text(string);
-        textLength = testText.node().clientWidth;
-
-        while (textLength > 80 && string.length > 0) {
-          string = string.slice(0, -1);
-          testText.text(string);
-          textLength = testText.node().clientWidth;
-        }
-
-        d.wrappedLabel = string;
-      }
-
-      points.forEach(wrap);
-
-      testText.remove();
     }
 
     /* Functions for handling dimredplot events and updates */
@@ -121,7 +81,7 @@ angular.module('contigBinningApp.services')
         d.selections[influencedComponent][key] = list.selected.NONE;
       });
 
-      d.data.processedData.forEach(function (row) {
+      d.processedData.forEach(function (row) {
         var colName,
           influencedName,
           selectedName;
@@ -223,6 +183,20 @@ angular.module('contigBinningApp.services')
       });
     }*/
 
+    d.addProcessedData = function (processedData) {
+      if (d.processedData === null) {
+        d.processedData = processedData;
+      } else {
+        processedData.forEach(function (row, rowIdx) {
+          _.forEach(row, function (value, variable) {
+            d.processedData[rowIdx][variable] = value;
+          });
+        });
+      }
+
+      resetStates();
+    };
+
     d.selectedVariables = function () {
       var selection = [];
 
@@ -309,8 +283,9 @@ angular.module('contigBinningApp.services')
     };
 
     d.changeIndividualSelection = function (method, individualSelection) {
-      /*jslint unparam:true*/
       d.selections.individual = individualSelection;
+
+
 
       // BAR selection indicates a selection by ParCoords. Those selections are now removed.
       _.forEach(d.selections.individual, function (val, key) {
@@ -327,12 +302,12 @@ angular.module('contigBinningApp.services')
         return d.selections.individual[row.row] !== list.selected.NONE;
       });
 
-      $rootScope.$broadcast("DimRedPlot::brushed", brushed);
+      $rootScope.$broadcast("DimRedPlot::brushed", brushed, method);
     };
 
     $rootScope.$on("ParCoords::brushed", function (ev, rows) {
       /*jslint unparam: true*/
-      if (d.data === null) {
+      if (d.processedData === null) {
         return;
       }
 
@@ -347,31 +322,6 @@ angular.module('contigBinningApp.services')
       updateStates("variable", "individual", true);
 
       $rootScope.$broadcast("DimRedPlot::selectionUpdated");
-    });
-
-    function updatePlot(data) {
-      d.data = data;
-      resetStates();
-
-      d.data.analyses.forEach(function (analysis) {
-        if (analysis.variableProjections !== undefined) {
-          createWrappedLabels(analysis.variableProjections);
-        }
-        if (analysis.individualProjections !== undefined) {
-          if (analysis.individualProjections.length > 1000) {
-            analysis.individualProjections = undefined;
-          } else {
-            createWrappedLabels(analysis.individualProjections);
-          }
-        }
-      });
-
-      $rootScope.$broadcast("DimRedPlot::dataLoaded");
-    }
-
-    $rootScope.$on("Analytics::dimensionalityReduced", function (ev, method, session) {
-      /*jslint unparam: true */
-      session.getObject(updatePlot);
     });
 
     return d;

@@ -1,0 +1,45 @@
+<!-- Control tabs -->
+<div class="modal-dialog">
+
+  <div class="modal-content ng-scope">
+
+    <div class="modal-body ng-scope">
+
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="active"><a href="#actions" role="tab" data-toggle="tab">Analyze</a></li>
+        <li><a href="#appearance" role="tab" data-toggle="tab">Parallel Coordinates</a></li>
+        <!--<li><a href="#scatterplot" role="tab" data-toggle="tab">Dim. Red. Plot</a></li>-->
+        <li><a href="#export" role="tab" data-toggle="tab">Export</a></li>
+        <button id="SwitchOptions" type="button" class="btn btn-default btn-sm"
+                ng-click="switchOptions()">
+          <span class="glyphicon glyphicon-transfer"></span>
+        </button>
+      </ul>
+
+
+      <div class="tab-content">
+        <div class="tab-pane container-fluid active" id="actions">
+          <ng-include src="'js/templates/filterctrl.html'"></ng-include>
+          <ng-include src="'js/templates/clusterctrl.html'"></ng-include>
+          <ng-include src="'js/templates/dimredctrl.html'"></ng-include>
+        </div>
+        <div class="tab-pane container-fluid" id="appearance">
+          <ng-include src="'js/templates/colorctrl.html'"></ng-include>
+          <ng-include src="'js/templates/parcoordsctrl.html'"></ng-include>
+        </div>
+        <!--
+        <div class="tab-pane container-fluid" id="scatterplot">
+          <ng-include src="'js/templates/dimreddisplayctrl.html'"></ng-include>
+        </div>
+        -->
+        <div class="tab-pane container-fluid" id="export">
+          <ng-include src="'js/templates/exportctrl.html'"></ng-include>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+

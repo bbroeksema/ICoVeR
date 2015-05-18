@@ -57,47 +57,19 @@
       </div>
 
       <!-- Bottom half of the sceen -->
-      <div id="bottom" class="row">
-        <!-- Control tabs -->
-        <div id="controls" class="col-lg-5">
-          <ul class="nav nav-tabs" role="tablist">
-            <li class="active"><a href="#actions" role="tab" data-toggle="tab">Analyze</a></li>
-            <li><a href="#appearance" role="tab" data-toggle="tab">Parallel Coordinates</a></li>
-            <!--<li><a href="#scatterplot" role="tab" data-toggle="tab">Dim. Red. Plot</a></li>-->
-            <li><a href="#export" role="tab" data-toggle="tab">Export</a></li>
-          </ul>
-
-          <div class="tab-content">
-            <div class="tab-pane container-fluid active" id="actions">
-              <ng-include src="'js/templates/filterctrl.html'"></ng-include>
-              <ng-include src="'js/templates/clusterctrl.html'"></ng-include>
-              <ng-include src="'js/templates/dimredctrl.html'"></ng-include>
-            </div>
-            <div class="tab-pane container-fluid" id="appearance">
-              <ng-include src="'js/templates/colorctrl.html'"></ng-include>
-              <ng-include src="'js/templates/parcoordsctrl.html'"></ng-include>
-            </div>
-            <!--
-            <div class="tab-pane container-fluid" id="scatterplot">
-              <ng-include src="'js/templates/dimreddisplayctrl.html'"></ng-include>
-            </div>
-            -->
-            <div class="tab-pane container-fluid" id="export">
-              <ng-include src="'js/templates/exportctrl.html'"></ng-include>
-            </div>
-          </div>
+      <div id="bottom" class="row" ng-controller="PlotCtrl">
+        <div id="options" ng-style="sliding">
+          <ng-include src="'js/templates/options.html'"></ng-include>
         </div>
-
+        <div class="col-lg-1">
+        </div>
         <!-- Scatterplot -->
-        <div id="charts" class="col-lg-7" ng-controller="ChartsCtrl">
+        <div class="col-lg-11" style="height: 100%">
           <ul class="nav nav-tabs" role="tablist">
-            <li class="active"><a href="#dimRedPlot" role="tab" data-toggle="tab">Dimensionlity Reduction Plot</a></li>
-            <li><a href="#twodmap" ng-hide="!location" role="tab" data-toggle="tab">2D map</a></li>
+            <li class="active"><a href="#dimRedPlot" role="tab" data-toggle="tab">Dimensionality Reduction Plot</a></li>
           </ul>
-          <div id="chartsContent" class="tab-content">
-            <div id="dimRedPlot" class="tab-pane container-fluid active" ng-controller="DimRedPlotCtrl">
-            </div>
-            <div id="twodmap" ng-hide="!location" class="tab-pane container-fluid" ng-controller="MapCtrl">
+          <div id="chartsContent" class="tab-content row">
+            <div id="dimRedPlot" class="tab-pane container-fluid active" ng-class="dimredplotWidth" ng-repeat="analysis in analyses" ng-controller="DimRedPlotCtrl">
             </div>
           </div>
         </div>
@@ -138,6 +110,7 @@
     <script src="js/controllers/dimredplotctrl.js"></script>
     <script src="js/controllers/colorctrl.js"></script>
     <script src="js/controllers/themectrl.js"></script>
+    <script src="js/controllers/plotctrl.js"></script>
     <script src="js/controllers/variableselectionctrl.js"></script>
     <script src="js/controllers/dimreddisplayctrl.js"></script>
     <script src="js/controllers/colourmapctrl.js"></script>

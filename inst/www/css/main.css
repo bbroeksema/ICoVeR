@@ -51,6 +51,10 @@ html, body {
   padding: 10px 15px;
 }
 
+#SwitchOptions {
+  float: right;
+}
+
 #main {
   height: 100%;
   width: 100%;
@@ -64,6 +68,12 @@ html, body {
 
 #bottom {
   height: 40%;
+}
+
+#options {
+  float: left;
+  position: absolute;
+  z-index: 3;
 }
 
 #parcoords,
@@ -83,8 +93,6 @@ html, body {
 
 #dimRedPlot {
   height: 100%;
-  padding-left: 0px;
-  padding-right: 0px;
 }
 
 #twodmap {
