@@ -197,7 +197,7 @@ list.DimRedPlot = function () {
       scatterplotWidth = parts.scatterplot.width,
       plotdata = [
         {
-          title: "Projected individuals/rows",
+          title: data.method[0].toUpperCase() + " projected individuals/rows",
           points: [],
           xVariance: data.explainedVariance[actives[0].idx],
           yVariance: data.explainedVariance[actives[1].idx],
@@ -209,7 +209,7 @@ list.DimRedPlot = function () {
           flags: flags
         },
         {
-          title: "Projected variables/columns",
+          title: data.method[0].toUpperCase() + " projected variables/columns",
           points: [
               /* Structure:
               {
