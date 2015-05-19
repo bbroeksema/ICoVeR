@@ -236,7 +236,7 @@ angular.module('contigBinningApp.services')
           });
         }
 
-        d.brushed = [];
+        changeBrushed([]);
         d.data.filtered = undefined;
         $rootScope.$broadcast("DataSet::filtered", currentDataSet());
       },
