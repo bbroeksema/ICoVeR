@@ -64,12 +64,15 @@
         <div class="col-lg-1">
         </div>
         <!-- Scatterplot -->
-        <div class="col-lg-11" style="height: 100%">
+        <div id="charts" class="col-lg-11" ng-controller="ChartsCtrl">
           <ul class="nav nav-tabs" role="tablist">
             <li class="active"><a href="#dimRedPlot" role="tab" data-toggle="tab">Dimensionality Reduction Plot</a></li>
+            <li><a href="#twodmap" ng-hide="!location" role="tab" data-toggle="tab">2D map</a></li>
           </ul>
           <div id="chartsContent" class="tab-content row">
             <div id="dimRedPlot" class="tab-pane container-fluid active" ng-class="dimredplotWidth" ng-repeat="analysis in analyses" ng-controller="DimRedPlotCtrl">
+            </div>
+            <div id="twodmap" ng-hide="!location" class="tab-pane container-fluid" ng-controller="MapCtrl">
             </div>
           </div>
         </div>
