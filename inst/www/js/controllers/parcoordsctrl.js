@@ -37,28 +37,104 @@ angular.module('contigBinningApp.controllers')
     }
 
     /*
-    function transformBrushExtents() {
-      var brushData = {extents: {}, categories: {}},
-        b = null,
-        getDomain = function (item, index) {
-          if (item >= d.parcoords.brushExtents()[b][0] && item <= d.parcoords.brushExtents()[b][1]) {
-            brushData.categories[b].push(d.parcoords.yscale[b].domain()[index]);
-          }
-        };
+     function transformBrushExtents() {
+     var brushData = {extents: {}, categories: {}},
+     b = null,
+     getDomain = function (item, index) {
+     if (item >= d.parcoords.brushExtents()[b][0] && item <= d.parcoords.brushExtents()[b][1]) {
+     brushData.categories[b].push(d.parcoords.yscale[b].domain()[index]);
+     }
+     };
 
-      for (b in d.parcoords.brushExtents()) {
-        if (d.parcoords.brushExtents().hasOwnProperty(b)) {
-          if (d.parcoords.types()[b] === "string") {
-            brushData.categories[b] = [];
-            d.parcoords.yscale[b].range().forEach(getDomain);
-          } else {
-            brushData.extents[b] = d.parcoords.brushExtents()[b];
-          }
+     for (b in d.parcoords.brushExtents()) {
+     if (d.parcoords.brushExtents().hasOwnProperty(b)) {
+     if (d.parcoords.types()[b] === "string") {
+     brushData.categories[b] = [];
+     d.parcoords.yscale[b].range().forEach(getDomain);
+     } else {
+     brushData.extents[b] = d.parcoords.brushExtents()[b];
+     }
+     }
+     }
+     return brushData;
+     }
+     */
+
+    function setDimensions() {
+      var dims = _.pluck(ParCoords.selectedVariables, "name"),
+        types = {},
+        averages = {},
+        brushedData = d.parcoords.brushed(),
+        dimensionsChanged;
+
+
+      d.orderedVariables = _.filter(d.orderedVariables, function (variable) {
+        return _.contains(dims, variable);
+      });
+
+      _.each(dims, function (variable) {
+        if (!_.contains(d.orderedVariables, variable)) {
+          d.orderedVariables.push(variable);
         }
+      });
+
+      _.each(ParCoords.selectedVariables, function (dim) {
+        if (dim.type === "factor") {
+          types[dim.name] = "string";
+        } else {
+          types[dim.name] = "number";
+        }
+      });
+
+      // We need to make sure that the scales for the dimensions we want are calculated,
+      // since we need those scales in the next block of code.
+      dimensionsChanged = d.orderedVariables.length !== d.parcoords.dimensions().length || d.orderedVariables.some(function (dimension) {
+        return d.parcoords.dimensions().indexOf(dimension) === -1;
+      });
+
+      d.parcoords.dimensions(d.orderedVariables);
+
+      if (dimensionsChanged) {
+        d.parcoords
+          .types(types)
+          .autoscale()
+          .updateAxes();
       }
-      return brushData;
+
+      if (ParCoords.variableSorting !== "none") {
+        if (brushedData === false) {
+          brushedData = d.parcoords.data();
+        }
+
+        _.each(d.orderedVariables, function (variable) {
+          var catCounts = {},
+            maxCategory,
+            maxCount = 0;
+
+          if (types[variable] === "string") {
+
+            _.each(brushedData, function (row) {
+              var category = row[variable];
+              if (catCounts[category] === undefined) {
+                catCounts[category] = 1;
+              } else {
+                catCounts[category] += 1;
+              }
+
+              if (catCounts[category] > maxCount) {
+                maxCategory = category;
+              }
+            });
+
+            averages[variable] = maxCategory;
+          } else {
+            averages[variable] = _.sum(brushedData, variable) / brushedData.length;
+
+          }
+        });
+        d.parcoords.reorder(averages);
+      }
     }
-    */
 
     /// Initialization
     d.parcoords
@@ -82,38 +158,15 @@ angular.module('contigBinningApp.controllers')
           // this issue here.
           brushed = brushed.length === d.parcoords.data().length ? [] : brushed;
           ParCoords.changeBrushed(brushed);
+
+          setDimensions();
+          d.parcoords.render();
         });
       })
       .on("axesreorder", function (variables) {
         d.orderedVariables = variables;
       });
 
-    function setDimensions() {
-      var dims = _.pluck(ParCoords.selectedVariables, "name"),
-        types = {};
-
-      d.orderedVariables = _.filter(d.orderedVariables, function (variable) {
-        return _.contains(dims, variable);
-      });
-
-      _.each(dims, function (variable) {
-        if (!_.contains(d.orderedVariables, variable)) {
-          d.orderedVariables.push(variable);
-        }
-      });
-
-      _.each(ParCoords.selectedVariables, function (dim) {
-        if (dim.type === "factor") {
-          types[dim.name] = "string";
-        } else {
-          types[dim.name] = "number";
-        }
-      });
-
-      d.parcoords
-        .dimensions(d.orderedVariables)
-        .types(types);
-    }
 
     // function to be used as callback when data is requested
     function loadData(data) {
@@ -159,7 +212,7 @@ angular.module('contigBinningApp.controllers')
       var dims = _.pluck(ParCoords.selectedVariables, "name"),
         newVariables = _.difference(dims, d.parcoords.dimensions()),
         missingVariables = _.difference(d.parcoords.dimensions(), dims),
-        existingVariables =  _.intersection(d.parcoords.dimensions(), dims);
+        existingVariables = _.intersection(d.parcoords.dimensions(), dims);
       // Comparing variable names to existing variables and only requesting new ones
       // and removing absent ones from the parcoords data
 
@@ -189,6 +242,14 @@ angular.module('contigBinningApp.controllers')
       }
       d.parcoords.brushed(brushed);
       d.parcoords.render();
+
+      setDimensions();
+      d.parcoords.render();
+    });
+
+    $scope.$on("ParCoords::variableSortingChanged", function () {
+      setDimensions();
+      d.parcoords.render();
     });
 
     $scope.$on("ParCoords::brushPredicateChanged", function () {
@@ -208,6 +269,7 @@ angular.module('contigBinningApp.controllers')
       function colorfn(d, i) {
         return colors.hasOwnProperty(d.row) ? colors[d.row] : "#000";
       }
+
       d.parcoords.color(colorfn);
       render();
     });

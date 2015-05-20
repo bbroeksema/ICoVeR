@@ -178,6 +178,13 @@ angular.module('contigBinningApp.services')
        */
       data: currentDataSet,
 
+      brushed: function () {
+        if (d.brushed === undefined) {
+          return [];
+        }
+        return d.brushed;
+      },
+
       // Returns the data values for given variables.
       // @param variables - a list of strings, containing the names of the
       //                    variables to be loaded.

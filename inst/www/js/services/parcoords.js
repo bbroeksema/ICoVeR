@@ -16,6 +16,8 @@ angular.module('contigBinningApp.services')
         selectionText: "",
         selectionTextLong: "",
 
+        variableSorting: "none",
+
         brushPredicates: ["AND", "OR"],
         brushPredicate: undefined,
         highlightFunction: undefined
@@ -68,6 +70,13 @@ angular.module('contigBinningApp.services')
       if (d.brushPredicate !== newPredicate) {
         d.brushPredicate = newPredicate;
         $rootScope.$broadcast("ParCoords::brushPredicateChanged", d.brushPredicate);
+      }
+    };
+
+    d.updateSortingMethod = function (sortingMethod) {
+      if (d.variableSorting !== sortingMethod) {
+        d.variableSorting = sortingMethod;
+        $rootScope.$broadcast("ParCoords::variableSortingChanged", d.variableSorting);
       }
     };
 

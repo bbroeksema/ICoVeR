@@ -8,6 +8,7 @@ angular.module('contigBinningApp.controllers')
 
     $scope.parcoords = ParCoords;
     $scope.brushPredicate = $scope.parcoords.brushPredicates[0];
+    $scope.variableSorting = "none";
 
     $scope.openSelectionDialog = function () {
       var dialog = $modal.open({
@@ -26,6 +27,10 @@ angular.module('contigBinningApp.controllers')
 
       dialog.result.then($scope.parcoords.updateSelectedVariables);
     };
+
+    $scope.$watch('variableSorting', function (sortingMethod) {
+      $scope.parcoords.updateSortingMethod(sortingMethod);
+    });
 
     $scope.$watch("brushPredicate", function (newPredicate) {
       $scope.parcoords.updateBrushPredicate(newPredicate);
