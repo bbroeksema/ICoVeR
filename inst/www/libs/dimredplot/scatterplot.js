@@ -593,11 +593,11 @@ list.ScatterPlot = function () {
     colors.enter()
       .append("line")
       .attr("class", "selection")
-      .attr("x1", plotWidth + 1)
+      .attr("x1", plotWidth + 3)
       .attr("y1", function (d) {
         return scales.colormap(xyContribution(d, data));
       })
-      .attr("x2", plotWidth + 20 - 1)
+      .attr("x2", plotWidth + 20 - 3)
       .attr("y2", function (d) {
         return scales.colormap(xyContribution(d, data));
       })
