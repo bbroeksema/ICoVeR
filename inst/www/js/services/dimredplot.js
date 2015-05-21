@@ -5,7 +5,7 @@
 // the various control widgets
 
 angular.module('contigBinningApp.services')
-  .service('DimRedPlot', function ($rootScope, ParCoords, DataSet) {
+  .service('DimRedPlot', function ($rootScope, ParCoords, DataSet, Analytics) {
 
     'use strict';
 
@@ -285,9 +285,7 @@ angular.module('contigBinningApp.services')
     d.changeIndividualSelection = function (method, individualSelection) {
       d.selections.individual = individualSelection;
 
-
-
-      // BAR selection indicates a selection by ParCoords. Those selections are now removed.
+      // BAR selection indicates a selection outside of dimredplot. Those selections are now removed.
       _.forEach(d.selections.individual, function (val, key) {
         if (val === list.selected.BAR) {
           d.selections.individual[key] = list.selected.NONE;
@@ -296,32 +294,34 @@ angular.module('contigBinningApp.services')
         }
       });
 
-      updateStates("variable", "individual", true);
-
       var brushed = DataSet.data().filter(function (row) {
         return d.selections.individual[row.row] !== list.selected.NONE;
       });
 
-      $rootScope.$broadcast("DimRedPlot::brushed", brushed, method);
+      DataSet.brush(brushed, method);
     };
 
-    $rootScope.$on("ParCoords::brushed", function (ev, rows) {
+    $rootScope.$on("DataSet::brushed", function (ev, rows, method) {
       /*jslint unparam: true*/
       if (d.processedData === null) {
         return;
       }
 
-      _.forEach(d.selections.individual, function (val, key) {
-        d.selections.individual[key] = list.selected.NONE;
-      });
+      // If this brushing is done outside of dimredplot we need to set the selection
+      // type to BAR.
+      if (_.findIndex(Analytics.dimRedMethods(), "name", method) === -1) {
+        _.forEach(d.selections.individual, function (val, key) {
+          d.selections.individual[key] = list.selected.NONE;
+        });
 
-      rows.forEach(function (row) {
-        d.selections.individual[row.row] = list.selected.BAR;
-      });
+        rows.forEach(function (row) {
+          d.selections.individual[row.row] = list.selected.BAR;
+        });
+      }
 
       updateStates("variable", "individual", true);
 
-      $rootScope.$broadcast("DimRedPlot::selectionUpdated");
+      $rootScope.$broadcast("DimRedPlot::selectionUpdated", method);
     });
 
     return d;

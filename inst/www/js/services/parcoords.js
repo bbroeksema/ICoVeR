@@ -50,10 +50,6 @@ angular.module('contigBinningApp.services')
       $rootScope.$broadcast("ParCoords::selectedVariablesChanged");
     };
 
-    d.changeBrushed = function (brushed) {
-      $rootScope.$broadcast("ParCoords::brushed", brushed);
-    };
-
     d.resetSelectedVariables = function () {
       d.selectedVariables = [];
 

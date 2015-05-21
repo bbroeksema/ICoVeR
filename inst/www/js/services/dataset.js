@@ -46,48 +46,45 @@ angular.module('contigBinningApp.services')
       d.brushPredicate = predicate;
     });
 
-    function changeBrushed(rows) {
-      d.brushed = rows;
-      $rootScope.$broadcast("DataSet::brushed", rows);
-    }
+    function addVariable(name, rows, type, group) {
+      var variableSchema = {name: name, type: type, group: group, group_type: group, analysable: false};
 
-    $rootScope.$on("ParCoords::brushed", function (ev, brushed) {
-      changeBrushed(brushed);
-    });
-
-    $rootScope.$on("DimRedPlot::brushed", function (ev, brushed) {
-      changeBrushed(brushed);
-    });
-
-    $rootScope.$on('DimRedPlot::analyticsAdded', function (e, variableName, analytics) {
-      var analyticsSchema = {name: variableName, type: "numeric", group: "Analytics", group_type: "Analytics", analysable: false};
-
-      if (d.backend.schemaIndex[variableName] === undefined) {
-        d.backend.schema.push(analyticsSchema);
-        d.backend.schemaIndex[variableName] = analyticsSchema;
+      if (d.backend.schemaIndex[name] === undefined) {
+        d.backend.schema.push(variableSchema);
+        d.backend.schemaIndex[name] = variableSchema;
       }
 
       d.data.full.forEach(function (datum, idx) {
-        d.data.full[idx][variableName] = analytics[datum.row];
+        d.data.full[idx][name] = rows[datum.row];
       });
       if (d.data.filtered !== undefined) {
         d.data.filtered.forEach(function (datum, idx) {
-          d.data.filtered[idx][variableName] = analytics[datum.row];
+          d.data.filtered[idx][name] = rows[datum.row];
         });
       }
 
       $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
-      $rootScope.$broadcast("DataSet::analyticsDataAvailable", analyticsSchema);
-    });
 
-    $rootScope.$on('DimRedPlot::analyticsRemoved', function (e, variableName) {
-      var variableIdx = _.findIndex(d.backend.schema, {name: variableName});
+      return variableSchema;
+    }
+
+    function removeVariable(name) {
+      var variableIdx = _.findIndex(d.backend.schema, {name: name});
 
       if (variableIdx !== -1) {
         d.backend.schema.splice(variableIdx, 1);
-        delete d.backend.schemaIndex[variableName];
+        delete d.backend.schemaIndex[name];
         $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
       }
+    }
+
+    $rootScope.$on('DimRedPlot::analyticsAdded', function (e, variableName, analytics) {
+      var variableSchema = addVariable(variableName, "numeric", "Analytics");
+      $rootScope.$broadcast("DataSet::analyticsDataAvailable", variableSchema);
+    });
+
+    $rootScope.$on('DimRedPlot::analyticsRemoved', function (e, variableName) {
+      removeVariable(variableName);
     });
 
     // Listen to the analytics service to store the results of various
@@ -162,6 +159,11 @@ angular.module('contigBinningApp.services')
       return d.data.full.slice();
     }
 
+    function changeBrushed(rows, method) {
+      d.brushed = rows;
+      $rootScope.$broadcast("DataSet::brushed", rows, method);
+    }
+
     return {
       FilterMethod: { KEEP: 'KEEP', REMOVE: 'REMOVE', RESET: 'RESET' },
 
@@ -184,6 +186,10 @@ angular.module('contigBinningApp.services')
         }
         return d.brushed;
       },
+
+      addVariable: addVariable,
+
+      removeVariable: removeVariable,
 
       // Returns the data values for given variables.
       // @param variables - a list of strings, containing the names of the
@@ -243,7 +249,7 @@ angular.module('contigBinningApp.services')
           });
         }
 
-        changeBrushed([]);
+        changeBrushed([], "filter");
         d.data.filtered = undefined;
         $rootScope.$broadcast("DataSet::filtered", currentDataSet());
       },

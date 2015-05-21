@@ -17,7 +17,7 @@ angular.module('contigBinningApp.controllers')
     function render() {
       if ($scope.brushed === undefined || $scope.brushed.length !== 0) {
         $scope.brushed = [];
-        DataSet.brush($scope.brushed);
+        DataSet.brush($scope.brushed, "parcoords");
       }
 
       d.parcoords
@@ -157,7 +157,7 @@ angular.module('contigBinningApp.controllers')
           // when no brushes are set, no data is brushed, so let's work around
           // this issue here.
           brushed = brushed.length === d.parcoords.data().length ? [] : brushed;
-          ParCoords.changeBrushed(brushed);
+          DataSet.brush(brushed, "parcoords");
 
           setDimensions();
           d.parcoords.render();
@@ -234,7 +234,11 @@ angular.module('contigBinningApp.controllers')
       }
     });
 
-    $scope.$on("DimRedPlot::brushed", function (ev, brushed) {
+    $scope.$on("DataSet::brushed", function (ev, brushed, method) {
+      if (method === "parcoords") {
+        return;
+      }
+
       d.parcoords.brushReset();
 
       if (brushed.length === 0) {

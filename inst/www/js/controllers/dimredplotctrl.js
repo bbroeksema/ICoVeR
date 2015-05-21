@@ -31,7 +31,7 @@ angular.module('contigBinningApp.controllers')
     angular.element($window).bind('resize', resize);
     $(document).ready(resize);
 
-    $scope.$on("DimRedPlot::brushed", function (ev, brushed, method) {
+    $scope.$on("DimRedPlot::selectionUpdated", function (ev, method) {
       /*jslint unparam:true*/
       if (method !== $scope.analysis.method[0]) {
         dimredplot.individualSelections(DimRedPlot.selections.individual);
@@ -46,14 +46,6 @@ angular.module('contigBinningApp.controllers')
         dimredplot.variableSelections(DimRedPlot.selections.variable);
       }
       dimredplot.individualInfluences(DimRedPlot.influences.individual);
-      changeSelection();
-    });
-
-    $scope.$on("DimRedPlot::selectionUpdated", function () {
-      dimredplot
-        .individualSelections(DimRedPlot.selections.individual)
-        .variableInfluences(DimRedPlot.influences.variable);
-
       changeSelection();
     });
 

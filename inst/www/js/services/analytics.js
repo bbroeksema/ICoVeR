@@ -34,6 +34,10 @@ angular.module('contigBinningApp.services')
         return d.clusterMethods;
       },
 
+      dimRedMethods: function () {
+        return d.dimRedMethods;
+      },
+
       cluster: function (method, variables, args, id) {
         var fnArgs = {
           vars: variables,
