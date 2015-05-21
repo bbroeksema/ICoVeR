@@ -2,7 +2,7 @@
 /*global angular, _ */
 
 angular.module('contigBinningApp.controllers')
-  .controller('TagCtrl', function ($scope, DataSet) {
+  .controller('TagCtrl', function ($scope, $modal, DataSet) {
 
     'use strict';
 
@@ -26,13 +26,35 @@ angular.module('contigBinningApp.controllers')
       DataSet.addVariable(tag, rows, "boolean", "Tags");
     }
 
+    $scope.$watch("selectedTag", function () {
+      // For some reason angular is being inconsistent here. When the default option "-- new selection --"
+      // is chosen sometimes it is given as null and sometimes as undefined.
+      if ($scope.selectedTag === null) {
+        $scope.selectedTag = undefined;
+      }
+    });
+
     $scope.createTag = function () {
-      var tag = "tag" + $scope.tags.length;
+      var tag = "selection" + $scope.tags.length,
+        dialog = $modal.open({
+          templateUrl: 'js/templates/givename.html',
+          size: 'sm',
+          controller: 'NameSelectionCtrl',
+          resolve: {
+            selectedName: function () {
+              return tag;
+            }
+          }
+        });
 
-      $scope.selectedTag = tag;
-      $scope.tags.push(tag);
+      function addTag(selectionName) {
+        $scope.selectedTag = selectionName;
+        $scope.tags.push(selectionName);
 
-      addTagVariable(tag);
+        addTagVariable(selectionName);
+      }
+
+      dialog.result.then(addTag);
     };
 
     $scope.assignTag = function () {
