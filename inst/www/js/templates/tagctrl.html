@@ -1,0 +1,32 @@
+<form role="form" class="form-horizontal"
+      ng-controller="TagCtrl"
+      ng-show="itemsBrushed || tags.length != 0">
+  <div class="form-group row">
+    <label class="col-sm-3 control-label adjusted-right-padding text-right">Selections:</label>
+
+    <div class="col-sm-3 no-left-padding adjusted-right-padding">
+      <select class="form-control input-sm"
+              ng-model="selectedTag"
+              ng-options="tag for tag in tags">
+        <option value="">-- new selection --</option>
+      </select>
+    </div>
+    <div class="col-sm-6 no-left-padding">
+      <button type="button" class="btn btn-sm btn-default"
+              ng-show="itemsBrushed && selectedTag === undefined" ng-click="createTag()">
+        Save selection</button>
+      <button type="button" class="btn btn-sm btn-default"
+              ng-show="itemsBrushed && selectedTag !== undefined" ng-click="assignTag()">
+        Save selection</button>
+
+      <button type="button" class="btn btn-sm btn-default"
+              ng-show="selectedTag !== undefined" ng-click="removeTag()">
+        Remove</button>
+      <button type="button" class="btn btn-sm btn-default"
+              ng-show="selectedTag !== undefined" ng-click="selectTag()">
+        Select</button>
+    </div>
+  </div>
+</form>
+
+
