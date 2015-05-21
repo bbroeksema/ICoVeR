@@ -16,10 +16,10 @@ angular.module('contigBinningApp.controllers')
 
     function switchOptions() {
       if ($scope.hideOptions) {
-        $scope.sliding = {"left": 0};
+        $scope.sliding = {"transform": "translate(0,0)"};
         $scope.hideOptions = false;
       } else {
-        $scope.sliding = {"left": "-40%"};
+        $scope.sliding = {"transform": "translate(-90%, 0)"};
         $scope.hideOptions = true;
       }
     }
