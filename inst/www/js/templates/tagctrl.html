@@ -8,7 +8,7 @@
       <select class="form-control input-sm"
               ng-model="selectedTag"
               ng-options="tag for tag in tags">
-        <option value="">-- new selection --</option>
+        <option value="" ng-show="itemsBrushed">-- new selection --</option>
       </select>
     </div>
     <div class="col-sm-6 no-left-padding">
