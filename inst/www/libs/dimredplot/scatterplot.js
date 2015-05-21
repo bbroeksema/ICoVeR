@@ -474,7 +474,8 @@ list.ScatterPlot = function () {
       .on("mousedown.zoom", null)
       .on("touchstart.zoom", null)
       .on("touchmove.zoom", null)
-      .on("touchend.zoom", null);
+      .on("touchend.zoom", null)
+      .on("dblclick.zoom", null);
   };
 
   colormap.blackRed = d3.interpolateLab("black", "red");
