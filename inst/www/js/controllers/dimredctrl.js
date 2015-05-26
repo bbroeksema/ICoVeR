@@ -2,7 +2,7 @@
 /*global angular, _, list */
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedCtrl', function ($scope, $modal, Analytics, R, DimRedPlot) {
+  .controller('DimRedCtrl', function ($scope, $modal, Analytics, R, DimRedPlot, DataSet) {
 
     'use strict';
 
@@ -158,6 +158,9 @@ angular.module('contigBinningApp.controllers')
     $scope.reduceDimensionality = function () {
       var drMethod = $scope.selectedDimRedMethod.name,
         vars = _.pluck($scope.selectedVariables, 'name');
+
+      // For quick loading purposes we are making sure here that all variables requested are loaded
+      DataSet.get(vars, function () { return; });
 
       $scope.configurationInvalid = true;
       Analytics.reduce(drMethod, vars);
