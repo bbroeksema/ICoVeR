@@ -215,13 +215,6 @@ angular.module('contigBinningApp.controllers')
         missingVariables = _.difference(d.parcoords.dimensions(), dims),
         existingVariables = _.intersection(d.parcoords.dimensions(), dims);
       // Comparing variable names to existing variables and only requesting new ones
-      // and removing absent ones from the parcoords data
-
-      d.parcoords.data().forEach(function (dataItem) {
-        missingVariables.forEach(function (missingVariable) {
-          delete dataItem[missingVariable];
-        });
-      });
 
       if (existingVariables.length === 0) {
         DataSet.get(dims, loadData);
