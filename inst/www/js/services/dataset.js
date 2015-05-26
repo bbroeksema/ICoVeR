@@ -36,7 +36,7 @@ angular.module('contigBinningApp.services')
 
     // Initialize the application as soon as the Dataset service is initialized and receive
     // the required information to configure and further bootstrap the front end.
-    OpenCPU.json("app.init", null, function (session, cfg) {
+    OpenCPU.json("app.init", {timestamp: Date.now()}, function (session, cfg) {
       d.data = cfg.data;
       updateSchema(cfg.data.schema);
       $rootScope.$broadcast("App::configurationLoaded", cfg);
@@ -46,8 +46,10 @@ angular.module('contigBinningApp.services')
       d.brushPredicate = predicate;
     });
 
-    function addVariable(name, rows, type, group) {
-      var variableSchema = {name: name, type: type, group: group, group_type: group, analysable: false};
+    function addVariable(name, rows, type, group, missingReplacement) {
+      var variableSchema = {name: name, type: type, group: group, group_type: group, analysable: false},
+        rowArray = [],
+        value;
 
       if (d.backend.schemaIndex[name] === undefined) {
         d.backend.schema.push(variableSchema);
@@ -65,16 +67,40 @@ angular.module('contigBinningApp.services')
 
       $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
 
+      // Tags need to be added to the actual database
+      // Preferably, R should get a function addVariable and the DataSet should not have to care what
+      // the group is of the variable we want to add. This would however require some extra work in R.
+      if (group === "Tags") {
+        _.each(d.data.full, function (row) {
+          value = rows[row.row];
+          if (value === undefined) {
+            value = missingReplacement;
+          }
+
+          rowArray.push(value);
+        });
+
+        OpenCPU.call("data.addTag", {timestamp: Date.now(), name: name, data: rowArray});
+      }
+
       return variableSchema;
     }
 
     function removeVariable(name) {
-      var variableIdx = _.findIndex(d.backend.schema, {name: name});
+      var variableIdx = _.findIndex(d.backend.schema, "name", name),
+        group;
 
-      if (variableIdx !== -1) {
-        d.backend.schema.splice(variableIdx, 1);
-        delete d.backend.schemaIndex[name];
-        $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
+      if (variableIdx === -1) {
+        return;
+      }
+
+      group = d.backend.schema[variableIdx].group;
+      d.backend.schema.splice(variableIdx, 1);
+      delete d.backend.schemaIndex[name];
+      $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
+
+      if (group === "Tags") {
+        OpenCPU.call("data.removeTag", {timestamp: Date.now(), name: name});
       }
     }
 
@@ -91,7 +117,8 @@ angular.module('contigBinningApp.services')
     // analytical actions.
     $rootScope.$on("Analytics::dataUpdated", function (ev, identifier) {
       if (!d.backend.schemaIndex.hasOwnProperty(identifier)) {
-        OpenCPU.json("data.schema", null, function (session, schema) {
+        // We send the current timestamp as arg to avoid caching to happen here
+        OpenCPU.json("data.schema", {timestamp: Date.now()}, function (session, schema) {
           updateSchema(schema);
           $rootScope.$broadcast("DataSet::analyticsDataAvailable", d.backend.schemaIndex[identifier]);
         });

@@ -2,91 +2,98 @@
 /*global angular, _ */
 
 angular.module('contigBinningApp.controllers')
-  .controller('TagCtrl', function ($scope, $modal, DataSet) {
+  .controller('TagCtrl', function ($scope, DataSet, Tag) {
 
     'use strict';
 
+    // modify tag:
     $scope.tags = [];
-    /*
-    {
-      name: "",
-      rows: []
-    }
-     */
     $scope.itemsBrushed = false;
-    $scope.selectedTag = undefined;
+    $scope.modifyTag = "";
+    $scope.modifyTagExists = false;
+    $scope.placeholder = "selection1";
 
-    function addTagVariable(tag) {
-      var rows = Array.apply(null, new Array(DataSet.data().length)).map(Boolean.prototype.valueOf, false);
 
-      DataSet.brushed().forEach(function (row) {
-        rows[row.row] = true;
+    function checkIfMofidyTagExists() {
+      $scope.modifyTagExists = _.some($scope.tags, function (tag) {
+        return tag === $scope.modifyTag;
+      });
+    }
+
+    $scope.$on("Tag::tagsLoaded", function () {
+      $scope.tags = Tag.tags();
+
+      $scope.selectedTags = _.filter($scope.selectedTags, function (selectedTag) {
+        return _.some($scope.tags, function (tag) {
+          return selectedTag === tag;
+        });
       });
 
-      DataSet.addVariable(tag, rows, "boolean", "Tags");
-    }
+      checkIfMofidyTagExists();
+    });
 
-    $scope.$watch("selectedTag", function () {
-      // For some reason angular is being inconsistent here. When the default option "-- new selection --"
-      // is chosen sometimes it is given as null and sometimes as undefined.
-      if ($scope.selectedTag === null) {
-        $scope.selectedTag = undefined;
-      }
+    $scope.$watch("modifyTag", function () {
+      checkIfMofidyTagExists();
     });
 
     $scope.createTag = function () {
-      var tag = "selection" + $scope.tags.length,
-        dialog = $modal.open({
-          templateUrl: 'js/templates/givename.html',
-          size: 'sm',
-          controller: 'NameSelectionCtrl',
-          resolve: {
-            selectedName: function () {
-              return tag;
-            }
-          }
-        });
-
-      function addTag(selectionName) {
-        $scope.selectedTag = selectionName;
-        $scope.tags.push(selectionName);
-
-        addTagVariable(selectionName);
-      }
-
-      dialog.result.then(addTag);
+      Tag.storeTag($scope.modifyTag);
     };
 
-    $scope.assignTag = function () {
-      addTagVariable($scope.selectedTag);
+    $scope.addToTag = function () {
+      Tag.appendToTag($scope.modifyTag);
     };
 
-    $scope.selectTag = function () {
-      var brushed = [];
+    // select tags:
+    $scope.dataFiltered = false;
+    $scope.filteringInProgress = false;
+    $scope.selectedTags = [];
+    $scope.enableDeselect = false;
 
-      DataSet.get([$scope.selectedTag], function (rows) {
-        brushed = DataSet.data().filter(function (row, rowIdx) {
-          /*jslint unparam:true*/
-          return rows[rowIdx][$scope.selectedTag];
-        });
-      });
-
-      DataSet.brush(brushed, "tag");
+    $scope.removeTags = function () {
+      Tag.removeTags($scope.selectedTags);
     };
 
-    $scope.removeTag = function () {
-      var index = _.findIndex($scope.tags, $scope.selectedTag);
-
-      $scope.tags.splice(index, 1);
-      DataSet.removeVariable($scope.selectedTag);
-      $scope.selectedTag = undefined;
+    $scope.selectTagged = function () {
+      Tag.selectTagged($scope.selectedTags);
     };
+
+    $scope.deselectTags = function () {
+      Tag.selectTagged([]);
+      $scope.enableDeselect = false;
+    };
+
+    $scope.keepSelected = function () {
+      $scope.selectTagged();
+      $scope.filteringInProgress = true;
+      DataSet.filter(DataSet.FilterMethod.KEEP);
+    };
+
+    $scope.removeSelected = function () {
+      $scope.selectTagged();
+      $scope.filteringInProgress = true;
+      DataSet.filter(DataSet.FilterMethod.REMOVE);
+    };
+
+    $scope.reloadData = function () {
+      DataSet.filter(DataSet.FilterMethod.RESET);
+    };
+
+    $scope.$on('DataSet::loaded', function () {
+      $scope.dataFiltered = false;
+      $scope.tags = Tag.tags();
+    });
+
+    $scope.$on('DataSet::filtered', function () {
+      $scope.filteringInProgress = false;
+      $scope.dataFiltered = DataSet.filtered();
+      Tag.removeNonPresentTags();
+    });
 
     $scope.$on('DataSet::brushed', function (e, rows, method) {
       /*jslint unparam: true*/
-      if (method !== "tag") {
-        $scope.itemsBrushed = rows.length > 0;
-        $scope.selectedTag = undefined;
-      }
+      $scope.enableDeselect = method === "tag";
+
+      $scope.itemsBrushed = rows.length > 0;
     });
   });

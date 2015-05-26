@@ -19,6 +19,9 @@ angular.module('contigBinningApp.services')
     }
 
     return {
+      call: function (fn, args) {
+        ocpu.call(fn, args);
+      },
 
       json: function (fn, args, cb) {
         ocpu.call(fn, args, asJson(cb));

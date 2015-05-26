@@ -9,6 +9,7 @@
         <li class="active"><a href="#actions" role="tab" data-toggle="tab">Analyze</a></li>
         <li><a href="#appearance" role="tab" data-toggle="tab">Parallel Coordinates</a></li>
         <!--<li><a href="#scatterplot" role="tab" data-toggle="tab">Dim. Red. Plot</a></li>-->
+        <li><a href="#tags" role="tab" data-toggle="tab">Tags</a></li>
         <li><a href="#export" role="tab" data-toggle="tab">Export</a></li>
         <button id="SwitchOptions" type="button" class="btn btn-default btn-sm"
                 ng-click="switchOptions()">
@@ -22,7 +23,6 @@
           <ng-include src="'js/templates/filterctrl.html'"></ng-include>
           <ng-include src="'js/templates/clusterctrl.html'"></ng-include>
           <ng-include src="'js/templates/dimredctrl.html'"></ng-include>
-          <ng-include src="'js/templates/tagctrl.html'"></ng-include>
         </div>
         <div class="tab-pane container-fluid" id="appearance">
           <ng-include src="'js/templates/colorctrl.html'"></ng-include>
@@ -33,6 +33,9 @@
           <ng-include src="'js/templates/dimreddisplayctrl.html'"></ng-include>
         </div>
         -->
+        <div class="tab-pane container-fluid" id="tags">
+          <ng-include src="'js/templates/tagctrl.html'"></ng-include>
+        </div>
         <div class="tab-pane container-fluid" id="export">
           <ng-include src="'js/templates/exportctrl.html'"></ng-include>
         </div>
