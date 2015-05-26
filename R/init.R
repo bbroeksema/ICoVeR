@@ -1,10 +1,10 @@
-app.init <- function() {
+app.init <- function(timestamp = Sys.time()) {
   # Makes sure that the database is initialized and returns the schema of the
   # data, and all the required UI configuration bits.
 
   db.init()
 
-  schema <- data.schema();
+  schema <- data.schema(timestamp = timestamp);
 
   data = list(
     schema = schema,
