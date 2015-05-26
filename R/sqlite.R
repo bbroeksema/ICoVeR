@@ -50,6 +50,11 @@ db.init <- function() {
   }
 }
 
+# This function makes sure column names are suitable for sqlite. It also prevents SQL injection.
+p.db.escape.name <- function (name) {
+  name <- paste("`", name, "`", sep="")
+}
+
 p.db.connection <-function() {
   DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
 }
@@ -77,6 +82,7 @@ p.db.add.column <- function(table="data", column.name, type) {
 
   con <- p.db.connection()
   if (!(column.name %in% DBI::dbListFields(con, table))) {
+    column.name <- p.db.escape.name(column.name)
     q <- paste("ALTER TABLE", table, "ADD COLUMN", column.name, type, sep=" ")
     res <- DBI::dbSendQuery(con, q)
     DBI::dbClearResult(res)
@@ -92,7 +98,12 @@ p.db.extend.schema <- function(name, type, group, group_type) {
   count <- unlist(DBI::dbGetQuery(con, q))
   if (count == 0) {
     values <- paste("'", c(name, type, group, group_type), "'", sep="", collapse=", ")
-    q <- paste("INSERT INTO schema (name, type, group, group_type) VALUES(", values , ")", sep="")
+    q <- paste("INSERT INTO schema (name, type, `group`, group_type) VALUES(", values , ")", sep="")
+    res <- DBI::dbSendQuery(con, q)
+    DBI::dbClearResult(res)
+  }
+  DBI::dbDisconnect(con)
+}
     res <- DBI::dbSendQuery(con, q)
     DBI::dbClearResult(res)
   }
@@ -101,6 +112,8 @@ p.db.extend.schema <- function(name, type, group, group_type) {
 
 # p.db.store(column.name="kmeans_30_7", 1:10, 8)
 p.db.store <- function(column.name, rows = c(), value) {
+  column.name <- p.db.escape.name(column.name)
+
   # NOTE: for now value is expected to be a numeric value.
   con <- p.db.connection()
   q <- paste("UPDATE data SET ", column.name, " = ", value, sep="")
@@ -116,6 +129,7 @@ p.db.store <- function(column.name, rows = c(), value) {
 }
 
 p.db.storeList <- function(column.name, values) {
+  column.name <- p.db.escape.name(column.name)
   #Note: list must have the row ids as the item names
   #connect to DB
   con <- p.db.connection()
@@ -135,6 +149,8 @@ p.db.storeList <- function(column.name, values) {
 }
 
 p.db.types <- function(variables) {
+  variables <- lapply(variables, p.db.escape.name)
+
   # NOTE: for now value is expected to be a numeric value.
   con <- p.db.connection()
   q <- paste("SELECT name, type FROM schema WHERE name in (\""
@@ -155,6 +171,8 @@ db.reset <- function() {
 
 # p.db.select(vars=c("M4", "M20"), rows=c(1,2,100,2300))
 p.db.select <- function(table="data", vars=c(), rows=c()) {
+  vars <- lapply(vars, p.db.escape.name)
+
   vars <- ifelse(length(vars) == 0,
                  "*",
                  paste(unlist(vars), collapse=", "))
