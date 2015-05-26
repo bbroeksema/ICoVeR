@@ -5,7 +5,7 @@
 // the various control widgets
 
 angular.module('contigBinningApp.services')
-  .service('DimRedPlot', function ($rootScope, ParCoords, DataSet, Analytics) {
+  .service('DimRedPlot', function ($rootScope, DataSet, Analytics) {
 
     'use strict';
 
@@ -214,8 +214,9 @@ angular.module('contigBinningApp.services')
     d.changeVariableSelection = function (method, variableSelection) {
       var variablesSelected = false,
         stateKey,
-        globalSelection,
-        selectedVariables = [];
+        nonSelectedVariables = [],
+        selectedVariables = [],
+        variableSelectedPairs = [];
 
       d.selections.variable = variableSelection;
 
@@ -239,47 +240,26 @@ angular.module('contigBinningApp.services')
         //$rootScope.$broadcast("DimRedPlot::analyticsRemoved", "mean_difference");
       }
 
-      /*jslint todo:true*/
-      //TODO: look into this: when both a PCA and a CA plot have been made,
-      //      currentVarPosition will never be -1, e.g., d.selections.variable will contain all variables.
-      globalSelection = ParCoords.selectedVariables;
-
       _.forEach(d.selections.variable, function (selection, variable) {
-        var currentVarPosition;
-
-        variable = variableName(variable);
-
-        currentVarPosition = _.findIndex(globalSelection, {"name": variable});
-
         if (selection === list.selected.NONE) {
-          if (currentVarPosition !== -1) {
-            globalSelection.splice(currentVarPosition, 1);
-          }
-          return;
+          nonSelectedVariables.push(variableName(variable));
         }
-        if (currentVarPosition !== -1) {
-          return;
-        }
-
-        selectedVariables.push(ParCoords.variables[_.findIndex(ParCoords.variables, {"name": variable})]);
       });
 
-      // We add the variables here because when we use MCA d.selections.variable contain categories,
-      // so if we add the variables in the previous loop they might be removed again by the splice.
-      selectedVariables.forEach(function (variable) {
-        globalSelection.push(variable);
+      nonSelectedVariables = _.uniq(nonSelectedVariables);
+      selectedVariables = d.selectedVariables();
+      // We need to do this because some variables could have both selected and non-selected categories
+      nonSelectedVariables = _.difference(nonSelectedVariables, selectedVariables);
+
+      _.forEach(nonSelectedVariables, function (variable) {
+        variableSelectedPairs.push({name: variable, selected: false});
       });
 
-      /*jslint todo:true*/
-      //TODO: change this to a broadcast, this logic should be handled by ParCoords
-      if (globalSelection.length === 0) {
-        ParCoords.resetSelectedVariables();
-      } else {
+      _.forEach(selectedVariables, function (variable) {
+        variableSelectedPairs.push({name: variable, selected: true});
+      });
 
-        ParCoords.updateSelectedVariables(globalSelection);
-      }
-
-      $rootScope.$broadcast("DimRedPlot::variablesSelected", method);
+      $rootScope.$broadcast("DimRedPlot::variablesSelected", method, variableSelectedPairs);
     };
 
     d.changeIndividualSelection = function (method, individualSelection) {

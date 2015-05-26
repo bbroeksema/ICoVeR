@@ -77,6 +77,28 @@ angular.module('contigBinningApp.services')
     };
 
     /*jslint unparam: true */
+    $rootScope.$on('DimRedPlot::variablesSelected', function (e, method, variableSelection) {
+      _.forEach(variableSelection, function (variable) {
+        var currentVarPosition = _.findIndex(d.selectedVariables, "name", variable.name);
+
+        if (currentVarPosition === -1) {
+          if (variable.selected) {
+            d.selectedVariables.push(d.variables[_.findIndex(d.variables, "name", variable.name)]);
+          }
+        } else {
+          if (variable.selected === false) {
+            d.selectedVariables.splice(currentVarPosition, 1);
+          }
+        }
+      });
+
+      if (d.selectedVariables.length === 0) {
+        d.resetSelectedVariables();
+      } else {
+        d.updateSelectedVariables(d.selectedVariables);
+      }
+    });
+
     $rootScope.$on('DataSet::schemaLoaded', function (e, schema) {
       var firstLoad = d.variables.length < 1,
         previousVariables =  d.selectedVariables;
