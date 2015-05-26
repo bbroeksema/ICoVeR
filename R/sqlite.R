@@ -91,6 +91,19 @@ p.db.add.column <- function(table="data", column.name, type) {
   DBI::dbDisconnect(con)
 }
 
+# ALTER TABLE DROP COLUMN is not supported by sqlite
+p.db.remove.column <- function(table="data", column.name) {
+#  con <- p.db.connection()
+#  if (column.name %in% DBI::dbListFields(con, table)) {
+#    column.name <- p.db.escape.name(column.name)
+#    q <- paste("ALTER TABLE", table, "DROP COLUMN", column.name, sep=" ")
+#    res <- DBI::dbSendQuery(con, q)
+#    DBI::dbClearResult(res)
+#  }
+#
+#  DBI::dbDisconnect(con)
+}
+
 # p.db.extend.schema("kmeans_30_7", "integer", "Analytics", "Clusterings")
 p.db.extend.schema <- function(name, type, group, group_type) {
   con <- p.db.connection()
@@ -104,6 +117,13 @@ p.db.extend.schema <- function(name, type, group, group_type) {
   }
   DBI::dbDisconnect(con)
 }
+
+p.db.truncate.schema <- function(name) {
+  con <- p.db.connection()
+  q <- paste("SELECT count(*) FROM schema WHERE name='", name, "'", sep="")
+  count <- unlist(DBI::dbGetQuery(con, q))
+  if (count == 1) {
+    q <- paste("DELETE FROM schema WHERE name='", name, "'", sep="")
     res <- DBI::dbSendQuery(con, q)
     DBI::dbClearResult(res)
   }

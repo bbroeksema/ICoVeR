@@ -17,3 +17,16 @@ data.get <- function(rows = c(), variables, addRows=T) {
 
   data
 }
+
+data.addTag <- function(timestamp, name, data) {
+  p.db.extend.schema(name = name, type = "boolean", group = "Tags", group_type = "Tags")
+  p.db.add.column(column.name = name, type = "integer")
+
+  p.db.store(column.name = name, rows = which(data==0), value = 0)
+  p.db.store(column.name = name, rows = which(data==1), value = 1)
+}
+
+data.removeTag <- function(timestamp, name) {
+  p.db.truncate.schema(name = name)
+  p.db.remove.column(column.name = name)
+}
