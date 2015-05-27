@@ -67,12 +67,10 @@ angular.module('contigBinningApp.services')
         dataIsSelected = false,
         stateKey;
 
-      // Points that are selected are not influenced and influenced points need their influence to be reset
-      _.forEach(d.influences, function (states, component) {
-        _.forEach(states, function (val, key) {
-          /*jslint unparam:true*/
-          d.influences[component][key] = 0;
-        });
+      // influenced points need their influence to be reset
+      _.forEach(d.influences[influencedComponent], function (val, key) {
+        /*jslint unparam:true*/
+        d.influences[influencedComponent][key] = 0;
       });
 
       // If points are influenced then they are not selected
