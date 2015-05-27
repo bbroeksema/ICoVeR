@@ -1,5 +1,5 @@
 /*jslint browser: true, todo:true, nomen: true, indent: 2 */
-/*global d3, _*/
+/*global d3*/
 
 var list = this.list || {};
 
@@ -11,7 +11,13 @@ list.ScatterPlot = function () {
     svgMargins = { top: 20, bottom: 20, left: 35, right: 50 },
     pointMargin = 5,
     render = {},
-    colormap = {},
+    color = {
+      colorFn: null,
+      variableName: "contribution",
+      variableValues: null,
+      useColouring: false
+    },
+    pointSizeFn = null,
     events = d3.dispatch.apply(this, ["selectionEnd", "brushEnd"]),
     origin = { size: 25, visible: true};
 
@@ -19,32 +25,53 @@ list.ScatterPlot = function () {
     return (d.xContribution * data.xVariance + d.yContribution * data.yVariance) / (data.xVariance + data.yVariance);
   }
 
+  function pointSizeFunction(value) {
+    if (pointSizeFn === null) {
+      return 4;
+    }
+    return pointSizeFn(value);
+  }
+
+  function pointExtentByContribution(data) {
+    var maxContribution = -1000,
+      maxDatum,
+      minContribution = 1000,
+      minDatum;
+
+    data.points.forEach(function (d) {
+      var contribution = xyContribution(d, data);
+      if (contribution > maxContribution) {
+        maxContribution = contribution;
+        maxDatum = d;
+      }
+      if (contribution < minContribution) {
+        minContribution = contribution;
+        minDatum = d;
+      }
+    });
+
+    return [minDatum, maxDatum];
+  }
+
   function updateScales(data, scales) {
-    var domain, range,  // output range
-      largestContribution;
+    var domain, range;  // output range
 
     // Update the colormap scale
-    domain = d3.extent(data.points, function (d) { return xyContribution(d, data); });
+    if (color.useColouring) {
+      domain = d3.extent(data.points, function (d) { return color.variableValues[d.id]; });
+    } else {
+      domain = d3.extent(data.points, function (d) { return xyContribution(d, data); });
+    }
+
     range = [size.height - svgMargins.top - svgMargins.bottom, 0];
     scales.colormap.domain(domain).range(range);
-    largestContribution = domain[1];
 
     // Update the color scale
     range = [0, 1];
     scales.color.domain(domain).range(range);
 
-    // Update the cx scale
-    domain = [0, 100]; // Contributions are in %
-    range = [2, 50];
-    scales.cx.domain(domain).range(range);
-
-    // Update the cy scale
-    domain = [0, 100]; // Contributions are in %
-    range = [2, 50];
-    scales.cy.domain(domain).range(range);
-
     // Make sure that none of the points overflow the plot space
-    pointMargin = scales.cx(largestContribution);
+    pointMargin = pointSizeFunction(pointExtentByContribution(data)[1]);
 
     // Update the x scale
     domain = d3.extent(data.points, function (d) { return d.x; }); // input domain
@@ -89,8 +116,6 @@ list.ScatterPlot = function () {
         scales = {
           x: d3.scale.linear(),
           y: d3.scale.linear(),
-          cx: d3.scale.linear(),
-          cy: d3.scale.linear(),
           colormap: d3.scale.linear(),
           color: d3.scale.linear()
         },
@@ -106,6 +131,12 @@ list.ScatterPlot = function () {
         .append("g")
         .attr("class", "points");
 
+      if (color.colorFn !== null && color.variableValues !== null) {
+        color.useColouring = true;
+      } else if (color.colorFn !== null || color.variableValues !== null) {
+        throw "If coloring is desired then both colorFunction and colorVariableValures have to be set";
+      }
+
       updateScales(data, scales);
 
       if (data.flags.pointsChanged) {
@@ -117,23 +148,39 @@ list.ScatterPlot = function () {
         });
 
         // The points are displayed from high contribution to low contribution
-        sortedPoints = _.sortBy(data.points, function (d) {
-          return -xyContribution(d, data);
+        sortedPoints = data.points.slice();
+        sortedPoints.sort(function (d1, d2) {
+          var d1Contribution = -xyContribution(d1, data),
+            d2Contribution = -xyContribution(d2, data);
+
+          if (d1Contribution < d2Contribution) {
+            return -1;
+          }
+          if (d1Contribution > d2Contribution) {
+            return 1;
+          }
+          return 0;
         });
 
         // Add the necessary elements
         render.resize(svg);
         render.title(svg, data.title);
         render.points(svg, data, scales);
-        //render.colormap(svg, data, scales);
         render.axes(svg, scales);
 
         render.origin(svg, scales);
         render.interactionOverlay(svg, data, scales, selectCircleRadius);
       }
 
-      render.colormap(svg, data, scales);
-      render.selectionOnColormap(svg, data, scales);
+      if (color.useColouring) {
+        render.colormap(svg, data, scales);
+        render.selectionOnColormap(svg, data, scales);
+      } else if (pointSizeFn !== null) {
+        render.sizemap(svg, data, scales);
+        render.selectionOnSizemap(svg, data, scales);
+        render.sizemapBrush(svg, data, scales);
+      }
+
       render.colorPoints(svg, data, scales);
 
       if (data.flags.pointsChanged) {
@@ -188,8 +235,9 @@ list.ScatterPlot = function () {
 
   //  Draws every points as an ellipse, elongated by the x+y contribution,
   //  rotated by the x and y contributions
-  render.pointsAsEllipses1 = function (gPoints, data, scales) {
-    var ellipse = gPoints.selectAll("g.point").data(data.points);
+  render.points = function (svg, data, scales) {
+    var gPoints = svg.select("g.points"),
+      ellipse = gPoints.selectAll("g.point").data(data.points);
 
     // We need to put out ellipses into groups otherwise the rotating/translation
     // that the ellipses are doing during transitioning will be wrong.
@@ -210,17 +258,9 @@ list.ScatterPlot = function () {
     ellipse.select("ellipse")
       .transition()
       .duration(1500)
-      .attr("rx", function (d) {
-        var xContribution = scales.cx(d.xContribution * data.xVariance / (data.xVariance + data.yVariance)),
-          yContribution = scales.cy(d.yContribution * data.yVariance / (data.xVariance + data.yVariance));
-
-        return Math.sqrt(xContribution * xContribution + yContribution * yContribution);
-      })
+      .attr("rx", pointSizeFunction)
       .attr("ry", function (d) {
-        var xContribution = scales.cx(d.xContribution * data.xVariance / (data.xVariance + data.yVariance)),
-          yContribution = scales.cy(d.yContribution * data.yVariance / (data.xVariance + data.yVariance));
-
-        return (Math.min(xContribution, yContribution) / Math.max(xContribution, yContribution)) * Math.sqrt(xContribution * xContribution + yContribution * yContribution);
+        return pointSizeFunction(d) / 4;
       })
       .attr("transform", function (d) {
         /*jslint unparam:true*/
@@ -236,87 +276,6 @@ list.ScatterPlot = function () {
     ellipse.exit().remove();
 
     return ellipse.select("ellipse");
-  };
-
-  //  Draws every points as an ellipse, elongated by the x+y contribution,
-  //  rotated by the x and y contributions
-  render.pointsAsEllipses2 = function (gPoints, data, scales) {
-    var ellipse = gPoints.selectAll("g.point").data(data.points);
-
-    // We need to put out ellipses into groups otherwise the rotating/translation
-    // that the ellipses are doing during transitioning will be wrong.
-    ellipse.enter()
-      .append("g")
-      .attr("class", "point")
-      .append("ellipse")
-      .attr("class", "point");
-
-    ellipse.style("visibility", null);
-    ellipse
-      .transition()
-      .duration(1500)
-      .attr("transform", function (d) {
-        return "translate(" + scales.x(d.x) + ", " + scales.y(d.y) + ")";
-      });
-
-    ellipse.select("ellipse")
-      .transition()
-      .duration(1500)
-      .attr("rx", function (d) {
-        return scales.cx(xyContribution(d, data));
-      })
-      .attr("ry", function (d) {
-        return scales.cx(xyContribution(d, data)) / 4;
-      })
-      .attr("transform", function (d) {
-        /*jslint unparam:true*/
-        var xContribution = d.xContribution * data.xVariance,
-          yContribution = d.yContribution * data.yVariance;
-
-        xContribution *= Math.sign(d.x);
-        yContribution *= Math.sign(d.y);
-
-        return "rotate(" + Math.atan2(yContribution, -xContribution) / Math.PI * 180 + ")";
-      });
-
-    ellipse.exit().remove();
-
-    return ellipse.select("ellipse");
-  };
-
-  //  Draws every point as an rectangle. The width and height of the rectangle
-  //  are based on the x and y contributions.
-  render.pointsAsRectangles = function (gPoints, data, scales) {
-    var rect = gPoints.selectAll("rect.point").data(data.points),
-      totalVariance = data.xVariance + data.yVariance;
-
-    //  This needs to be uncommented for the experimental functions to work
-    //render.subPoints2(gPoints, points, 0, 0, "first", 0);
-    //render.subPoints2(gPoints, points, 2, 0, "second", 1);
-    //render.subPoints2(gPoints, points, 0, 2, "third", 2);
-    //render.subPoints2(gPoints, points, 2, 2, "fourth", 3);
-    //return;
-
-    // Points width and height are based on their contributions to their
-    // respective principal axes. Contributions help locating the the variables
-    // important for a given principal axes. As a rule of the tumb, points with
-    // a contribution larger than the average contribute (1/numberOfVars) are
-    // considered the important ones.
-
-    rect.enter().append("rect")
-      .attr("class", "point");
-
-    rect.style("visibility", null);
-    rect.exit().remove();
-    rect
-      .transition()
-      .duration(1500)
-      .attr("x", function (d) { return scales.x(d.x) - scales.cx(d.xContribution * data.xVariance / totalVariance) / 2; })
-      .attr("y", function (d) { return scales.y(d.y) - scales.cy(d.yContribution * data.yVariance / totalVariance) / 2; })
-      .attr("width", function (d) { return scales.cx(d.xContribution * data.xVariance / totalVariance); })
-      .attr("height", function (d) { return scales.cy(d.yContribution * data.yVariance / totalVariance); });
-
-    return rect;
   };
 
   // Draws a circle that can be used as selection brush and to hover over items, displaying their labels,
@@ -403,6 +362,11 @@ list.ScatterPlot = function () {
 
       // Only re-render when something actually changed
       if (pointsSelected) {
+        if (color.useColouring) {
+          render.selectionOnColormap(svg, data, scales);
+        } else if (pointSizeFn !== null) {
+          render.selectionOnSizemap(svg, data, scales);
+        }
         render.colorPoints(svg, data, scales);
       }
       if (pointsHovered) {
@@ -478,12 +442,156 @@ list.ScatterPlot = function () {
       .on("dblclick.zoom", null);
   };
 
-  colormap.blackRed = d3.interpolateLab("black", "red");
-  colormap.blackBlue = d3.interpolateLab("black", "blue");
-  colormap.blueRed = d3.interpolateLab("blue", "red");
-  colormap.greenRed = d3.interpolateLab("green", "red");
-  colormap.rainbow = function (val) {
-    return d3.hsl((1 - val) * 240, 1, 0.5);
+  render.sizemapBrush = function (svg, data, scales) {
+    var gPoints = svg.select("g.points"),
+      plotWidth = size.width - svgMargins.right - svgMargins.left,
+      brush = d3.svg.brush(),
+      brushGroup;
+
+    function brushed() {
+      var extent = brush.extent();
+
+      data.brushExtent = extent;
+
+      data.points.forEach(function (d) {
+        var contribution = xyContribution(d, data);
+        setNotSelected(d);
+
+        if (contribution >= extent[0] && contribution <= extent[1]) {
+          setSelected(d);
+        }
+      });
+      render.colorPoints(svg, data, scales);
+      render.selectionOnSizemap(svg, data, scales);
+    }
+
+    function brushEnd() {
+      var selected = [];
+      data.points.forEach(function (d) {
+        selected.push(d.selected === list.selected.POINT || d.selected === list.selected.BOTH);
+      });
+      events.brushEnd(sp, selected, data.idx, brush.extent()[0], brush.extent()[1]);
+    }
+
+    brush
+      .y(scales.colormap)
+      .extent(data.brushExtent)
+      .on("brush", brushed)
+      .on("brushend", brushEnd);
+
+    //  Render the brush
+    brushGroup = gPoints.selectAll("g.brush").data([true]);
+    brushGroup.enter().append("g").attr("class", "brush");
+    brushGroup
+      .call(brush);
+
+    brushGroup.selectAll("rect")
+      .attr("width", 20)
+      .attr("x", plotWidth);
+  };
+
+  // Renders a colormap with scale on the right side of the plot
+  render.sizemap = function (svg, data, scales) {
+    var gPoints = svg.select("g.points"),
+      plotWidth = size.width - svgMargins.right - svgMargins.left,
+      plotHeight = size.height - svgMargins.top - svgMargins.bottom,
+      axis,
+      axisGroup,
+      ellipses = [
+        {
+          y: 0,
+          size: 0
+        },
+        {
+          y: plotHeight,
+          size: 0
+        }
+      ],
+      lines = [-1, 1],
+      pointExtent = pointExtentByContribution(data);
+
+    ellipses[0].size = pointSizeFn(pointExtent[1]);
+    ellipses[1].size = pointSizeFn(pointExtent[0]);
+
+    axis = d3.svg.axis()
+      .scale(scales.colormap)
+      .orient("right");
+
+    axisGroup = gPoints.selectAll("g.coloraxis").data([true]);
+    axisGroup.enter()
+      .append("g")
+      .attr("class", "coloraxis");
+    axisGroup
+      .attr("transform", "translate(" + (plotWidth + 20 - 1) + ", 0)")
+      .transition()
+      .duration(1500)
+      .call(axis);
+
+    ellipses = gPoints.selectAll("ellipse.sizemap").data(ellipses);
+    ellipses
+      .enter()
+      .append("ellipse")
+      .attr("class", "sizemap");
+    ellipses
+      .transition()
+      .duration(1500)
+      .attr("rx", function (d) {
+        return d.size;
+      })
+      .attr("ry", function (d) {
+        return d.size / 4;
+      })
+      .attr("cx", plotWidth + 10)
+      .attr("cy", function (d) {
+        return d.y;
+      })
+      .style("fill", "grey");
+
+    lines = gPoints.selectAll("line.sizemap").data(lines);
+    lines
+      .enter()
+      .append("line")
+      .attr("class", "sizemap");
+    lines
+      .transition()
+      .duration(1500)
+      .attr("x1", function (mult) {
+        return plotWidth + 10 + mult * pointSizeFn(pointExtent[1]);
+      })
+      .attr("y1", 0)
+      .attr("x2", function (mult) {
+        return plotWidth + 10 + mult * pointSizeFn(pointExtent[0]);
+      })
+      .attr("y2", plotHeight)
+      .style("stroke-width", "1px")
+      .style("stroke", "gray");
+  };
+
+  render.selectionOnSizemap = function (svg, data, scales) {
+    var gPoints = svg.select("g.points"),
+      plotWidth = size.width - svgMargins.right - svgMargins.left,
+      ellipses;
+
+    ellipses = gPoints.selectAll("ellipse.selection").data(data.points);
+    ellipses.enter()
+      .append("ellipse")
+      .attr("class", "selection")
+      .attr("rx", function (d) {
+        return pointSizeFn(d);
+      })
+      .attr("ry", function (d) {
+        return pointSizeFn(d) / 4;
+      })
+      .attr("cx", plotWidth + 10)
+      .attr("cy", function (d) {
+        return scales.colormap(xyContribution(d, data));
+      })
+      .style("fill", "steelblue");
+
+    ellipses
+      .style("visibility", function (d) {
+        return d.selected !== list.selected.NONE ? "visible" : "hidden";
+      });
   };
 
   render.colormap = function (svg, data, scales) {
@@ -498,14 +606,15 @@ list.ScatterPlot = function () {
       data.brushExtent = extent;
 
       data.points.forEach(function (d) {
-        var contribution = xyContribution(d, data);
+        var value = color.variableValues[d.id];
         setNotSelected(d);
 
-        if (contribution >= extent[0] && contribution <= extent[1]) {
+        if (value >= extent[0] && value <= extent[1]) {
           setSelected(d);
         }
       });
       render.colorPoints(svg, data, scales);
+      render.selectionOnColormap(svg, data, scales);
     }
 
     function brushEnd() {
@@ -521,9 +630,7 @@ list.ScatterPlot = function () {
       .extent(data.brushExtent)
       .scale(scales.colormap)
       .axisSide("right")
-      .colourFunction(function (datum) {
-        return colormap[data.colormap](scales.color(datum));
-      })
+      .colourFunction(color.colorFn)
       .on("brush", brush)
       .on("brushEnd", brushEnd);
 
@@ -571,20 +678,6 @@ list.ScatterPlot = function () {
 
   };
 
-  // Wrapper function that sets up the axis and calls another function to render the actual points.
-  render.points = function (svg, data, scales) {
-    var gPoints = svg.select("g.points");
-
-    //render.pointsAsEllipses2(gPoints, data, scales)
-    if (data.renderFunction.indexOf("pointsAsEllipses") > -1) {
-      gPoints.selectAll("rect.point").style("visibility", "hidden");
-    } else if (data.renderFunction === "pointsAsRectangles") {
-      gPoints.selectAll("g.point").style("visibility", "hidden");
-    }
-
-    render[data.renderFunction](gPoints, data, scales);
-  };
-
   render.selectionOnColormap = function (svg, data, scales) {
     var gPoints = svg.select("g.points"),
       plotWidth = size.width - svgMargins.right - svgMargins.left,
@@ -596,11 +689,11 @@ list.ScatterPlot = function () {
       .attr("class", "selection")
       .attr("x1", plotWidth + 3)
       .attr("y1", function (d) {
-        return scales.colormap(xyContribution(d, data));
+        return scales.colormap(color.variableValues[d.id]);
       })
       .attr("x2", plotWidth + 20 - 3)
       .attr("y2", function (d) {
-        return scales.colormap(xyContribution(d, data));
+        return scales.colormap(color.variableValues[d.id]);
       })
       .style("stroke-width", "1px")
       .style("stroke", "black");
@@ -615,16 +708,10 @@ list.ScatterPlot = function () {
 
   // Sets the color of the points, this is separated from the points function because sometimes a recolour is
   // all that is needed for an update.
-  render.colorPoints = function (svg, data, scales) {
-    var contributionColorMap = colormap[data.colormap],
-      points,
+  render.colorPoints = function (svg, data) {
+    var colorMap = color.colorFn,
+      points = svg.select("g.points").selectAll("ellipse.point"),
       isSelected = false;
-
-    if (data.renderFunction.indexOf("pointsAsEllipses") > -1) {
-      points = svg.select("g.points").selectAll("ellipse.point");
-    } else if (data.renderFunction === "pointsAsRectangles") {
-      points = svg.select("g.points").selectAll("rect.point");
-    }
 
     isSelected = data.brushExtent[0] !== data.brushExtent[1] || data.points.some(function (d) {
       return d.selected !== list.selected.NONE;
@@ -632,8 +719,16 @@ list.ScatterPlot = function () {
 
     if (isSelected || data.isInfluenced) {
       points.style("fill", function (d, idx) {
-        var contributionColor = contributionColorMap(scales.color(xyContribution(d, data))),
+        var pointColor = "steelblue",
           influence = data.points[idx].influence;
+
+        if (color.useColouring) {
+          pointColor = colorMap(color.variableValues[d.id]);
+        }
+
+        if (isSelected) {
+          influence = 0;
+        }
 
         if (data.points[idx].selected !== list.selected.NONE) {
           influence = 1;
@@ -644,13 +739,16 @@ list.ScatterPlot = function () {
           return "rgb(230, 230, 230)";
         }
         if (influence === 1) {
-          return contributionColor;
+          return pointColor;
         }
-        return d3.interpolateHsl("rgb(255, 255, 255)", contributionColor)(influence * 0.9 + 0.1);
+        return d3.interpolateHsl("rgb(255, 255, 255)", pointColor)(influence * 0.9 + 0.1);
       });
     } else {
       points.style("fill", function (d) {
-        return contributionColorMap(scales.color(xyContribution(d, data)));
+        if (color.useColouring) {
+          return colorMap(color.variableValues[d.id]);
+        }
+        return "steelblue";
       });
     }
   };
@@ -1022,6 +1120,30 @@ list.ScatterPlot = function () {
   sp.originSize = function (_) {
     if (!arguments.length) {return origin.size; }
     origin.size = _;
+    return sp;
+  };
+
+  sp.pointSize = function (_) {
+    if (!arguments.length) {return pointSizeFn; }
+    pointSizeFn = _;
+    return sp;
+  };
+
+  sp.colorVariableName = function (_) {
+    if (!arguments.length) {return color.variableName; }
+    color.variableName = _;
+    return sp;
+  };
+
+  sp.colorVariableValues = function (_) {
+    if (!arguments.length) {return color.variableValues; }
+    color.variableValues = _;
+    return sp;
+  };
+
+  sp.colorFunction = function (_) {
+    if (!arguments.length) {return color.colorFn; }
+    color.colorFn = _;
     return sp;
   };
 

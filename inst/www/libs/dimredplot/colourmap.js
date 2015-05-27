@@ -1,5 +1,5 @@
 /*jslint browser: true, todo:true, nomen: true, indent: 2 */
-/*global d3, _*/
+/*global d3*/
 
 var list = this.list || {};
 

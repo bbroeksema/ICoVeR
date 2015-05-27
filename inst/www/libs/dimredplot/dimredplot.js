@@ -1,5 +1,5 @@
 /*jslint browser: true, todo:true, nomen: true, indent: 2 */
-/*global d3, _*/
+/*global d3*/
 
 var list = this.list || {};
 
@@ -126,15 +126,12 @@ list.DimRedPlot = function () {
     render = {},
     events = d3.dispatch.apply(this, ["changeVariableSelection", "changeIndividualSelection"]),
     actives = [{idx: 0, scroll: false}, {idx: 1, scroll: true}],
-    contributionBrushExtents = [
-      [0, 0],
-      [0, 0],
-      [0, 0],
-      [0, 0]
-    ],
-    colormapBrushExtent = {
-      variable: [0, 0],
-      individual: [0, 0]
+    contributionBrushExtents,
+    colormapBrushExtent = {},
+    color = {
+      colorFn: null,
+      variableName: "contribution",
+      variableValues: null
     },
     selections = {
       variable: {},
@@ -150,6 +147,7 @@ list.DimRedPlot = function () {
       [0, 0],
       [0, 0],
       [0, 0],
+      [0, 0],
       [0, 0]
     ];
   }
@@ -158,6 +156,9 @@ list.DimRedPlot = function () {
     colormapBrushExtent.variable = [0, 0];
     colormapBrushExtent.individual = [0, 0];
   }
+
+  resetContributionBrushExtents();
+  resetColormapBrushExtent();
 
   function drp(selection) {
     var div;
@@ -189,10 +190,7 @@ list.DimRedPlot = function () {
   };
 
   render.scatterplot = function (div, data, flags) {
-    var pointSelect = d3.select("select#points"),
-      colorSelect1 = d3.select("select#color1"),
-      colorSelect2 = d3.select("select#color2"),
-      individualsPresent = data.individualProjections !== undefined,
+    var individualsPresent = data.individualProjections !== undefined,
       variablesPresent = data.variableProjections !== undefined,
       scatterplotWidth = parts.scatterplot.width,
       plotdata = [
@@ -202,8 +200,8 @@ list.DimRedPlot = function () {
           xVariance: data.explainedVariance[actives[0].idx],
           yVariance: data.explainedVariance[actives[1].idx],
           isInfluenced: false,
+          isSelected: false,
           idx: 0,
-          renderFunction: "pointsAsEllipses2",//pointSelect.node().value,
           colormap: "blueRed",//colorSelect1.node().value,
           brushExtent: [0, 0],
           flags: flags
@@ -226,31 +224,17 @@ list.DimRedPlot = function () {
               }*/
           ],
           isInfluenced: false,
+          isSelected: false,
           xVariance: data.explainedVariance[actives[0].idx],
           yVariance: data.explainedVariance[actives[1].idx],
           idx: 0,
-          renderFunction: "pointsAsEllipses2",//pointSelect.node().value,
           colormap: "blueRed",//colorSelect1.node().value,
           brushExtent: [0, 0],
           flags: flags
         }
       ],
-      scatterPlot = list.ScatterPlot(),
+      scatterPlotCharts,
       scatterPlotDiv;
-
-    // Handle html select tag changes
-    pointSelect.on("change", function () {
-      data.flags.pointsChanged = true;
-      render.scatterplot(div, data);
-    });
-    colorSelect1.on("change", function () {
-      data.flags.pointsChanged = true;
-      render.scatterplot(div, data);
-    });
-    colorSelect2.on("change", function () {
-      data.flags.pointsChanged = true;
-      render.scatterplot(div, data);
-    });
 
     plotdata.forEach(function (d, i) {
       /*jslint unparam:true*/
@@ -282,8 +266,8 @@ list.DimRedPlot = function () {
           selected: selections[component][d.id],
           influence: influence
         });
-        if (influence > 0) {
-          plotData.isInfluenced = true;
+        if (selections[component][d.id] !== list.selected.NONE) {
+          plotData.isSelected = true;
         }
 
         xContributionSum += d.contrib[actives[0].idx];
@@ -304,9 +288,15 @@ list.DimRedPlot = function () {
 
     if (individualsPresent) {
       initPlotdata(plotdata[0], data.individualProjections, "individual");
+      if (plotdata[0].isSelected) {
+        plotdata[1].isInfluenced = true;
+      }
     }
     if (variablesPresent) {
       initPlotdata(plotdata[1], data.variableProjections, "variable");
+      if (plotdata[1].isSelected) {
+        plotdata[0].isInfluenced = true;
+      }
     }
 
     if (variablesPresent && individualsPresent) {
@@ -343,13 +333,63 @@ list.DimRedPlot = function () {
       brushed(sp, selected, idx, 0, 0);
     }
 
-    scatterPlot
-      .height(size.height * parts.scatterplot.height)
-      .width(size.width * scatterplotWidth)
-      .originVisible(parts.scatterplot.origin.visible)
-      .originSize(parts.scatterplot.origin.size)
-      .on("selectionEnd", select)
-      .on("brushEnd", brushed);
+    function xyContribution(d, data) {
+      return (d.xContribution * data.xVariance + d.yContribution * data.yVariance) / (data.xVariance + data.yVariance);
+    }
+
+    scatterPlotCharts = plotdata.map(function (datum) {
+      var scatterPlot = list.ScatterPlot(),
+        pointSizeScale = d3.scale.linear(),
+        colormap = d3.interpolateLab("green", "purple"),
+        colorscale = d3.scale.linear(),
+        colorVariableValues = {},
+        colorFn = null;
+
+      scatterPlot
+        .height(size.height * parts.scatterplot.height)
+        .width(size.width * scatterplotWidth)
+        .originVisible(parts.scatterplot.origin.visible)
+        .originSize(parts.scatterplot.origin.size)
+        .on("selectionEnd", select)
+        .on("brushEnd", brushed);
+
+      if (datum.idx === 0 && individualsPresent) {
+        // If the user did not specify a colormapping than we will create one based on contribution.
+        if (color.variableValues === null) {
+          datum.points.forEach(function (point) {
+            colorVariableValues[point.id] = xyContribution(point, datum);
+          });
+        } else {
+          colorVariableValues = color.variableValues;
+        }
+
+        if (color.colorFn === null) {
+          colorscale
+            .domain(d3.extent(datum.points, function (point) { return colorVariableValues[point.id]; }))
+            .range([0, 1]);
+
+          colorFn = function (datum) {
+            return colormap(colorscale(datum));
+          };
+        } else {
+          colorFn = color.colorFn;
+        }
+
+        scatterPlot
+          .colorFunction(colorFn)
+          .colorVariableName(color.variableName)
+          .colorVariableValues(colorVariableValues);
+      } else {
+        pointSizeScale.domain([0, 100]).range([2, datum.points.length * 3]);
+
+        scatterPlot
+          .pointSize(function (d) {
+            return pointSizeScale(xyContribution(d, datum));
+          });
+      }
+
+      return scatterPlot;
+    });
 
     scatterPlotDiv = div.selectAll("div.scatterplot").data(plotdata.filter(function (d) {
       return d.points.length !== 0;
@@ -366,7 +406,10 @@ list.DimRedPlot = function () {
       .style("outline-style", "solid")
       .style("outline-width", "1px")
       .style("outline-color", "#ddd")
-      .call(scatterPlot);
+      .each(function (datum) {
+        /*jslint unparam:true*/
+        d3.select(this).call(scatterPlotCharts[datum.idx]);
+      });
   };
 
   render.contributions = function (div, data) {
@@ -400,16 +443,16 @@ list.DimRedPlot = function () {
           component: "other axes",
           variance: 0,
           contributions: [],
-          index: 2,
-          brushExtent: contributionBrushExtents[2],
+          index: 3,
+          brushExtent: contributionBrushExtents[3],
           maxContribution: 0
         },
         {
-          component: "total",
-          variance: 100,
+          component: "influence",
+          variance: null,
           contributions: [],
-          index: 3,
-          brushExtent: contributionBrushExtents[3],
+          index: 4,
+          brushExtent: contributionBrushExtents[4],
           maxContribution: 0
         }
       ],
@@ -423,7 +466,7 @@ list.DimRedPlot = function () {
       yMax = 0.0,
       xyMax = 0.0,
       errorMax = 0.0,
-      totalMax = 0.0,
+      influenceMax = 0.0,
       //accMax,
       xSum = 0.0,
       ySum = 0.0,
@@ -446,18 +489,20 @@ list.DimRedPlot = function () {
 
     plotdata[3].variance = 100 - plotdata[0].variance - plotdata[1].variance;
 
+
+
     //  Convert data to plotdata
     data.variableProjections.forEach(function (projection, projectionIdx) {
       var contributions,
         contributionsSum,
         contribution1,
         contribution2,
-        label = projection.id;
+        label = projection.id,
+        influence = influences.variable[projection.id];
 
       if (projection.label !== undefined) {
         label = projection.label;
       }
-
 
       contributions = projection.contrib.map(function (contribution, contributionIdx) {
         return contribution * data.explainedVariance[contributionIdx];
@@ -472,13 +517,17 @@ list.DimRedPlot = function () {
 
       totalSum += contributionsSum;
 
+      if (influence === undefined) {
+        influence = 0;
+      }
+
       sortedContributions.push({
         index: projectionIdx,
         xContribution: contribution1,
         yContribution: contribution2,
         xyContribution: contribution1 + contribution2,
         errorContribution: contributionsSum - contribution1 - contribution2,
-        totalContribution: contributionsSum,
+        influenceContribution: influence,
         selected: selections.variable[projection.id],
         label: label
       });
@@ -489,22 +538,20 @@ list.DimRedPlot = function () {
       item.yContribution /= ySum / 100;
       item.xyContribution /= (xSum + ySum) / 100;
       item.errorContribution /= (totalSum - xSum - ySum) / 100;
-      item.totalContribution /= totalSum / 100;
 
       xMax = Math.max(xMax, item.xContribution);
       yMax = Math.max(yMax, item.yContribution);
       errorMax = Math.max(errorMax, item.errorContribution);
       xyMax = Math.max(xyMax, item.xyContribution);
-      totalMax = Math.max(totalMax, item.totalContribution);
+      influenceMax = Math.max(influenceMax, item.influenceContribution);
     });
-
 
     //accMax = Math.max(Math.max(xMax, yMax), xyMax);
     plotdata[0].maxContribution = xMax;
     plotdata[1].maxContribution = yMax;
     plotdata[2].maxContribution = xyMax;
     plotdata[3].maxContribution = errorMax;
-    plotdata[4].maxContribution = totalMax;
+    plotdata[4].maxContribution = influenceMax;
 
 
     // Add the controls that control the sorting
@@ -544,7 +591,7 @@ list.DimRedPlot = function () {
         elem.append("option").attr("value", "y").text("Sort on y");
         elem.append("option").attr("value", "xy").text("Sort on x+y").attr("selected", "selected");
         elem.append("option").attr("value", "error").text("Sort on other axes");
-        elem.append("option").attr("value", "total").text("Sort on total");
+        elem.append("option").attr("value", "influence").text("Sort on influence");
       });
 
     function sortEvent() {
@@ -555,15 +602,26 @@ list.DimRedPlot = function () {
     selectionSortCheck.on("change", sortEvent);
 
     // Sort the contributions
-    sortedContributions = _.sortBy(sortedContributions, function (d, idx) {
+    sortedContributions.sort(function (d1, d2) {
       var sortOn = sortSelect.node().value + "Contribution",
-        value = d[sortOn];
+        value1 = d1[sortOn],
+        value2 = d2[sortOn];
 
-      if (selectionSortCheck.node().checked && data.variableProjections[idx].brushed) {
-        value += 1000;
+      if (selectionSortCheck.node().checked && d1.selected !== list.selected.POINT) {
+        value1 -= 1000;
+      }
+      if (selectionSortCheck.node().checked && d2.selected !== list.selected.POINT) {
+        value2 -= 1000;
       }
 
-      return -value;
+      if (value1 < value2) {
+        return 1;
+      }
+      if (value1 > value2) {
+        return -1;
+      }
+
+      return 0;
     });
 
     // Fill plotdata with the sorted contributions
@@ -571,19 +629,22 @@ list.DimRedPlot = function () {
     plotdata[1].contributions = sortedContributions.map(function (d) { return {contribution: d.yContribution, selected: d.selected, label: d.label}; });
     plotdata[2].contributions = sortedContributions.map(function (d) { return {contribution: d.xyContribution, selected: d.selected, label: d.label}; });
     plotdata[3].contributions = sortedContributions.map(function (d) { return {contribution: d.errorContribution, selected: d.selected, label: d.label}; });
-    plotdata[4].contributions = sortedContributions.map(function (d) { return {contribution: d.totalContribution, selected: d.selected, label: d.label}; });
+    plotdata[4].contributions = sortedContributions.map(function (d) { return {contribution: d.influenceContribution, selected: d.selected, label: d.label}; });
+
+    if (influenceMax === 0) {
+      plotdata.splice(4, 1);
+    }
 
     indices = sortedContributions.map(function (d) { return d.index; });
 
     //  Respond to a brush event within the BarPlot chart
     function brushed(bp, index, start, end) {
       /*jslint unparam:true*/
-      var selected = [],
-        brushIdx;
+      var selected = [];
 
-      for (idx = 0; idx !== data.variableProjections.length; idx += 1) {
+      data.variableProjections.forEach(function () {
         selected.push(false);
-      }
+      });
 
       function setSelected(range) {
         for (idx = range[0]; idx !== range[1]; idx += 1) {
@@ -593,9 +654,9 @@ list.DimRedPlot = function () {
 
       contributionBrushExtents[index] = [start, end];
 
-      for (brushIdx = 0; brushIdx !== 4; brushIdx += 1) {
-        setSelected(contributionBrushExtents[brushIdx]);
-      }
+      contributionBrushExtents.forEach(function (brushExtent) {
+        setSelected(brushExtent);
+      });
 
       data.variableProjections.forEach(function (point, pointIdx) {
         if (selected[pointIdx]) {
@@ -786,6 +847,24 @@ list.DimRedPlot = function () {
     influences.variable = _;
     resetContributionBrushExtents();
     colormapBrushExtent.variable = [0, 0];
+    return drp;
+  };
+
+  drp.colorVariableName = function (_) {
+    if (!arguments.length) {return color.variableName; }
+    color.variableName = _;
+    return drp;
+  };
+
+  drp.colorVariableValues = function (_) {
+    if (!arguments.length) {return color.variableValues; }
+    color.variableValues = _;
+    return drp;
+  };
+
+  drp.colorFunction = function (_) {
+    if (!arguments.length) {return color.colorFn; }
+    color.colorFn = _;
     return drp;
   };
 

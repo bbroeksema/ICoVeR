@@ -1,5 +1,5 @@
 /*jslint browser: true, todo:true, nomen: true, indent: 2 */
-/*global d3, _*/
+/*global d3*/
 
 var list = this.list || {};
 
@@ -22,7 +22,6 @@ list.BarPlot = function () {
       if (!data) {return; }
       if (!data.contributions) {throw "BarPlot expects an 'contributions' property on the data"; }
       if (data.contributions.length === 0) {throw "BarPlot expects 'contributions' to contain data"; }
-      if (!data.variance) {throw "BarPlot expects an 'variance' property on the data"; }
       if (!data.component) {throw "BarPlot expects an 'component' property on the data"; }
 
       var svg = d3.select(this).selectAll("svg").data([data]);
@@ -61,13 +60,15 @@ list.BarPlot = function () {
 
     text = data.component + ": ";
 
-    if (selectedContributionSum !== 0) {
-      selectedContributionSum = selectedContributionSum / contributionSum * data.variance;
+    if (data.variance !== null) {
+      if (selectedContributionSum !== 0) {
+        selectedContributionSum = selectedContributionSum / contributionSum * data.variance;
 
-      text += Math.round(selectedContributionSum * 100) / 100 + "% / ";
+        text += Math.round(selectedContributionSum * 100) / 100 + "% / ";
+      }
+
+      text += Math.round(data.variance * 100) / 100 + "%";
     }
-
-    text += Math.round(data.variance * 100) / 100 + "%";
 
     //  Add the label
     label = gContributions.selectAll("text").data([data]);
