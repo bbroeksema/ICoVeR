@@ -71,28 +71,23 @@ angular.module('contigBinningApp.controllers')
 
     function updatePlot(data) {
       $scope.$apply(function () {
-        var analysis = data.analyses[0],
-          index;
+        var index;
 
         DimRedPlot.addProcessedData(data.processedData);
 
-        if (analysis.variableProjections !== undefined) {
-          createWrappedLabels(analysis.variableProjections);
+        if (data.variableProjections !== undefined) {
+          createWrappedLabels(data.variableProjections);
         }
-        if (analysis.individualProjections !== undefined) {
-          if (analysis.individualProjections.length > 1000) {
-            analysis.individualProjections = undefined;
-          } else {
-            createWrappedLabels(analysis.individualProjections);
-          }
+        if (data.individualProjections !== undefined) {
+          createWrappedLabels(data.individualProjections);
         }
 
-        index = _.findIndex($scope.analyses, {'method': analysis.method});
+        index = _.findIndex($scope.analyses, {'method': data.method});
 
         if (index === -1) {
-          $scope.analyses.push(analysis);
+          $scope.analyses.push(data);
         } else {
-          $scope.analyses[index] = analysis;
+          $scope.analyses[index] = data;
         }
 
         $scope.dimredplotWidth = "col-lg-" + (12 / $scope.analyses.length);

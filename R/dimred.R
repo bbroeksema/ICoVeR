@@ -80,7 +80,10 @@ p.plotdata <- function(dim.red.res, labels, processedData, type) {
     }
   }
 
+  # TODO: optimise processedData storage, currently it is a data.frame,
+  #       which means that every column name is present in every row
   analysis <- list(
+    processedData = processedData,
     variableProjections = p.projections(dim.red.res, column.results = varName),
     individualProjections = individualProjections,
     explainedVariance = dim.red.res$eig$"percentage of variance",
@@ -91,12 +94,7 @@ p.plotdata <- function(dim.red.res, labels, processedData, type) {
     analysis$individualProjections <- NULL
   }
 
-  # TODO: optimise processedData storage, currently it is a data.frame,
-  #       which means that every column name is present in every row
-  list(
-    processedData = processedData,
-    analyses = list(analysis)
-  )
+  analysis
 }
 
 # dimred.pca(vars = c("M4", "M20", "M28", "M36", "M40", "M44", "M48"))
@@ -163,7 +161,10 @@ p.mca.plotdata <- function(dim.red.res, labels, processedData, nd) {
     individualProjections <- NULL
   }
 
-  analysis = list(
+  # TODO: optimise processedData storage, currently it is a data.frame,
+  #       which means that every column name is present in every row
+  analysis <- list(
+    processedData = processedData,
     variableProjections = variableProjections,
     individualProjections = individualProjections,
     explainedVariance = dim.red.res$inertia.e[1:nd] * 100,
@@ -173,13 +174,8 @@ p.mca.plotdata <- function(dim.red.res, labels, processedData, nd) {
   if (!includeIndividuals) {
     analysis$individualProjections <- NULL
   }
-
-  # TODO: optimise processedData storage, currently it is a data.frame,
-  #       which means that every column name is present in every row
-  list(
-    processedData = processedData,
-    analyses = list(analysis)
-  )
+  
+  analysis
 }
 
 #dimred.mca(vars=c("Exposition", "Max_Lithol", "Max_Permea", "Max_Zumste", "climatic_class", "Geologie", "Soil", "Bodenzustand", "GrAndigkeit", "Lage_im_Relief", "Durchwurzelung", "WAlbung", "Tiefe_cm_A", "Horizont_A", "Bodenart_A", "Bodenfarbe_A", "Zeilung", "Bodenpflegesystem", "Art_der_Begrunung", "Unterstockbodenpflege", "Festigkeit_A", "Tiefe_cm_B", "Horizont_B", "Bodenart_B", "Bodenfarbe_B", "Festigkeit_B", "Unterlage", "Klon", "Bodenart"))
