@@ -2,11 +2,12 @@
 /*global angular, crpgl, list, d3, ocpu, _, $*/
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedPlotCtrl', function ($scope, $element, $window, DimRedPlot) {
+  .controller('DimRedPlotCtrl', function ($scope, $element, $window, DimRedPlot, DataSet) {
     'use strict';
-    /*jslint unparam:true*/
 
     var dimredplot = list.DimRedPlot();
+
+
 
     function changeSelection() {
       d3.select($element[0]).selectAll("div.dimredplot").call(dimredplot);
@@ -72,6 +73,26 @@ angular.module('contigBinningApp.controllers')
 
       resize();
     }
+
+    $scope.$on("Colors::changed", function (e, rowColors, colorFunction, variable) {
+      /*jslint unparam:true*/
+      DataSet.get([variable], function (rows) {
+        var variableValues = {};
+
+        _.each(rows, function (row) {
+          variableValues[row.row] = row[variable];
+        });
+
+        dimredplot
+          .colorFunction(function (d) {
+            return colorFunction(d);
+          })
+          .colorVariableName(variable)
+          .colorVariableValues(variableValues);
+
+        changeSelection();
+      });
+    });
 
     updatePlot();
   });
