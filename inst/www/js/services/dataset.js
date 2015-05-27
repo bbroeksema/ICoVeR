@@ -105,7 +105,7 @@ angular.module('contigBinningApp.services')
     }
 
     $rootScope.$on('DimRedPlot::analyticsAdded', function (e, variableName, analytics) {
-      var variableSchema = addVariable(variableName, "numeric", "Analytics");
+      var variableSchema = addVariable(variableName, analytics, "numeric", "Analytics");
       $rootScope.$broadcast("DataSet::analyticsDataAvailable", variableSchema);
     });
 
