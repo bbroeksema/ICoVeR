@@ -103,12 +103,8 @@ dimred.pca <- function(rows=c(), vars) {
   data <- res$data
 
   # Create a dataframe with normalised data, to be used for the calculation of influence
-  PCAmax <- apply(abs(data), 2, max)
-  PCAmin <- apply(abs(data), 2, min)
-  PCAextent <- PCAmax - PCAmin
-  processedData <- abs(data) - t(replicate(nrow(data), PCAmin))
-  processedData <- t(diag(1/PCAextent) %*% t(processedData))
-  processedData <- as.data.frame(processedData)
+  columnNorms <- apply(data, 2, function(x){sqrt(sum(x^2))})
+  processedData <- as.data.frame(t(t(data)/columnNorms))
 
   colnames(processedData) <- colnames(data)
   processedData$name <- rownames(data)
