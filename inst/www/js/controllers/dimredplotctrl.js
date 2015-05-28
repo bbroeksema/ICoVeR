@@ -75,7 +75,16 @@ angular.module('contigBinningApp.controllers')
     }
 
     $scope.$on("Colors::changed", function (e, rowColors, colorFunction, variable) {
-      /*jslint unparam:true*/
+      /*jslint unparam:true todo:true*/
+      var schema = _.find(DataSet.schema(), "name", variable);
+
+      // TODO: Currently there is no support for colour mapping categorical variables,
+      // so for now we will just ignore these. In the future we may just want to upgrade
+      // the colourmap chart or not show a colour map, just colour the points.
+      if (schema.type !== "numeric" && schema.type !== "integer") {
+        return;
+      }
+
       DataSet.get([variable], function (rows) {
         var variableValues = {};
 
@@ -84,9 +93,7 @@ angular.module('contigBinningApp.controllers')
         });
 
         dimredplot
-          .colorFunction(function (d) {
-            return colorFunction(d);
-          })
+          .colorFunction(colorFunction)
           .colorVariableName(variable)
           .colorVariableValues(variableValues);
 

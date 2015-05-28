@@ -207,6 +207,10 @@ angular.module('contigBinningApp.services')
        */
       data: currentDataSet,
 
+      schema: function () {
+        return d.backend.schema.slice();
+      },
+
       brushed: function () {
         if (d.brushed === undefined) {
           return [];
