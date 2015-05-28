@@ -95,7 +95,8 @@ angular.module('contigBinningApp.services')
           domain = d3.extent(data, function (datum) { return datum[colorVariable]; }),
           currentBin = 0,
           currentBinSize = 0,
-          lastValue;
+          lastValue,
+          colorStepValues = [];
 
         data.sort(function (a, b) {
           return +a[colorVariable] - +b[colorVariable];
@@ -103,22 +104,35 @@ angular.module('contigBinningApp.services')
 
         colorScheme = d.schemes.numeric.decile[colorScheme];
 
-        function colorFunction(datum) {
-          var value = datum[colorVariable];
+        _.each(data, function (row) {
+          var value = row[colorVariable];
 
           if (currentBinSize >= binSize && currentBin < 9 && value !== lastValue) {
             currentBin = currentBin + 1;
             currentBinSize = 0;
+
+            colorStepValues.push((value + lastValue) / 2);
           }
 
           currentBinSize = currentBinSize + 1;
           lastValue = value;
-          return colorScheme[currentBin];
-        }
 
-        _.each(data, function (datum) {
-          colored[datum.row] = colorFunction(datum);
+          colored[row.row] = colorScheme[currentBin];
         });
+
+        function colorFunction(value) {
+          var bin = 0;
+
+          _.each(colorStepValues, function (stepValue) {
+            if (value > stepValue) {
+              bin += 1;
+            } else {
+              return;
+            }
+          });
+
+          return colorScheme[bin];
+        }
 
         $rootScope.$broadcast("Colors::changed", colored, colorFunction, colorVariable, domain);
       });
