@@ -380,12 +380,7 @@ list.DimRedPlot = function () {
           .colorVariableName(color.variableName)
           .colorVariableValues(colorVariableValues);
       } else {
-        pointSizeScale.domain([0, 100]).range([2, datum.points.length * 3]);
-
-        scatterPlot
-          .pointSize(function (d) {
-            return pointSizeScale(xyContribution(d, datum));
-          });
+        scatterPlot.pointSize(function (d) { return xyContribution(d, datum); });
       }
 
       return scatterPlot;

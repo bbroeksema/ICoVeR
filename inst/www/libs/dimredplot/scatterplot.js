@@ -25,36 +25,27 @@ list.ScatterPlot = function () {
     return (d.xContribution * data.xVariance + d.yContribution * data.yVariance) / (data.xVariance + data.yVariance);
   }
 
-  function pointSizeFunction(value) {
+  function pointSizeFunction(value, scales) {
     if (pointSizeFn === null) {
       return 4;
     }
-    return pointSizeFn(value);
-  }
-
-  function pointExtentByContribution(data) {
-    var maxContribution = -1000,
-      maxDatum,
-      minContribution = 1000,
-      minDatum;
-
-    data.points.forEach(function (d) {
-      var contribution = xyContribution(d, data);
-      if (contribution > maxContribution) {
-        maxContribution = contribution;
-        maxDatum = d;
-      }
-      if (contribution < minContribution) {
-        minContribution = contribution;
-        minDatum = d;
-      }
-    });
-
-    return [minDatum, maxDatum];
+    return scales.size(pointSizeFn(value));
   }
 
   function updateScales(data, scales) {
     var domain, range;  // output range
+
+    // Update the size scale
+    if (pointSizeFn !== null) {
+      domain = d3.extent(data.points, function (d) { return pointSizeFn(d); });
+      range = [2, 10];
+      scales.size.domain(domain).range(range);
+
+      // pointMargin is used to make sure that none of the points overflow the plot space
+      pointMargin = 10;
+    } else {
+      pointMargin = 4;
+    }
 
     // Update the colormap scale
     if (color.useColouring) {
@@ -69,9 +60,6 @@ list.ScatterPlot = function () {
     // Update the color scale
     range = [0, 1];
     scales.color.domain(domain).range(range);
-
-    // Make sure that none of the points overflow the plot space
-    pointMargin = pointSizeFunction(pointExtentByContribution(data)[1]);
 
     // Update the x scale
     domain = d3.extent(data.points, function (d) { return d.x; }); // input domain
@@ -117,7 +105,8 @@ list.ScatterPlot = function () {
           x: d3.scale.linear(),
           y: d3.scale.linear(),
           colormap: d3.scale.linear(),
-          color: d3.scale.linear()
+          color: d3.scale.linear(),
+          size: d3.scale.linear()
         },
         selectCircleRadius = 40;
 
@@ -258,9 +247,11 @@ list.ScatterPlot = function () {
     ellipse.select("ellipse")
       .transition()
       .duration(1500)
-      .attr("rx", pointSizeFunction)
+      .attr("rx", function (d) {
+        return pointSizeFunction(d, scales);
+      })
       .attr("ry", function (d) {
-        return pointSizeFunction(d) / 4;
+        return pointSizeFunction(d, scales) / 4;
       })
       .attr("transform", function (d) {
         /*jslint unparam:true*/
@@ -454,10 +445,10 @@ list.ScatterPlot = function () {
       data.brushExtent = extent;
 
       data.points.forEach(function (d) {
-        var contribution = xyContribution(d, data);
+        var value = pointSizeFn(d);
         setNotSelected(d);
 
-        if (contribution >= extent[0] && contribution <= extent[1]) {
+        if (value >= extent[0] && value <= extent[1]) {
           setSelected(d);
         }
       });
@@ -500,18 +491,14 @@ list.ScatterPlot = function () {
       ellipses = [
         {
           y: 0,
-          size: 0
+          size: 10
         },
         {
           y: plotHeight,
-          size: 0
+          size: 2
         }
       ],
-      lines = [-1, 1],
-      pointExtent = pointExtentByContribution(data);
-
-    ellipses[0].size = pointSizeFn(pointExtent[1]);
-    ellipses[1].size = pointSizeFn(pointExtent[0]);
+      lines = [-1, 1];
 
     axis = d3.svg.axis()
       .scale(scales.colormap)
@@ -556,11 +543,11 @@ list.ScatterPlot = function () {
       .transition()
       .duration(1500)
       .attr("x1", function (mult) {
-        return plotWidth + 10 + mult * pointSizeFn(pointExtent[1]);
+        return plotWidth + 10 + mult * 10;
       })
       .attr("y1", 0)
       .attr("x2", function (mult) {
-        return plotWidth + 10 + mult * pointSizeFn(pointExtent[0]);
+        return plotWidth + 10 + mult * 2;
       })
       .attr("y2", plotHeight)
       .style("stroke-width", "1px")
@@ -575,16 +562,17 @@ list.ScatterPlot = function () {
     ellipses = gPoints.selectAll("ellipse.selection").data(data.points);
     ellipses.enter()
       .append("ellipse")
-      .attr("class", "selection")
+      .attr("class", "selection");
+    ellipses
       .attr("rx", function (d) {
-        return pointSizeFn(d);
+        return pointSizeFunction(d, scales);
       })
       .attr("ry", function (d) {
-        return pointSizeFn(d) / 4;
+        return pointSizeFunction(d, scales) / 4;
       })
       .attr("cx", plotWidth + 10)
       .attr("cy", function (d) {
-        return scales.colormap(xyContribution(d, data));
+        return scales.colormap(pointSizeFn(d));
       })
       .style("fill", "steelblue");
 
@@ -686,7 +674,8 @@ list.ScatterPlot = function () {
     colors = gPoints.selectAll("line.selection").data(data.points);
     colors.enter()
       .append("line")
-      .attr("class", "selection")
+      .attr("class", "selection");
+    colors
       .attr("x1", plotWidth + 3)
       .attr("y1", function (d) {
         return scales.colormap(color.variableValues[d.id]);
