@@ -65,23 +65,27 @@
         </div>
         <!-- Scatterplot -->
         <div id="charts" class="col-lg-11" ng-controller="ChartsCtrl">
-          <ul class="nav nav-tabs" role="tablist">
-            <li class="active"><a href="#dimRedPlot" role="tab" data-toggle="tab">Dimensionality Reduction Plot</a></li>
-            <li><a href="#twodmap" ng-hide="!location" role="tab" data-toggle="tab">2D map</a></li>
-          </ul>
-          <div id="chartsContent" class="tab-content row">
-            <div id="dimRedPlot" class="tab-pane container-fluid active" ng-class="dimredplotWidth" ng-repeat="analysis in analyses" ng-controller="DimRedPlotCtrl">
-            </div>
-            <div id="twodmap" ng-hide="!location" class="tab-pane container-fluid" ng-controller="MapCtrl">
-            </div>
-          </div>
+          <tabset>
+
+            <tab heading="Dimensionality Reduction Plot">
+              <div class="row" id="dimRedPlots">
+                <div id="dimRedPlot" class="tab-pane container-fluid active" ng-class="dimredplotWidth" ng-repeat="analysis in analyses" ng-controller="DimRedPlotCtrl">
+                </div>
+              </div>
+            </tab>
+
+            <tab heading="2D map" ng-hide="!location">
+              <div id="twodmap" class="tab-pane container-fluid" ng-controller="MapCtrl">
+              </div>
+            </tab>
+
+          </tabset>
         </div>
       </div>
     </div>
 
     <script src="libs/lodash/lodash-3.9.0.min.js"></script>
     <script src="libs/jquery/jquery-1.11.1.min.js"></script>
-    <script src="libs/bootstrap/js/bootstrap.js"></script>
     <script src="libs/opencpu/opencpu-0.5.js"></script>
     <script src="libs/d3/d3.min.js"></script>
     <script src="libs/d3/d3.svg.multibrush.js"></script>
@@ -94,7 +98,7 @@
     <script src="libs/dimredplot/colourmap.js"></script>
     <script src="libs/mapplot/mapplot.js"></script>
     <script src="libs/angularjs/angular-1.2.21.min.js"></script>
-    <script src="libs/ui-bootstrap/ui-bootstrap-tpls-0.11.0.min.js"></script>
+    <script src="libs/ui-bootstrap/ui-bootstrap-tpls-0.12.1.min.js"></script>
 
     <script src="js/app.js"></script>
     <script src="js/services/dataset.js"></script>
