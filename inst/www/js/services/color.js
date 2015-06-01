@@ -8,6 +8,7 @@ angular.module('contigBinningApp.services')
 
     var d = {
         dataSchema: undefined,
+        currentColorScheme: undefined,
         schemes: {
           numeric: {
             value: {
@@ -63,7 +64,8 @@ angular.module('contigBinningApp.services')
           colored[datum.row] = color(datum[colorVariable]);
         });
 
-        $rootScope.$broadcast("Colors::changed", colored, color, colorVariable, domain);
+        d.currentColorScheme = d.schemes.factor.value[colorScheme];
+        $rootScope.$broadcast("Colors::changed", colored, color, colorVariable);
       });
     }
 
@@ -82,7 +84,8 @@ angular.module('contigBinningApp.services')
           colored[datum.row] = color(datum[colorVariable]);
         });
 
-        $rootScope.$broadcast("Colors::changed", colored, color, colorVariable, domain);
+        d.currentColorScheme = d.schemes.numeric.value[colorScheme];
+        $rootScope.$broadcast("Colors::changed", colored, color, colorVariable);
       });
     }
 
@@ -92,7 +95,6 @@ angular.module('contigBinningApp.services')
       DataSet.get([colorVariable], function (data) {
         var colored = {},
           binSize = Math.round(data.length / 10),
-          domain = d3.extent(data, function (datum) { return datum[colorVariable]; }),
           currentBin = 0,
           currentBinSize = 0,
           lastValue,
@@ -134,7 +136,8 @@ angular.module('contigBinningApp.services')
           return colorScheme[bin];
         }
 
-        $rootScope.$broadcast("Colors::changed", colored, colorFunction, colorVariable, domain);
+        d.currentColorScheme = d.schemes.numeric.decile[colorScheme];
+        $rootScope.$broadcast("Colors::changed", colored, colorFunction, colorVariable);
       });
     }
 
@@ -163,9 +166,31 @@ angular.module('contigBinningApp.services')
       }
     }
 
+    function colorManual(colorVariable, colorScheme) {
+      var data = DataSet.data(),
+        rowColors = {},
+        colorFunction = function () {
+          return "steelblue";
+        };
+
+      _.forEach(data, function (row) {
+        rowColors[row.row] = "steelblue";
+      });
+
+      d.currentColorScheme = d.schemes.factor.value[colorScheme];
+
+      DataSet.addVariable("Manual selection", rowColors, "factor", "Colors", "steelblue");
+
+      $rootScope.$broadcast("Colors::changed", rowColors, colorFunction, colorVariable);
+    }
+
     /*jslint unparam: true */
     $rootScope.$on("DataSet::schemaLoaded", function (ev, schema) {
       d.dataSchema = schema;
+    });
+
+    $rootScope.$on("DataSet::initialDataLoaded", function () {
+      DataSet.addVariable("Manual selection", {}, "factor", "Colors", "steelblue");
     });
     /*jslint unparam: false */
 
@@ -177,12 +202,38 @@ angular.module('contigBinningApp.services')
       color: function (variable, colorMethod, colorScheme) {
         var type = variableType(variable);
         if (R.is.factor(type)) {
-          colorFactor(variable, colorMethod, colorScheme);
+          if (variable === "Manual selection") {
+            colorManual(variable, colorScheme);
+          } else {
+            colorFactor(variable, colorMethod, colorScheme);
+          }
         } else if (R.is.numeric(type)) {
           colorNumeric(variable, colorMethod, colorScheme);
         } else {
           throw type + " is an unsupported data type";
         }
+      },
+
+      colorScheme: function () {
+        return d.currentColorScheme;
+      },
+
+      colorBrushed: function (color) {
+        var rowColors = {};
+
+        DataSet.get(["Manual selection"], function (rows) {
+          _.forEach(rows, function (row) {
+            rowColors[row.row] = row["Manual selection"];
+          });
+        });
+
+        _.forEach(DataSet.brushed(), function (row) {
+          rowColors[row.row] = color;
+        });
+
+        DataSet.addVariable("Manual selection", rowColors, "factor", "Colors", "steelblue");
+
+        $rootScope.$broadcast("Colors::changed", rowColors, undefined, "Manual selection");
       },
 
       opacity: function (value) {

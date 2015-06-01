@@ -69,13 +69,13 @@ angular.module('contigBinningApp.controllers')
     $(document).ready(resize);
 
     /// Scope extensions
-    $scope.$on("Colors::changed", function (e, rowColors, colorFunction, variable, domain) {
+    $scope.$on("Colors::changed", function (e, rowColors, colorFunction, variable) {
       /*jslint unparam:true todo:true*/
       //$scope.renderColourmap = true;
       //TODO fix this so it actualles uses ng-show
       d3.select($element[0]).style("display", "block");
 
-      d.colourMapScale.domain(domain);
+      //d.colourMapScale.domain(domain);
       d.colourMap.scale(d.colourMapScale);
       d.colourMap.colourFunction(colorFunction);
 

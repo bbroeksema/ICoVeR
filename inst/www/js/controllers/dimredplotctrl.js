@@ -81,7 +81,7 @@ angular.module('contigBinningApp.controllers')
       // TODO: Currently there is no support for colour mapping categorical variables,
       // so for now we will just ignore these. In the future we may just want to upgrade
       // the colourmap chart or not show a colour map, just colour the points.
-      if (schema.type !== "numeric" && schema.type !== "integer") {
+      if (schema === undefined || (schema.type !== "numeric" && schema.type !== "integer")) {
         return;
       }
 

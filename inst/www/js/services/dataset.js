@@ -49,11 +49,13 @@ angular.module('contigBinningApp.services')
     function addVariable(name, rows, type, group, missingReplacement) {
       var variableSchema = {name: name, type: type, group: group, group_type: group, analysable: false},
         rowArray = [],
-        value;
+        value,
+        newVariable = false;
 
       if (d.backend.schemaIndex[name] === undefined) {
         d.backend.schema.push(variableSchema);
         d.backend.schemaIndex[name] = variableSchema;
+        newVariable = true;
       }
 
       d.data.full.forEach(function (datum, idx) {
@@ -65,7 +67,9 @@ angular.module('contigBinningApp.services')
         });
       }
 
-      $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
+      if (newVariable) {
+        $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
+      }
 
       // Tags need to be added to the actual database
       // Preferably, R should get a function addVariable and the DataSet should not have to care what
@@ -136,6 +140,7 @@ angular.module('contigBinningApp.services')
         _.each(data, function (datum, i) {
           d.data.full.index[datum.row] = i;
         });
+        $rootScope.$broadcast("DataSet::initialDataLoaded");
       } else {
         // For each item we retrieved
         _.each(data, function (datum) {
@@ -183,7 +188,10 @@ angular.module('contigBinningApp.services')
         return d.data.filtered.slice();
       }
 
-      return d.data.full.slice();
+      if (d.data !== undefined && d.data.full !== undefined) {
+        return d.data.full.slice();
+      }
+      return [];
     }
 
     function changeBrushed(rows, method) {

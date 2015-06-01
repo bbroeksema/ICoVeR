@@ -71,6 +71,15 @@ angular.module('contigBinningApp.controllers')
         return R.is.numeric(variable.type) || R.is.factor(variable.type);
       });
 
+      // Make sure that the manual selection option is on top
+      var manualIndex = _.findIndex($scope.variables, "name", "Manual selection"),
+        manualSelectionVar;
+
+      if (manualIndex !== -1) {
+        manualSelectionVar = $scope.variables[manualIndex];
+        $scope.variables.splice(manualIndex, 1);
+        $scope.variables.splice(0, 0, manualSelectionVar);
+      }
     }
 
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {

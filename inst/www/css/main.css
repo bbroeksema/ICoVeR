@@ -51,6 +51,13 @@ html, body {
   padding: 10px 15px;
 }
 
+.colorpatch {
+    display: block;
+    vertical-align: middle;
+    width: 37px;
+    height: 22px;
+}
+
 #SwitchOptions {
   float: right;
 }
