@@ -73,7 +73,7 @@ angular.module('contigBinningApp.controllers')
       $scope.$apply(function () {
         var index;
 
-        DimRedPlot.addProcessedData(data.processedData);
+        DimRedPlot.addProcessedData(data.method[0], data.processedData);
 
         if (data.variableProjections !== undefined) {
           createWrappedLabels(data.variableProjections);
