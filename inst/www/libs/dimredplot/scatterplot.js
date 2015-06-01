@@ -11,6 +11,8 @@ list.ScatterPlot = function () {
     svgMargins = { top: 20, bottom: 20, left: 35, right: 50 },
     pointMargin = 5,
     render = {},
+    unifyAxesScaling = true,
+    automaticResize = true,
     color = {
       colorFn: null,
       variableName: "contribution",
@@ -18,7 +20,7 @@ list.ScatterPlot = function () {
       useColouring: false
     },
     pointSizeFn = null,
-    events = d3.dispatch.apply(this, ["selectionEnd", "brushEnd"]),
+    events = d3.dispatch.apply(this, ["selectionEnd", "brushEnd", "resize"]),
     origin = { size: 25, visible: true};
 
   function xyContribution(d, data) {
@@ -32,8 +34,12 @@ list.ScatterPlot = function () {
     return scales.size(pointSizeFn(value));
   }
 
-  function updateScales(data, scales) {
-    var domain, range;  // output range
+  function updateScales(div, data, scales) {
+    var domain, range,  // output range
+      rangeRatio,
+      domainRatio,
+      rangeDiff,
+      domainDiff;
 
     // Update the size scale
     if (pointSizeFn !== null) {
@@ -78,6 +84,28 @@ list.ScatterPlot = function () {
     range = [size.height - svgMargins.top - svgMargins.bottom, 0];
     domain = [scales.y.invert(range[0]), scales.y.invert(range[1])];
     scales.y.domain(domain).range(range);
+
+    if (unifyAxesScaling) {
+      rangeRatio = (scales.x.range()[1] - scales.x.range()[0]) / (scales.y.range()[0] - scales.y.range()[1]);
+      domainDiff = (scales.x.domain()[1] - scales.x.domain()[0]) - rangeRatio * (scales.y.domain()[1] - scales.y.domain()[0]);
+
+      // Determine range that needs to be enlarged
+      if (domainDiff < 0) { // scales.x.domain needs to be enlarged
+        if (automaticResize) { // However, instead of enlarging we can also make the plot smaller
+          domainRatio = (scales.x.domain()[1] - scales.x.domain()[0]) / (scales.y.domain()[1] - scales.y.domain()[0]);
+          rangeDiff = Math.abs((scales.x.range()[1] - scales.x.range()[0]) - domainRatio * (scales.y.range()[0] - scales.y.range()[1]));
+
+          scales.x.range([scales.x.range()[0], scales.x.range()[1] - rangeDiff]);
+
+          render.changeDivWidth(div, data, scales);
+        } else {
+          domainDiff = Math.abs(domainDiff);
+          scales.x.domain([scales.x.domain()[0] - domainDiff / 2, scales.x.domain()[1] + domainDiff / 2]);
+        }
+      } else { // scales.y.domain need to be enlarged
+        scales.y.domain([scales.y.domain()[0] - domainDiff / 2, scales.y.domain()[1] + domainDiff / 2]);
+      }
+    }
   }
 
   function setSelected(point) {
@@ -98,17 +126,14 @@ list.ScatterPlot = function () {
 
   function sp(selection) {
     selection.each(function (data) {
-      var sortedPoints,
-        group,
-        svg,
+      var svg,
         scales = {
           x: d3.scale.linear(),
           y: d3.scale.linear(),
           colormap: d3.scale.linear(),
           color: d3.scale.linear(),
           size: d3.scale.linear()
-        },
-        selectCircleRadius = 40;
+        };
 
       if (!data) {return; }
       if (!data.points) {throw "ScatterPlot expects a 'points' property on the data"; }
@@ -126,81 +151,98 @@ list.ScatterPlot = function () {
         throw "If coloring is desired then both colorFunction and colorVariableValures have to be set";
       }
 
-      updateScales(data, scales);
+      updateScales(d3.select(this), data, scales);
 
-      if (data.flags.pointsChanged) {
-        svg.selectAll("g.points")
-          .attr("transform", "translate(" + svgMargins.left + ", " + svgMargins.top + ")");
-
-        data.points.forEach(function (point) {
-          point.hovered = false;
-        });
-
-        // The points are displayed from high contribution to low contribution
-        sortedPoints = data.points.slice();
-        sortedPoints.sort(function (d1, d2) {
-          var d1Contribution = -xyContribution(d1, data),
-            d2Contribution = -xyContribution(d2, data);
-
-          if (d1Contribution < d2Contribution) {
-            return -1;
-          }
-          if (d1Contribution > d2Contribution) {
-            return 1;
-          }
-          return 0;
-        });
-
-        // Add the necessary elements
-        render.resize(svg);
-        render.title(svg, data.title);
-        render.points(svg, data, scales);
-        render.axes(svg, scales);
-
-        render.origin(svg, scales);
-        render.interactionOverlay(svg, data, scales, selectCircleRadius);
-      }
-
-      if (color.useColouring) {
-        render.colormap(svg, data, scales);
-        render.selectionOnColormap(svg, data, scales);
-      } else if (pointSizeFn !== null) {
-        render.sizemap(svg, data, scales);
-        render.selectionOnSizemap(svg, data, scales);
-        render.sizemapBrush(svg, data, scales);
-      }
-
-      render.colorPoints(svg, data, scales);
-
-      if (data.flags.pointsChanged) {
-        // The creation of the label groups happens here because the labels need to be created after the points
-        group = svg.select("g.points").selectAll("g.pointlabel").data(sortedPoints);
-        group.enter()
-          .append("g")
-          .attr("class", "pointlabel")
-          .each(function () {
-            var self = d3.select(this);
-            self.append("rect")
-              .attr("class", "pointlabel");
-
-            self.append("line")
-              .attr("class", "pointlabel");
-
-            self.append("text")
-              .attr("pointer-events", "none")
-              .attr("class", "pointlabel")
-              .style("font-size", "10px");
-          })
-          .style("visibility", "hidden");
-
-        group.select("text")
-          .text(function (d) { return d.wrappedLabel; });
-
-        group.exit().remove();
-        //render.clusteredLabels(svg, data.points, scales);
-      }
+      render.scatterplot(svg, data, scales);
     });
   }
+
+  render.changeDivWidth = function (div, data, scales) {
+    var newWidth = svgMargins.left + svgMargins.right + (scales.x.range()[1] - scales.x.range()[0]);
+    div.style("width", newWidth + "px");
+
+    events.resize(sp, newWidth, data.idx);
+
+    size.width = newWidth;
+  };
+
+  render.scatterplot = function (svg, data, scales) {
+    var sortedPoints,
+      group,
+      selectCircleRadius = 40;
+
+    if (data.flags.pointsChanged) {
+      svg.selectAll("g.points")
+        .attr("transform", "translate(" + svgMargins.left + ", " + svgMargins.top + ")");
+
+      data.points.forEach(function (point) {
+        point.hovered = false;
+      });
+
+      // The points are displayed from high contribution to low contribution
+      sortedPoints = data.points.slice();
+      sortedPoints.sort(function (d1, d2) {
+        var d1Contribution = -xyContribution(d1, data),
+          d2Contribution = -xyContribution(d2, data);
+
+        if (d1Contribution < d2Contribution) {
+          return -1;
+        }
+        if (d1Contribution > d2Contribution) {
+          return 1;
+        }
+        return 0;
+      });
+
+      // Add the necessary elements
+      render.resize(svg);
+      render.title(svg, data.title);
+      render.points(svg, data, scales);
+      render.axes(svg, scales);
+
+      render.origin(svg, scales);
+      render.interactionOverlay(svg, data, scales, selectCircleRadius);
+    }
+
+    if (color.useColouring) {
+      render.colormap(svg, data, scales);
+      render.selectionOnColormap(svg, data, scales);
+    } else if (pointSizeFn !== null) {
+      render.sizemap(svg, scales);
+      render.selectionOnSizemap(svg, data, scales);
+      render.sizemapBrush(svg, data, scales);
+    }
+
+    render.colorPoints(svg, data, scales);
+
+    if (data.flags.pointsChanged) {
+      // The creation of the label groups happens here because the labels need to be created after the points
+      group = svg.select("g.points").selectAll("g.pointlabel").data(sortedPoints);
+      group.enter()
+        .append("g")
+        .attr("class", "pointlabel")
+        .each(function () {
+          var self = d3.select(this);
+          self.append("rect")
+            .attr("class", "pointlabel");
+
+          self.append("line")
+            .attr("class", "pointlabel");
+
+          self.append("text")
+            .attr("pointer-events", "none")
+            .attr("class", "pointlabel")
+            .style("font-size", "10px");
+        })
+        .style("visibility", "hidden");
+
+      group.select("text")
+        .text(function (d) { return d.wrappedLabel; });
+
+      group.exit().remove();
+      //render.clusteredLabels(svg, data.points, scales);
+    }
+  };
 
   render.resize = function (svg) {
     svg
@@ -482,7 +524,7 @@ list.ScatterPlot = function () {
   };
 
   // Renders a colormap with scale on the right side of the plot
-  render.sizemap = function (svg, data, scales) {
+  render.sizemap = function (svg, scales) {
     var gPoints = svg.select("g.points"),
       plotWidth = size.width - svgMargins.right - svgMargins.left,
       plotHeight = size.height - svgMargins.top - svgMargins.bottom,
@@ -509,9 +551,9 @@ list.ScatterPlot = function () {
       .append("g")
       .attr("class", "coloraxis");
     axisGroup
-      .attr("transform", "translate(" + (plotWidth + 20 - 1) + ", 0)")
       .transition()
       .duration(1500)
+      .attr("transform", "translate(" + (plotWidth + 20 - 1) + ", 0)")
       .call(axis);
 
     ellipses = gPoints.selectAll("ellipse.sizemap").data(ellipses);
@@ -564,6 +606,8 @@ list.ScatterPlot = function () {
       .append("ellipse")
       .attr("class", "selection");
     ellipses
+      .transition()
+      .duration(1500)
       .attr("rx", function (d) {
         return pointSizeFunction(d, scales);
       })
@@ -623,8 +667,13 @@ list.ScatterPlot = function () {
       .on("brushEnd", brushEnd);
 
     colourMapGroup = gPoints.selectAll("g.colourmap").data([true]);
-    colourMapGroup.enter().append("g").attr("class", "colourmap");
+    colourMapGroup.enter()
+      .append("g")
+      .attr("class", "colourmap")
+      .attr("transform", "translate(" + plotWidth + ", 0)"); // This line avoids animation on first render
     colourMapGroup
+      .transition()
+      .duration(1500)
       .attr("transform", "translate(" + plotWidth + ", 0)")
       .call(colourMap);
 
@@ -676,14 +725,16 @@ list.ScatterPlot = function () {
       .append("line")
       .attr("class", "selection");
     colors
-      .attr("x1", plotWidth + 3)
+      .transition()
+      .duration(1500)
       .attr("y1", function (d) {
         return scales.colormap(color.variableValues[d.id]);
       })
-      .attr("x2", plotWidth + 20 - 3)
       .attr("y2", function (d) {
         return scales.colormap(color.variableValues[d.id]);
       })
+      .attr("x1", plotWidth + 3)
+      .attr("x2", plotWidth + 20 - 3)
       .style("stroke-width", "1px")
       .style("stroke", "black");
 
@@ -1115,6 +1166,18 @@ list.ScatterPlot = function () {
   sp.pointSize = function (_) {
     if (!arguments.length) {return pointSizeFn; }
     pointSizeFn = _;
+    return sp;
+  };
+
+  sp.unifyAxesScaling = function (_) {
+    if (!arguments.length) {return unifyAxesScaling; }
+    unifyAxesScaling = _;
+    return sp;
+  };
+
+  sp.automaticResize = function (_) {
+    if (!arguments.length) {return automaticResize; }
+    automaticResize = _;
     return sp;
   };
 

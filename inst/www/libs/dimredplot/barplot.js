@@ -161,10 +161,17 @@ list.BarPlot = function () {
     brushGroup
       .on("mousemove", function () {
         var mouseX = d3.mouse(this)[0],
-          contributionIdx = Math.floor(mouseX / barWidth);
+          contributionIdx = Math.floor(mouseX / barWidth),
+          text = "";
+
+        if (data.variance !== null) {
+          text = " contribution: " + Math.round(data.contributions[contributionIdx].contribution * 100) / 100 + "%";
+        } else {
+          text = " " + Math.round(data.contributions[contributionIdx].contribution * 100) / 100;
+        }
 
         list.DimRedPlot.setTooltip(data.contributions[contributionIdx].label,
-          data.component + " contribution: " + Math.round(data.contributions[contributionIdx].contribution * 100) / 100 + "%");
+          data.component + text);
       })
       .on("mouseout", function () {
         list.DimRedPlot.removeTooltip();

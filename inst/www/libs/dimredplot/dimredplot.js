@@ -110,12 +110,12 @@ list.DimRedPlot = function () {
   var size = { width: 500, height: 500 },
     parts = {
       variancepercentage: {
-        width: 1.0,
         height: 0.05
       },
       scatterplot: {
-        width: 0.80,
+        maxWidth: 0.80,
         height: 0.95,
+        width: [0.40, 0.40],
         origin: { size: 25, visible: true }
       },
       contributions: {
@@ -126,6 +126,8 @@ list.DimRedPlot = function () {
     render = {},
     events = d3.dispatch.apply(this, ["changeVariableSelection", "changeIndividualSelection"]),
     actives = [{idx: 0, scroll: false}, {idx: 1, scroll: true}],
+    unifyAxesScaling = true,
+    automaticResize = false,
     contributionBrushExtents,
     colormapBrushExtent = {},
     color = {
@@ -184,15 +186,19 @@ list.DimRedPlot = function () {
   }
 
   render.dimredplot = function (div, data, flags) {
+    // We reset the scatterplot width here. This way any rerendering of other elements
+    // after this rerendering knows what the current scatterplot width is.
+    parts.scatterplot.width[0] = parts.scatterplot.maxWidth / 2;
+    parts.scatterplot.width[1] = parts.scatterplot.maxWidth / 2;
+
     render.variancePercentageBar(div, data);
-    render.scatterplot(div, data, flags);
     render.contributions(div, data);
+    render.scatterplot(div, data, flags);
   };
 
   render.scatterplot = function (div, data, flags) {
     var individualsPresent = data.individualProjections !== undefined,
       variablesPresent = data.variableProjections !== undefined,
-      scatterplotWidth = parts.scatterplot.width,
       plotdata = [
         {
           title: data.method[0].toUpperCase() + " projected individuals/rows",
@@ -202,7 +208,6 @@ list.DimRedPlot = function () {
           isInfluenced: false,
           isSelected: false,
           idx: 0,
-          colormap: "blueRed",//colorSelect1.node().value,
           brushExtent: [0, 0],
           flags: flags
         },
@@ -228,7 +233,6 @@ list.DimRedPlot = function () {
           xVariance: data.explainedVariance[actives[0].idx],
           yVariance: data.explainedVariance[actives[1].idx],
           idx: 0,
-          colormap: "blueRed",//colorSelect1.node().value,
           brushExtent: [0, 0],
           flags: flags
         }
@@ -299,10 +303,6 @@ list.DimRedPlot = function () {
       }
     }
 
-    if (variablesPresent && individualsPresent) {
-      scatterplotWidth /= 2;
-    }
-
     function brushed(sp, selected, idx, extent0, extent1) {
       /*jslint unparam:true*/
       var states = selections.variable;
@@ -339,19 +339,30 @@ list.DimRedPlot = function () {
 
     scatterPlotCharts = plotdata.map(function (datum) {
       var scatterPlot = list.ScatterPlot(),
-        pointSizeScale = d3.scale.linear(),
         colormap = d3.interpolateLab("green", "purple"),
         colorscale = d3.scale.linear(),
         colorVariableValues = {},
-        colorFn = null;
+        colorFn = null,
+        plotWidth = parts.scatterplot.maxWidth / 2;
 
       scatterPlot
         .height(size.height * parts.scatterplot.height)
-        .width(size.width * scatterplotWidth)
+        .width(size.width * plotWidth)
         .originVisible(parts.scatterplot.origin.visible)
         .originSize(parts.scatterplot.origin.size)
+        .unifyAxesScaling(unifyAxesScaling)
+        .automaticResize(automaticResize)
         .on("selectionEnd", select)
-        .on("brushEnd", brushed);
+        .on("brushEnd", brushed)
+        .on("resize", function (sp, newWidth, idx) {
+          /*jslint unparam:true*/
+          var currentWidth = size.width * plotWidth,
+            newWidthPercentage = plotWidth * (newWidth / currentWidth);
+
+          parts.scatterplot.width[idx] = Math.min(plotWidth, newWidthPercentage);
+
+          render.variancePercentageBar(div, data);
+        });
 
       if (datum.idx === 0 && individualsPresent) {
         // If the user did not specify a colormapping than we will create one based on contribution.
@@ -388,15 +399,17 @@ list.DimRedPlot = function () {
 
     scatterPlotDiv = div.selectAll("div.scatterplot").data(plotdata.filter(function (d) {
       return d.points.length !== 0;
-    }));
+    }).reverse());
     scatterPlotDiv
       .enter()
       .append("div")
       .attr("class", "scatterplot");
     scatterPlotDiv.exit().remove();
     scatterPlotDiv
-      .style("float", "left")
-      .style("width", 100 * scatterplotWidth + "%")
+      .style("float", "right")
+      .style("width", function (datum) {
+        return 100 * parts.scatterplot.width[datum.idx] + "%";
+      })
       .style("height", 100 * parts.scatterplot.height + "%")
       .style("outline-style", "solid")
       .style("outline-width", "1px")
@@ -477,7 +490,10 @@ list.DimRedPlot = function () {
       .append("div")
       .attr("class", "barplots")
       .style("position", "relative")
-      .style("float", "left");
+      .style("float", "right")
+      .style("outline-style", "solid")
+      .style("outline-width", "1px")
+      .style("outline-color", "#ddd");
     barplotsDiv
       .style("width", 100 * parts.contributions.width + "%")
       .style("height", 100 * parts.contributions.height + "%");
@@ -692,10 +708,11 @@ list.DimRedPlot = function () {
         }
       ],
       barPlot = list.VariancePercentagePlot(),
-      barPlotDiv;
+      barPlotDiv,
+      plotWidth = parts.scatterplot.width[0] + parts.scatterplot.width[1] + parts.contributions.width;
 
     barPlot
-      .width(size.width * parts.variancepercentage.width)
+      .width(size.width * plotWidth)
       .height(size.height * parts.variancepercentage.height)
       .on("rotate", function (drp, direction) {
         /*jslint unparam:true*/
@@ -762,8 +779,8 @@ list.DimRedPlot = function () {
       .attr("class", "variancepercentageplot");
     barPlotDiv.exit().remove();
     barPlotDiv
-      .style("float", "left")
-      .style("width", 100 * parts.variancepercentage.width + "%")
+      .style("float", "right")
+      .style("width", 100 * plotWidth + "%")
       .style("height", 100 * parts.variancepercentage.height + "%")
       .style("outline-style", "solid")
       .style("outline-width", "1px")
@@ -842,6 +859,18 @@ list.DimRedPlot = function () {
     influences.variable = _;
     resetContributionBrushExtents();
     colormapBrushExtent.variable = [0, 0];
+    return drp;
+  };
+
+  drp.unifyAxesScaling = function (_) {
+    if (!arguments.length) {return unifyAxesScaling; }
+    unifyAxesScaling = _;
+    return drp;
+  };
+
+  drp.automaticResize = function (_) {
+    if (!arguments.length) {return automaticResize; }
+    automaticResize = _;
     return drp;
   };
 

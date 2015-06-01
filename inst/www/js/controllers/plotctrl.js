@@ -99,7 +99,7 @@ angular.module('contigBinningApp.controllers')
         }
       });
 
-      $scope.$broadcast("DimRedPlot::resize");
+      $scope.$broadcast("DimRedPlot::resize", $scope.analyses.length);
     }
 
     $scope.$on("Analytics::dimensionalityReduced", function (ev, method, session) {

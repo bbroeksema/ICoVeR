@@ -27,7 +27,16 @@ angular.module('contigBinningApp.controllers')
       changeSelection();
     }
 
-    $scope.$on("DimRedPlot::resize", resize);
+    $scope.$on("DimRedPlot::resize", function (e, numOfPlots) {
+      /*jslint unparam:true*/
+      //if (numOfPlots === 1) {
+      //  dimredplot.automaticResize(true);
+      //} else {
+      dimredplot.automaticResize(false);
+      //}
+
+      resize();
+    });
 
     angular.element($window).bind('resize', resize);
     $(document).ready(resize);
