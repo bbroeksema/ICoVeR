@@ -73,14 +73,10 @@ angular.module('contigBinningApp.controllers')
 
     }
 
-    /*jslint unparam: true */
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
+      /*jslint unparam: true */
       updateVariables(schema);
       $scope.colorVariable = undefined;
-    });
-
-    $scope.$on('DataSet::influenceLoaded', function (e, schema) {
-      updateVariables(schema);
 
       var influenceSchemaIdx = _.findIndex(schema, {name: "influence"});
 
@@ -96,7 +92,6 @@ angular.module('contigBinningApp.controllers')
         }
       }
     });
-    /*jslint unparam: false */
 
     $scope.$watch('colorVariable', onVariableChange);
     $scope.$watch('colorMethod', onMethodChange);

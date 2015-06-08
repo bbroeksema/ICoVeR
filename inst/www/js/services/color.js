@@ -111,7 +111,6 @@ angular.module('contigBinningApp.services')
             currentBinSize = 0;
           }
 
-          colored[datum.row] = colorScheme[currentBin];
           currentBinSize = currentBinSize + 1;
           lastValue = value;
           return colorScheme[currentBin];

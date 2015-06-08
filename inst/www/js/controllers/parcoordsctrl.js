@@ -15,13 +15,16 @@ angular.module('contigBinningApp.controllers')
 
     /// private controller functions
     function render() {
-      $scope.brushed = [];
+      if ($scope.brushed === undefined || $scope.brushed.length !== 0) {
+        $scope.brushed = [];
+        DataSet.brush($scope.brushed);
+      }
+
       d.parcoords
         .brushReset()
         .autoscale()
         .updateAxes()
         .render();
-      DataSet.brush($scope.brushed);
     }
 
     function resize() {

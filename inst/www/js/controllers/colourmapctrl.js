@@ -82,15 +82,4 @@ angular.module('contigBinningApp.controllers')
       d.title.text(variable);
       resize();
     });
-
-    $scope.$on("ParCoords::influencesChanged", function (e, influencesCalculated) {
-      /*jslint unparam:true*/
-      $scope.influencesCalculated = influencesCalculated;
-      if (influencesCalculated) {
-        $scope.$apply();
-
-        d.colourMap.colourFunction(d3.interpolateLab("steelblue", "brown"));
-        resize();
-      }
-    });
   });

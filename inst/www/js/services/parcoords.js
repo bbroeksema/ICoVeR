@@ -84,6 +84,15 @@ angular.module('contigBinningApp.services')
     });
     /*jslint unparam: false */
 
+    $rootScope.$on("DimRedPlot::influenceRemoved", function () {
+      var influenceIdx = _.findIndex(d.selectedVariables, { name: "influence" });
+
+      if (influenceIdx !== -1) {
+        d.selectedVariables.splice(influenceIdx, 1);
+        d.updateSelectedVariables(d.selectedVariables);
+      }
+    });
+
     d.setHighlightFunction = function (highlightFunc) {
       d.highlightFunction = highlightFunc;
     };

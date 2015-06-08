@@ -39,7 +39,7 @@ angular.module('contigBinningApp.services')
       d.brushPredicate = predicate;
     });
 
-    $rootScope.$on('ParCoords::influenceAdded', function (e, influences) {
+    $rootScope.$on('DimRedPlot::influenceAdded', function (e, influences) {
       var influenceSchema = {name: "influence", type: "numeric", group: "Analytics", group_type: "Influences"};
 
       if (d.backend.schemaIndex.influence === undefined) {
@@ -56,13 +56,18 @@ angular.module('contigBinningApp.services')
         });
       }
 
-      $rootScope.$broadcast('DataSet::influenceLoaded', d.backend.schema);
+      $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
+      $rootScope.$broadcast("DataSet::analyticsDataAvailable", influenceSchema);
     });
 
-    $rootScope.$on('ParCoords::influenceRemoved', function () {
-      delete d.backend.schemaIndex.influence;
+    $rootScope.$on('DimRedPlot::influenceRemoved', function () {
+      var influenceIdx = _.findIndex(d.backend.schema, {name: "influence"});
 
-      $rootScope.$broadcast('DataSet::influenceLoaded', d.backend.schema);
+      if (influenceIdx !== -1) {
+        d.backend.schema.splice(influenceIdx, 1);
+        delete d.backend.schemaIndex.influence;
+        $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
+      }
     });
 
     // Listen to the analytics service to store the results of various
