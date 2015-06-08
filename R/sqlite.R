@@ -92,7 +92,7 @@ p.db.extend.schema <- function(name, type, group, group_type) {
   count <- unlist(DBI::dbGetQuery(con, q))
   if (count == 0) {
     values <- paste("'", c(name, type, group, group_type), "'", sep="", collapse=", ")
-    q <- paste("INSERT INTO schema VALUES(", values , ")", sep="")
+    q <- paste("INSERT INTO schema (name, type, group, group_type) VALUES(", values , ")", sep="")
     res <- DBI::dbSendQuery(con, q)
     DBI::dbClearResult(res)
   }
