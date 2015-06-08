@@ -2,11 +2,14 @@
 /*global angular */
 
 angular.module('contigBinningApp.controllers')
-  .controller('ClusterConfigCtrl', function ($scope, $modalInstance, options) {
+  .controller('ClusterConfigCtrl', function ($scope, $modalInstance, options, DataSet) {
 
     'use strict';
 
-    var previousCentersCount = 30;
+    // It is possible that there are less than 30 individuals, in which case we can not use 30 clusters.
+    // The default number of clusters in this case is less than the number of rows as it would otherwise,
+    // make no sense.
+    var previousCentersCount = Math.min(30, Math.floor(Math.sqrt(DataSet.data().length)));
 
     function updateControllerState() {
       $scope.specified.identifier = $scope.specified.method.name
@@ -23,8 +26,8 @@ angular.module('contigBinningApp.controllers')
 
     $scope.specified = {
       method: $scope.options.methods[0],
-      identifier: $scope.options.methods[0].name + '_30_0',
-      centers: 30, // NOTE: The naming is kmeans specific
+      identifier: $scope.options.methods[0].name + '_' + previousCentersCount + '_0',
+      centers: previousCentersCount, // NOTE: The naming is kmeans specific
       variables: []
     };
 
