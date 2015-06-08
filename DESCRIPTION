@@ -7,3 +7,4 @@ Author: Bertjan Broeksema <broeksem@lippman.lu>
 Maintainer: Bertjan Broeksema <broeksem@lippman.lu>
 Description: A simple test project to explore the R/OpenCPU/HTML5 stack.
 License: undecided
+LazyData: true
