@@ -18,13 +18,13 @@ angular.module('contigBinningApp.controllers')
     };
 
     $scope.reloadData = function() {
-      DataSet.load();
+      DataSet.filter(DataSet.FilterMethod.RESET);
     }
 
     $scope.$on('DataSet::loaded', function() { $scope.dataFiltered = false });
-    $scope.$on('DataSet::filtered', function() {
+    $scope.$on('DataSet::filtered', function(e, method) {
       $scope.filteringInProgress = false;
-      $scope.dataFiltered = true;
+      $scope.dataFiltered = method !== DataSet.FilterMethod.RESET;
     });
     $scope.$on('DataSet::brushed', function(e, extents) {
       $scope.itemsBrushed = Object.getOwnPropertyNames(extents).length > 0;

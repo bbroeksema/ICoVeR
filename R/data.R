@@ -1,15 +1,15 @@
-data(cstr.all)
 data(cstr.schema)
+data(cstr)
 
 data.schema <- function() {
   cstr.schema
 }
 
-data.get <- function(data = cstr.all, variables) {
+data.get <- function(data = cstr, variables) {
   data[ ,variables]
 }
 
-data.filter <- function(data = cstr.all, extents, method = "KEEP") {
+data.filter <- function(data = cstr, extents, method = "KEEP") {
   finalSelection <- as.logical(c(1:nrow(data)))
 
   methods <- list(
