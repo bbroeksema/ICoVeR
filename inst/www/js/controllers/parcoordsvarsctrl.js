@@ -32,6 +32,24 @@ angular.module('contigBinningApp.controllers')
       $scope.parcoords.updateSortingMethod(sortingMethod);
     });
 
+    $scope.openScaleBindDialog = function () {
+      var dialog = $modal.open({
+        templateUrl: 'js/templates/selectvars.html',
+        size: 'sm',
+        controller: 'VariableSelectionCtrl',
+        resolve: {
+          variables: function () {
+            return $scope.parcoords.selectedVariables;
+          },
+          selected: function () {
+            return $scope.parcoords.sharedScaleVariables;
+          }
+        }
+      });
+
+      dialog.result.then($scope.parcoords.shareScales);
+    };
+
     $scope.$watch("brushPredicate", function (newPredicate) {
       $scope.parcoords.updateBrushPredicate(newPredicate);
     });

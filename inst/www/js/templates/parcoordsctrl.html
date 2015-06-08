@@ -36,5 +36,16 @@
       </div>
     </div>
   </form>
-</div>
+  <form role="form" class="form-horizontal">
+    <div class="form-group">
+      <label class="col-sm-3 adjusted-right-padding control-label text-right">Share scale:</label>
 
+      <div class="col-sm-9 no-left-padding">
+        <button type="button" class="btn btn-default btn-sm"
+                ng-click="openScaleBindDialog()"
+                popover={{parcoords.scaleTextLong}}
+                popover-trigger="mouseenter">{{parcoords.scaleText}}</button>
+      </div>
+    </div>
+  </form>
+</div>

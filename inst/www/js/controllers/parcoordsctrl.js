@@ -250,6 +250,26 @@ angular.module('contigBinningApp.controllers')
       d.parcoords.render();
     });
 
+    $scope.$on("ParCoords::scaleSharingVariablesChanged", function () {
+      var dims = _.pluck(ParCoords.sharedScaleVariables, "name"),
+        domain = d.parcoords.scale(dims[0]).domain();
+
+      // First we determine the min/max required extents of the domain
+      domain = _.reduce(dims, function (widest, current) {
+        current = d.parcoords.scale(current).domain();
+        return [
+          Math.min(domain[0], current[0]),
+          Math.max(domain[1], current[1])
+        ];
+      }, domain);
+
+      // Next, we change the domain of the variables that have to share scale.
+      _.each(dims, function (dim) {
+        d.parcoords.scale(dim, domain);
+      });
+      d.parcoords.updateAxes();
+    });
+
     $scope.$on("ParCoords::brushPredicateChanged", function () {
       d.parcoords.brushPredicate(ParCoords.brushPredicate).render();
     });

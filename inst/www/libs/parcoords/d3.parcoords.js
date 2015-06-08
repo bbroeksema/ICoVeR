@@ -226,9 +226,14 @@ pc.autoscale = function() {
 };
 
 pc.scale = function(d, domain) {
-	yscale[d].domain(domain);
-
-	return this;
+  if (arguments.length >= 2) {
+    yscale[d].domain(domain);
+    return this;
+  } else if (arguments.length === 1) {
+    return yscale[d];
+  } else {
+    return yscale;
+  }
 };
 
 pc.flip = function(d) {

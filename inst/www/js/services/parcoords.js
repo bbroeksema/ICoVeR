@@ -13,8 +13,12 @@ angular.module('contigBinningApp.services')
         variables: [],         // List of variables that can be displayed in parcoords.
         selectedVariables: [], // List of variables currently displayed in parcoords.
 
-        selectionText: "",
-        selectionTextLong: "",
+        sharedScaleVariables: [], // List of variables for which the same scale should be used.
+        scaleText: "None",
+        scaleTextLong: "No variables share the same scale.",
+
+        selectionText: "None",
+        selectionTextLong: "None",
 
         variableSorting: "none",
 
@@ -60,6 +64,21 @@ angular.module('contigBinningApp.services')
       });
 
       d.updateSelectedVariables(variables);
+    };
+
+    d.shareScales = function (variables) {
+      var text = _.reduce(variables, function (str, variable) {
+        return str === "" ? variable.name : str + ", " + variable.name;
+      }, "");
+
+      if (text.length > "Select variables...".length) {
+        d.scaleTextLong = text;
+        text = variables.length + " variables share same scale";
+      }
+
+      d.scaleText = text;
+      d.sharedScaleVariables = variables;
+      $rootScope.$broadcast("ParCoords::scaleSharingVariablesChanged");
     };
 
     d.updateBrushPredicate = function (newPredicate) {
