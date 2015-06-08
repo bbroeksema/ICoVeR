@@ -1,0 +1,3 @@
+[submodule "inst/www/libs/dimredplot"]
+	path = inst/www/libs/dimredplot
+	url = git@utrecht.crpgl.lu:vizcomponents/dimredplot.git
