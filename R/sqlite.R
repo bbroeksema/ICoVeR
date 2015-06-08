@@ -1,6 +1,13 @@
+library(DBI)
 library(RSQLite)
 
 # Some private helper functions and variables (starting with p.db.)
+
+# Change this variable to switch data sets. It is expected that the data
+# directory contains the files:
+# - ${p.db.dataset}.rda
+# - ${p.db.dataset}.schema.rda
+p.db.dataset <- "cstr"
 
 # NOTE: The "cache" databse will be created as: /tmp/RParcoords/cache.db under
 #       linux. In order to make this work with the opencpu service a couple of
@@ -18,26 +25,24 @@ library(RSQLite)
 #          such two calls to data.schema() can yield different results. This
 #          doesn't happen when the opencpu cache is enabled, as it will cache
 #          results of a function for given parameter configuration.
-
 p.db.file.path <- paste(.Platform$file.sep, paste("tmp", "RParcoords", sep=.Platform$file.sep), sep="")
-p.db.file.name <- paste(p.db.file.path, "cache.db", sep=.Platform$file.sep)
+p.db.file.name <- paste(p.db.file.path, paste(p.db.dataset, "cache.db", sep="-"), sep=.Platform$file.sep)
 
 p.db.init <- function() {
-  data(cstr)
-  data(cstr.schema)
-  names(cstr.schema) <- c("name", "type", "group", "group_type")
-
   if (!file.exists(p.db.file.path)) {
     dir.create(p.db.file.path, recursive = T)
   }
 
+  data(list=list(p.db.dataset, paste(p.db.dataset, ".schema", sep="")))
+  mSchema <- .GlobalEnv[[paste(p.db.dataset, ".schema", sep="")]]
+  mData <- .GlobalEnv[[p.db.dataset]]
   # rownames(cstr) returns a vector of character, in the databse we actually
   # prefer to have it as integer
-  cstr$row <- as.integer(rownames(cstr))
+  mData$row <- as.integer(rownames(mData))
 
   con <- DBI::dbConnect(RSQLite::SQLite(), p.db.file.name)
-  DBI::dbWriteTable(con, "data", cstr, row.names=F)
-  DBI::dbWriteTable(con, "schema", cstr.schema, row.names=F)
+  DBI::dbWriteTable(con, "data", mData, row.names=F)
+  DBI::dbWriteTable(con, "schema", mSchema, row.names=F)
   DBI::dbDisconnect(con)
 }
 
