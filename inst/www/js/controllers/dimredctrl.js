@@ -138,9 +138,7 @@ angular.module('contigBinningApp.controllers')
     });
     /*jslint unparam: false */
 
-    $scope.$on('DataSet::filtered', function () {
-      $scope.configurationInvalid = $scope.selectedVariables.length === 0;
-    });
+    $scope.$on('DataSet::filtered', updateCaOnTnf);
 
     /*jslint unparam: true */
     $scope.$on('Analytics::dimRedMethodsAvailable', function (e, methods) {
