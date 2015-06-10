@@ -79,21 +79,10 @@
         </div>
         <!-- Scatterplot -->
         <div id="charts" class="col-lg-11" ng-controller="ChartsCtrl">
-          <tabset>
-
-            <tab heading="Dimensionality Reduction Plot">
-              <div class="row" id="dimRedPlots">
-                <div id="dimRedPlot" class="tab-pane container-fluid active" ng-class="dimredplotWidth" ng-repeat="analysis in analyses" ng-controller="DimRedPlotCtrl">
-                </div>
-              </div>
-            </tab>
-
-            <tab heading="2D map" ng-hide="!location">
-              <div id="twodmap" class="tab-pane container-fluid" ng-controller="MapCtrl">
-              </div>
-            </tab>
-
-          </tabset>
+          <div class="row" id="dimRedPlots">
+            <div id="dimRedPlot" class="tab-pane container-fluid active" ng-class="dimredplotWidth" ng-repeat="analysis in analyses" ng-controller="DimRedPlotCtrl">
+            </div>
+          </div>
         </div>
       </div>
     </div>
