@@ -21,7 +21,7 @@ angular.module('contigBinningApp.controllers')
         .style("height", "100%")
         .style("width", "100%");
       dimredplot
-        .width(div.node().clientWidth / dimredplot.length)
+        .width(div.node().clientWidth)
         .height(div.node().clientHeight);
 
       changeSelection();
