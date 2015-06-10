@@ -73,8 +73,15 @@ angular.module('contigBinningApp.controllers')
         $scope.variables = _.filter($scope.variables, function (variable) {
           return variable.analysable;
         });
-        $scope.selectedVariables = [];
-        updateSelectedVariables([]);
+
+        $scope.selectedVariables = _.filter($scope.variables, function (variable) {
+          return variable.group === "Tetra nucleotide frequencies";
+        });
+
+        updateSelectedVariables($scope.selectedVariables);
+        if ($scope.selectedVariables.length > 2) {
+          $scope.reduceDimensionality();
+        }
       }
     }
 
@@ -135,7 +142,9 @@ angular.module('contigBinningApp.controllers')
 
     /*jslint unparam: true */
     $scope.$on('Analytics::dimRedMethodsAvailable', function (e, methods) {
-      $scope.dimRedMethods = methods;
+      // ICoBiRe: For now we only suppor CA on (T|P)NF, so we filter out all
+      //          other dim. red. methods.
+      $scope.dimRedMethods = _.filter(methods, function (m) { return m.name === "ca"; });
       $scope.selectedDimRedMethod = $scope.dimRedMethods[0];
       setVariables();
     });
