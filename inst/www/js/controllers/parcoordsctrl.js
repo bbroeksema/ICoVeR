@@ -160,8 +160,10 @@ angular.module('contigBinningApp.controllers')
           brushed = brushed.length === d.parcoords.data().length ? [] : brushed;
           DataSet.brush(brushed, "parcoords");
 
-          setDimensions();
-          d.parcoords.render();
+          if (ParCoords.variableSorting !== "none") {
+            setDimensions();
+            d.parcoords.render();
+          }
         });
       })
       .on("axesreorder", function (variables) {
@@ -264,10 +266,11 @@ angular.module('contigBinningApp.controllers')
         brushed = d.parcoords.data();
       }
       d.parcoords.brushed(brushed);
-      d.parcoords.render();
 
-      setDimensions();
-      d.parcoords.render();
+      if (ParCoords.variableSorting !== "none") {
+        setDimensions();
+        d.parcoords.render();
+      }
     });
 
     $scope.$on("ParCoords::variableSortingChanged", function () {
