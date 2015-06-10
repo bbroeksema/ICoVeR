@@ -73,15 +73,6 @@ angular.module('contigBinningApp.controllers')
         $scope.variables = _.filter($scope.variables, function (variable) {
           return variable.analysable;
         });
-
-        $scope.selectedVariables = _.filter($scope.variables, function (variable) {
-          return variable.group === "Tetra nucleotide frequencies";
-        });
-
-        updateSelectedVariables($scope.selectedVariables);
-        if ($scope.selectedVariables.length > 2) {
-          $scope.reduceDimensionality();
-        }
       }
     }
 
@@ -128,6 +119,17 @@ angular.module('contigBinningApp.controllers')
       updateSelectedVariables(variables);
     });
 
+    function updateCaOnTnf() {
+      $scope.selectedVariables = _.filter($scope.variables, function (variable) {
+        return variable.group === "Tetra nucleotide frequencies";
+      });
+
+      updateSelectedVariables($scope.selectedVariables);
+      if ($scope.selectedVariables.length > 2) {
+        $scope.reduceDimensionality();
+      }
+    }
+
     /*jslint unparam: true */
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
       $scope.dataAvailable = true;
@@ -147,6 +149,7 @@ angular.module('contigBinningApp.controllers')
       $scope.dimRedMethods = _.filter(methods, function (m) { return m.name === "ca"; });
       $scope.selectedDimRedMethod = $scope.dimRedMethods[0];
       setVariables();
+      updateCaOnTnf();
     });
     /*jslint unparam: false */
 
