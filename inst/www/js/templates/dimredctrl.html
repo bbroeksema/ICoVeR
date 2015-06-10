@@ -6,13 +6,14 @@
            popover="Dimensionality Reduction"
            popover-trigger="mouseenter">Dim. Red:</label>
 
-    <div class="col-sm-3 no-left-padding adjusted-right-padding">
+    <div ng-if="dimRedMethods.length > 1"
+         class="col-sm-3 no-left-padding adjusted-right-padding">
       <select class="form-control input-sm"
-              ng-disabled="dimRedMethods.length <= 1"
               ng-model="selectedDimRedMethod"
               ng-options="method.name for method in dimRedMethods">
       </select>
     </div>
+
     <div class="col-sm-6 no-left-padding">
       <!-- disabled for now, we assume default settings
       <button type="button" class="btn btn-default btn-sm">
