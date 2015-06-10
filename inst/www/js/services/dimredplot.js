@@ -218,7 +218,7 @@ angular.module('contigBinningApp.services')
           selectedMeans[variable] /= selectedCount;
         }
         if (numOfRows !== selectedCount) {
-          nonSelectedMeans[variable] /= (d.processedData.pca.length - selectedCount);
+          nonSelectedMeans[variable] /= (numOfRows - selectedCount);
         }
         d.influences.variable[variable] = Math.abs(selectedMeans[variable] - nonSelectedMeans[variable]);
       });
