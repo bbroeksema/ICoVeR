@@ -11,8 +11,13 @@ list.VariancePercentagePlot = function () {
       width: 500,
       height: 500
     },
+    actives = {
+      first: 0,
+      second: 1,
+      lastChanged: "first"
+    },
     render = {},
-    events = d3.dispatch.apply(this, ["rotate", "selectVariance"]);
+    events = d3.dispatch.apply(this, ["activesChanged"]);
 
   function vpp(selection) {
     selection.each(function (data) {
@@ -45,15 +50,43 @@ list.VariancePercentagePlot = function () {
       idx,
       scroll = d3.behavior.zoom(),
       direction = scroll.scale(),
-      dragging = false,
-      draggedActive = 0,
-      draggedIdx = 0;
+      dragging,
+      draggedActive;
 
     scroll
       .translate([1, 1])
       .on("zoom", function () {
-        events.rotate(vpp, scroll.scale() > direction ? "up" : "down");
+        var scrollUp = scroll.scale() > direction,
+          addToActives = 0,
+          update = false;
+
         direction = scroll.scale();
+
+        function updateActive(active, other) {
+          var newActive = actives[active] + addToActives;
+
+          if (newActive >= 0 && newActive < data.variances.length && newActive !== actives[other]) {
+            actives[active] = newActive;
+            update = true;
+          }
+        }
+
+        // The ordering of the updateActive calls is important to make sure
+        // the two actives do not overlap
+        if (scrollUp) {
+          addToActives = 1;
+          updateActive("second", "first");
+          updateActive("first", "second");
+        } else {
+          addToActives = -1;
+          updateActive("first", "second");
+          updateActive("second", "first");
+        }
+
+        if (update) {
+          events.activesChanged(vpp);
+          render.variances(svg, data);
+        }
       });
 
     gVariances
@@ -114,20 +147,37 @@ list.VariancePercentagePlot = function () {
       })
       .style("pointer-events", "none");
 
+    function resetActiveRects() {
+      rect.classed("active", function (d, rectIdx) {
+        /*jslint unparam:true*/
+        return actives.first === rectIdx || actives.second === rectIdx;
+      });
+    }
+
+    function changeActives() {
+      // Make sure that the first active is always the x-axis
+      if (actives.first > actives.second) {
+        var tmp = actives.first;
+        actives.first = actives.second;
+        actives.second = tmp;
+
+        actives.lastChanged = actives.lastChanged === "first" ? "second" : "first";
+      }
+
+      events.activesChanged(vpp);
+    }
+
     function mouseUp(d, i) {
       /*jslint unparam:true*/
       if (dragging) {
         dragging = false;
-        events.selectVariance(vpp, draggedActive, draggedIdx);
+        actives.lastChanged = draggedActive;
+        changeActives();
       }
     }
 
     rect
       .classed("variance", true)
-      .classed("active", function (d, i) {
-        /*jslint unparam:true*/
-        return data.actives[0].idx === i || data.actives[1].idx === i;
-      })
       .on("mousemove", function (d, i) {
         list.DimRedPlot.setTooltip("Factor #" + (i + 1),
           "variance: " + Math.round(d * 100) / 100 + "%");
@@ -142,29 +192,31 @@ list.VariancePercentagePlot = function () {
       })
       .on("mouseenter", function (d, i) {
         /*jslint unparam:true*/
-        var nonDraggedActive = draggedActive === 0 ? 1 : 0;
-
-        if (dragging && data.actives[nonDraggedActive].idx !== i) {
-          draggedIdx = i;
-          rect.classed("active", function (d, rectIdx) {
-            /*jslint unparam:true*/
-            return rectIdx === i || data.actives[nonDraggedActive].idx === rectIdx;
-          });
+        if (dragging && actives.first !== i && actives.second !== i) {
+          actives[draggedActive] = i;
+          resetActiveRects();
         }
       })
       .on("mousedown", function (d, i) {
         /*jslint unparam:true*/
         d3.event.preventDefault();
 
-        if (data.actives[0].idx !== i && data.actives[1].idx !== i) {
-          events.selectVariance(vpp, +(Math.abs(data.actives[0].idx - i) >= Math.abs(data.actives[1].idx - i)), i);
+        if (actives.first !== i && actives.second !== i) {
+          var activeToChange = actives.lastChanged === "first" ? "second" : "first";
+
+          actives[activeToChange] = i;
+          actives.lastChanged = activeToChange;
+
+          changeActives();
+          render.variances(svg, data);
         } else {
+          draggedActive = actives.first === i ? "first" : "second";
           dragging = true;
-          draggedIdx = i;
-          draggedActive = +(data.actives[1].idx === i);
         }
       })
       .on("mouseup", mouseUp);
+
+    resetActiveRects();
   };
 
   vpp.width = function (_) {
@@ -176,6 +228,15 @@ list.VariancePercentagePlot = function () {
   vpp.height = function (_) {
     if (!arguments.length) {return size.height; }
     size.height = _;
+    return vpp;
+  };
+
+  vpp.actives = function (_) {
+    if (!arguments.length) {return actives; }
+    actives = _;
+    if (actives.lastChanged === undefined) {
+      actives.lastChanged = "first";
+    }
     return vpp;
   };
 

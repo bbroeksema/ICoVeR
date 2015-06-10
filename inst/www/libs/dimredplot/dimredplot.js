@@ -113,9 +113,12 @@ list.DimRedPlot = function () {
         height: 0.05
       },
       scatterplot: {
-        maxWidth: 0.80,
+        totalWidth: 0.80,
+        width: {
+          individual: 0.40,
+          variable: 0.40
+        },
         height: 0.95,
-        width: [0.40, 0.40],
         origin: { size: 25, visible: true }
       },
       contributions: {
@@ -125,7 +128,11 @@ list.DimRedPlot = function () {
     },
     render = {},
     events = d3.dispatch.apply(this, ["changeVariableSelection", "changeIndividualSelection"]),
-    actives = [{idx: 0, scroll: false}, {idx: 1, scroll: true}],
+    actives = {
+      first: 0,
+      second: 1,
+      lastChanged: "first"
+    },
     unifyAxesScaling = true,
     automaticResize = false,
     contributionBrushExtents,
@@ -177,6 +184,24 @@ list.DimRedPlot = function () {
         .attr("class", "dimredplot-tooltip")
         .append("strong");
 
+      function setStates(type) {
+        var projections = data[type + "Projections"];
+
+        if (projections === undefined) {
+          return;
+        }
+
+        projections.forEach(function (projection) {
+          if (selections[type][projection.id] === undefined) {
+            selections[type][projection.id] = list.selected.NONE;
+            influences[type][projection.id] = 0;
+          }
+        });
+      }
+
+      setStates("variable");
+      setStates("individual");
+
       div.selectAll("p").data([true]).enter().append("p");
 
       render.dimredplot(d3.select(this), data, {pointsChanged: true});
@@ -188,143 +213,172 @@ list.DimRedPlot = function () {
   render.dimredplot = function (div, data, flags) {
     // We reset the scatterplot width here. This way any rerendering of other elements
     // after this rerendering knows what the current scatterplot width is.
-    parts.scatterplot.width[0] = parts.scatterplot.maxWidth / 2;
-    parts.scatterplot.width[1] = parts.scatterplot.maxWidth / 2;
+    parts.scatterplot.width.individual = parts.scatterplot.totalWidth / 2;
+    parts.scatterplot.width.variable = parts.scatterplot.totalWidth / 2;
 
     render.variancePercentageBar(div, data);
+    render.scatterplots(div, data, flags);
     render.contributions(div, data);
-    render.scatterplot(div, data, flags);
   };
 
-  render.scatterplot = function (div, data, flags) {
+  render.scatterplots = function (div, data, flags) {
     var individualsPresent = data.individualProjections !== undefined,
       variablesPresent = data.variableProjections !== undefined,
-      plotdata = [
-        {
-          title: data.method[0].toUpperCase() + " projected individuals/rows",
-          points: [],
-          xVariance: data.explainedVariance[actives[0].idx],
-          yVariance: data.explainedVariance[actives[1].idx],
-          isInfluenced: false,
+      status = {
+        variable: {
           isSelected: false,
-          idx: 0,
-          brushExtent: [0, 0],
-          flags: flags
+          isInfluenced: false
         },
-        {
-          title: data.method[0].toUpperCase() + " projected variables/columns",
-          points: [
-              /* Structure:
-              {
-                x: 0,
-                y: 0,
-                xContribution: 0,
-                yContribution: 0,
-                label: "",
-                mass: 0,
-                wrappedLabel: "",
-                selected: false,
-                brushed: false,
-                influence: 0
-              }*/
-          ],
-          isInfluenced: false,
+        individual: {
           isSelected: false,
-          xVariance: data.explainedVariance[actives[0].idx],
-          yVariance: data.explainedVariance[actives[1].idx],
-          idx: 0,
-          brushExtent: [0, 0],
-          flags: flags
+          isInfluenced: false
         }
-      ],
-      scatterPlotCharts,
-      scatterPlotDiv;
+      };
 
-    plotdata.forEach(function (d, i) {
-      /*jslint unparam:true*/
-      plotdata[i].idx = i;
-    });
+    function checkStatus(type, otherType) {
+      var item;
 
-    // Initialise the plot data
-    function initPlotdata(plotData, fillData, component) {
-      var xContributionSum = 0,
-        yContributionSum = 0;
-
-      fillData.forEach(function (d) {
-        var influence = influences[component][d.id],
-          label = d.id;
-
-        if (d.label !== undefined) {
-          label = d.label;
+      for (item in selections[type]) {
+        if (selections[type].hasOwnProperty(item)) {
+          if (selections[type][item] !== list.selected.NONE) {
+            status[type].isSelected = true;
+            status[otherType].isInfluenced = true;
+            break;
+          }
         }
-
-        plotData.points.push({
-          x: d.coord[actives[0].idx],
-          y: d.coord[actives[1].idx],
-          xContribution: d.contrib[actives[0].idx],
-          yContribution: d.contrib[actives[1].idx],
-          label: label,
-          id: d.id,
-          mass: d.mass,
-          wrappedLabel: d.wrappedLabel,
-          selected: selections[component][d.id],
-          influence: influence
-        });
-        if (selections[component][d.id] !== list.selected.NONE) {
-          plotData.isSelected = true;
-        }
-
-        xContributionSum += d.contrib[actives[0].idx];
-        yContributionSum += d.contrib[actives[1].idx];
-      });
-
-      plotData.points.forEach(function (d) {
-        d.xContribution /= xContributionSum / 10000;
-        d.yContribution /= yContributionSum / 10000;
-        d.xContribution = Math.round(d.xContribution) / 100;
-        d.yContribution = Math.round(d.yContribution) / 100;
-      });
-
-      if (!plotData.isInfluenced) {
-        plotData.brushExtent = colormapBrushExtent[component];
       }
+    }
+
+    checkStatus("variable", "individual");
+
+    if (!individualsPresent) {
+      parts.scatterplot.width.variable = parts.scatterplot.totalWidth;
+      parts.scatterplot.width.individual = 0;
     }
 
     if (individualsPresent) {
-      initPlotdata(plotdata[0], data.individualProjections, "individual");
-      if (plotdata[0].isSelected) {
-        plotdata[1].isInfluenced = true;
+      if (status.variable.isSelected === false) {
+        checkStatus("individual", "variable");
       }
+
+      render.scatterplot(div, data, "individual", status.individual, flags);
     }
+
     if (variablesPresent) {
-      initPlotdata(plotdata[1], data.variableProjections, "variable");
-      if (plotdata[1].isSelected) {
-        plotdata[0].isInfluenced = true;
+      render.scatterplot(div, data, "variable", status.variable, flags);
+    }
+  };
+
+  render.scatterplot = function (div, data, type, status, flags) {
+    var plotdatum = {
+        title: data.method[0].toUpperCase() + " projected " + type + "s",
+        points: [
+        /* Structure:
+          {
+            x: 0,
+            y: 0,
+            xContribution: 0,
+            yContribution: 0,
+            label: "",
+            mass: 0,
+            wrappedLabel: "",
+            selected: false,
+            brushed: false,
+            influence: 0
+          }*/
+        ],
+        xVariance: data.explainedVariance[actives.first],
+        yVariance: data.explainedVariance[actives.second],
+        isInfluenced: status.isInfluenced,
+        isSelected: status.isSelected,
+        idx: 0,
+        brushExtent: [0, 0],
+        flags: flags
+      },
+      projections = data[type + "Projections"],
+      plotWidth = parts.scatterplot.width[type],
+      scatterPlotChart = list.ScatterPlot(),
+      scatterPlotDiv,
+      projectionDomain = {
+        x: [10000, -10000],
+        y: [10000, -10000]
+      },
+      xContributionSum = 0,
+      yContributionSum = 0,
+      colormap = d3.interpolateLab("green", "purple"),
+      colorscale = d3.scale.linear(),
+      colorVariableValues = {},
+      colorFn = null;
+
+    // Initialise the plot data
+    projections.forEach(function (projection) {
+      var influence = influences[type][projection.id],
+        label = projection.id;
+
+      if (projection.label !== undefined) {
+        label = projection.label;
       }
+
+      if (unifyAxesScaling) {
+        // Calculate the domains used when using uniform domains
+        projection.coord.forEach(function (coord, coordIdx) {
+          // We can skip the first projection, since the y-axis cannot show the first eigenvector
+          if (coordIdx !== 0) {
+            projectionDomain.y[0] = Math.min(projectionDomain.y[0], coord);
+            projectionDomain.y[1] = Math.max(projectionDomain.y[1], coord);
+          }
+          // We can skip the last projection, since the x-axis cannot show the last eigenvector
+          if (coordIdx !== projection.coord.length - 1) {
+            projectionDomain.x[0] = Math.min(projectionDomain.x[0], coord);
+            projectionDomain.x[1] = Math.max(projectionDomain.x[1], coord);
+          }
+        });
+      }
+
+      // Fill plotdata
+      plotdatum.points.push({
+        x: projection.coord[actives.first],
+        y: projection.coord[actives.second],
+        xContribution: projection.contrib[actives.first],
+        yContribution: projection.contrib[actives.second],
+        label: label,
+        id: projection.id,
+        mass: projection.mass,
+        wrappedLabel: projection.wrappedLabel,
+        selected: selections[type][projection.id],
+        influence: influence
+      });
+
+      xContributionSum += projection.contrib[actives.first];
+      yContributionSum += projection.contrib[actives.second];
+    });
+
+    plotdatum.points.forEach(function (d) {
+      d.xContribution /= xContributionSum / 10000;
+      d.yContribution /= yContributionSum / 10000;
+      d.xContribution = Math.round(d.xContribution) / 100;
+      d.yContribution = Math.round(d.yContribution) / 100;
+    });
+
+    if (!plotdatum.isInfluenced) {
+      plotdatum.brushExtent = colormapBrushExtent[type];
     }
 
     function brushed(sp, selected, idx, extent0, extent1) {
       /*jslint unparam:true*/
-      var states = selections.variable;
-
-      if (idx === 0) {
-        states = selections.individual;
-
-      }
-
-      plotdata[idx].points.forEach(function (point, pointIdx) {
+      plotdatum.points.forEach(function (point, pointIdx) {
         if (selected[pointIdx]) {
-          list.selectByPoint(states, point.id);
+          list.selectByPoint(selections[type], point.id);
         } else {
-          list.deselectByPoint(states, point.id);
+          list.deselectByPoint(selections[type], point.id);
         }
       });
 
-      if (idx === 0) {
-        colormapBrushExtent.individual = [extent0, extent1];
+      colormapBrushExtent[type] = [extent0, extent1];
+
+      if (type === "individual") {
         events.changeIndividualSelection(drp);
       } else {
-        colormapBrushExtent.variable = [extent0, extent1];
         events.changeVariableSelection(drp);
       }
     }
@@ -337,87 +391,80 @@ list.DimRedPlot = function () {
       return (d.xContribution * data.xVariance + d.yContribution * data.yVariance) / (data.xVariance + data.yVariance);
     }
 
-    scatterPlotCharts = plotdata.map(function (datum) {
-      var scatterPlot = list.ScatterPlot(),
-        colormap = d3.interpolateLab("green", "purple"),
-        colorscale = d3.scale.linear(),
-        colorVariableValues = {},
-        colorFn = null,
-        plotWidth = parts.scatterplot.maxWidth / 2;
+    scatterPlotChart
+      .height(size.height * parts.scatterplot.height)
+      .width(size.width * plotWidth)
+      .originVisible(parts.scatterplot.origin.visible)
+      .originSize(parts.scatterplot.origin.size)
+      .unifyAxesScaling(true) // In the case of scatterplot this just refers two the shown axes
+      .automaticResize(automaticResize)
+      .on("selectionEnd", select)
+      .on("brushEnd", brushed)
+      .on("resize", function (sp, newWidth) {
+        /*jslint unparam:true*/
+        var currentWidth = size.width * plotWidth,
+          newWidthPercentage = plotWidth * (newWidth / currentWidth);
 
-      scatterPlot
-        .height(size.height * parts.scatterplot.height)
-        .width(size.width * plotWidth)
-        .originVisible(parts.scatterplot.origin.visible)
-        .originSize(parts.scatterplot.origin.size)
-        .unifyAxesScaling(unifyAxesScaling)
-        .automaticResize(automaticResize)
-        .on("selectionEnd", select)
-        .on("brushEnd", brushed)
-        .on("resize", function (sp, newWidth, idx) {
-          /*jslint unparam:true*/
-          var currentWidth = size.width * plotWidth,
-            newWidthPercentage = plotWidth * (newWidth / currentWidth);
+        parts.scatterplot.width[type] = Math.min(plotWidth, newWidthPercentage);
 
-          parts.scatterplot.width[idx] = Math.min(plotWidth, newWidthPercentage);
+        render.variancePercentageBar(div, data);
+      });
 
-          render.variancePercentageBar(div, data);
+    if (unifyAxesScaling) {
+      scatterPlotChart.showAxes(false);
+      scatterPlotChart.xDomain(projectionDomain.x);
+      scatterPlotChart.yDomain(projectionDomain.y);
+    }
+
+    if (type === "individual") {
+      // If the user did not specify a colormapping than we will create one based on contribution.
+      if (color.variableValues === null) {
+        plotdatum.points.forEach(function (point) {
+          colorVariableValues[point.id] = xyContribution(point, plotdatum);
         });
-
-      if (datum.idx === 0 && individualsPresent) {
-        // If the user did not specify a colormapping than we will create one based on contribution.
-        if (color.variableValues === null) {
-          datum.points.forEach(function (point) {
-            colorVariableValues[point.id] = xyContribution(point, datum);
-          });
-        } else {
-          colorVariableValues = color.variableValues;
-        }
-
-        if (color.colorFn === null) {
-          colorscale
-            .domain(d3.extent(datum.points, function (point) { return colorVariableValues[point.id]; }))
-            .range([0, 1]);
-
-          colorFn = function (datum) {
-            return colormap(colorscale(datum));
-          };
-        } else {
-          colorFn = color.colorFn;
-        }
-
-        scatterPlot
-          .colorFunction(colorFn)
-          .colorVariableName(color.variableName)
-          .colorVariableValues(colorVariableValues);
       } else {
-        scatterPlot.pointSize(function (d) { return xyContribution(d, datum); });
+        colorVariableValues = color.variableValues;
       }
 
-      return scatterPlot;
-    });
+      if (color.colorFn === null) {
+        colorscale
+          .domain(d3.extent(plotdatum.points, function (point) { return colorVariableValues[point.id]; }))
+          .range([0, 1]);
 
-    scatterPlotDiv = div.selectAll("div.scatterplot").data(plotdata.filter(function (d) {
-      return d.points.length !== 0;
-    }).reverse());
+        colorFn = function (datum) {
+          return colormap(colorscale(datum));
+        };
+      } else {
+        colorFn = color.colorFn;
+      }
+
+      scatterPlotChart
+        .colorFunction(colorFn)
+        .colorVariableName(color.variableName)
+        .colorVariableValues(colorVariableValues);
+    } else {
+      // The sqrt is needed because the pointSize function is used for ellipse radius, but we want to encode
+      // something in area
+      scatterPlotChart.pointSize(function (d) { return Math.sqrt(xyContribution(d, plotdatum)); });
+    }
+
+    scatterPlotDiv = div.selectAll("div." + type + ".scatterplot").data([plotdatum]);
     scatterPlotDiv
       .enter()
       .append("div")
-      .attr("class", "scatterplot");
+      .attr("class", type + " scatterplot");
     scatterPlotDiv.exit().remove();
     scatterPlotDiv
-      .style("float", "right")
+      .style("display", "inline-block")
+      .style("vertical-align", "top")
       .style("width", function (datum) {
-        return 100 * parts.scatterplot.width[datum.idx] + "%";
+        return 100 * parts.scatterplot.width[type] + "%";
       })
       .style("height", 100 * parts.scatterplot.height + "%")
       .style("outline-style", "solid")
       .style("outline-width", "1px")
       .style("outline-color", "#ddd")
-      .each(function (datum) {
-        /*jslint unparam:true*/
-        d3.select(this).call(scatterPlotCharts[datum.idx]);
-      });
+      .call(scatterPlotChart);
   };
 
   render.contributions = function (div, data) {
@@ -425,7 +472,7 @@ list.DimRedPlot = function () {
     var plotdata = [
         {
           component: "x",
-          variance: data.explainedVariance[actives[0].idx],
+          variance: data.explainedVariance[actives.first],
           contributions: [],
           index: 0,
           brushExtent: contributionBrushExtents[0],
@@ -433,7 +480,7 @@ list.DimRedPlot = function () {
         },
         {
           component: "y",
-          variance: data.explainedVariance[actives[1].idx],
+          variance: data.explainedVariance[actives.second],
           contributions: [],
           index: 1,
           brushExtent: contributionBrushExtents[1],
@@ -441,7 +488,7 @@ list.DimRedPlot = function () {
         },
         {
           component: "x+y",
-          variance: data.explainedVariance[actives[0].idx] + data.explainedVariance[actives[1].idx],
+          variance: data.explainedVariance[actives.first] + data.explainedVariance[actives.second],
           contributions: [],
           index: 2,
           brushExtent: contributionBrushExtents[2],
@@ -489,8 +536,8 @@ list.DimRedPlot = function () {
     barplotsDiv.enter()
       .append("div")
       .attr("class", "barplots")
-      .style("position", "relative")
-      .style("float", "right")
+      .style("display", "inline-block")
+      .style("text-align", "left")
       .style("outline-style", "solid")
       .style("outline-width", "1px")
       .style("outline-color", "#ddd");
@@ -519,8 +566,8 @@ list.DimRedPlot = function () {
         return contribution * data.explainedVariance[contributionIdx];
       });
 
-      contribution1 = contributions[actives[0].idx];
-      contribution2 = contributions[actives[1].idx];
+      contribution1 = contributions[actives.first];
+      contribution2 = contributions[actives.second];
 
       xSum += contribution1;
       ySum += contribution2;
@@ -569,11 +616,7 @@ list.DimRedPlot = function () {
     controlDiv = barplotsDiv.selectAll("div.sortcontrol").data([true]);
     controlDiv.enter()
       .append("div")
-      .attr("class", "sortcontrol")
-      .style("position", "absolute")
-      .style("bottom", 0)
-      .style("left", 0)
-      .style("width", "100%");
+      .attr("class", "sortcontrol");
 
     selectionSortCheck = controlDiv.selectAll("input#selectionSort").data([true]);
     selectionSortCheck.enter()
@@ -595,7 +638,7 @@ list.DimRedPlot = function () {
     sortSelect.enter()
       .append("select")
       .attr("id", "sort")
-      .style("width", "100%")
+      .style("width", "98%")
       .each(function () {
         var elem = d3.select(this);
         elem.append("option").attr("value", "x").text("Sort on x");
@@ -689,12 +732,11 @@ list.DimRedPlot = function () {
     barplotDiv
       .enter()
       .insert("div", "div.sortcontrol")
-      .attr("class", "barplot")
-      .style("float", "left");
+      .attr("class", "barplot");
     barplotDiv.exit().remove();
     barplotDiv
       .style("width", "100%")
-      .style("height", 100 / (plotdata.length + 1) + "%")
+      .style("height", "calc((100% - " + controlDiv.node().clientHeight + "px) / " + plotdata.length + ")")
       .call(barplot);
 
     barplotDiv.exit().remove();
@@ -703,69 +745,19 @@ list.DimRedPlot = function () {
   render.variancePercentageBar = function (div, data) {
     var plotdata = [
         {
-          variances: data.explainedVariance,
-          actives: actives
+          variances: data.explainedVariance
         }
       ],
       barPlot = list.VariancePercentagePlot(),
       barPlotDiv,
-      plotWidth = parts.scatterplot.width[0] + parts.scatterplot.width[1] + parts.contributions.width;
+      plotWidth = parts.scatterplot.width.individual + parts.scatterplot.width.variable + parts.contributions.width;
 
     barPlot
       .width(size.width * plotWidth)
       .height(size.height * parts.variancepercentage.height)
-      .on("rotate", function (drp, direction) {
-        /*jslint unparam:true*/
-        var update = false,
-          addToActives = 0,
-          newActives;
-
-        if (direction === "up") {
-          addToActives = 1;
-          update = true;
-        } else if (direction === "down") {
-          addToActives = -1;
-          update = true;
-        }
-
-        if (update) {
-          newActives = actives.map(function (d) {
-            var newIdx = d.idx + addToActives;
-            if (!d.scroll || newIdx < 0 || newIdx >= data.explainedVariance.length) {
-              newIdx = d.idx;
-            }
-            return {idx: newIdx, scroll: d.scroll};
-          });
-
-          if (newActives[0].idx !== newActives[1].idx) {
-            actives = newActives;
-          }
-
-          resetContributionBrushExtents();
-          resetColormapBrushExtent();
-          render.dimredplot(div, data, {pointsChanged: true});
-        }
-      })
-      .on("selectVariance", function (drp, activeIdx, varianceIdx) {
-        /*jslint unparam:true*/
-        var tmpActive;
-
-        if (actives[activeIdx].idx === varianceIdx) {
-          return;
-        }
-
-        if (actives[activeIdx === 0 ? 1 : 0].idx === varianceIdx) {
-          return;
-        }
-
-        actives[activeIdx].idx = varianceIdx;
-
-        // The actives should always be ordered left to right
-        if (actives[0].idx > actives[1].idx) {
-          tmpActive = actives[0].idx;
-          actives[0].idx = actives[1].idx;
-          actives[1].idx = tmpActive;
-        }
+      .actives(actives)
+      .on("activesChanged", function () {
+        actives = barPlot.actives();
 
         resetContributionBrushExtents();
         resetColormapBrushExtent();
@@ -779,7 +771,7 @@ list.DimRedPlot = function () {
       .attr("class", "variancepercentageplot");
     barPlotDiv.exit().remove();
     barPlotDiv
-      .style("float", "right")
+      .style("margin-left", 100 * (1 - plotWidth) + "%")
       .style("width", 100 * plotWidth + "%")
       .style("height", 100 * parts.variancepercentage.height + "%")
       .style("outline-style", "solid")

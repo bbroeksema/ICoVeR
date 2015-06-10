@@ -11,6 +11,9 @@ list.ScatterPlot = function () {
     svgMargins = { top: 20, bottom: 20, left: 35, right: 50 },
     pointMargin = 5,
     render = {},
+    xDomain = null,
+    yDomain = null,
+    showAxes = true,
     unifyAxesScaling = true,
     automaticResize = true,
     color = {
@@ -68,22 +71,26 @@ list.ScatterPlot = function () {
     scales.color.domain(domain).range(range);
 
     // Update the x scale
-    domain = d3.extent(data.points, function (d) { return d.x; }); // input domain
+    if (xDomain === null) {
+      xDomain = d3.extent(data.points, function (d) { return d.x; }); // input domain
+    }
     range = [pointMargin, size.width - svgMargins.right - svgMargins.left - pointMargin];  // output range
-    scales.x.domain(domain).range(range);
+    scales.x.domain(xDomain).range(range);
     // Use the created scale to update the scale in order to have it span the entire plot
     range = [0, size.width - svgMargins.right - svgMargins.left];
-    domain = [scales.x.invert(range[0]), scales.x.invert(range[1])];
-    scales.x.domain(domain).range(range);
+    xDomain = [scales.x.invert(range[0]), scales.x.invert(range[1])];
+    scales.x.domain(xDomain).range(range);
 
     // Update the y scale
-    domain = d3.extent(data.points, function (d) { return d.y; });
+    if (yDomain === null) {
+      yDomain = d3.extent(data.points, function (d) { return d.y; });
+    }
     range = [size.height - svgMargins.top - svgMargins.bottom - pointMargin, pointMargin];
-    scales.y.domain(domain).range(range);
+    scales.y.domain(yDomain).range(range);
     // Use the created scale to update the scale in order to have it span the entire plot
     range = [size.height - svgMargins.top - svgMargins.bottom, 0];
-    domain = [scales.y.invert(range[0]), scales.y.invert(range[1])];
-    scales.y.domain(domain).range(range);
+    yDomain = [scales.y.invert(range[0]), scales.y.invert(range[1])];
+    scales.y.domain(yDomain).range(range);
 
     if (unifyAxesScaling) {
       rangeRatio = (scales.x.range()[1] - scales.x.range()[0]) / (scales.y.range()[0] - scales.y.range()[1]);
@@ -145,6 +152,10 @@ list.ScatterPlot = function () {
         .append("g")
         .attr("class", "points");
 
+      if (!showAxes) {
+        svgMargins = { top: 20, bottom: 10, left: 5, right: 50 };
+      }
+
       if (color.colorFn !== null && color.variableValues !== null) {
         color.useColouring = true;
       } else if (color.colorFn !== null || color.variableValues !== null) {
@@ -198,7 +209,7 @@ list.ScatterPlot = function () {
       render.resize(svg);
       render.title(svg, data.title);
       render.points(svg, data, scales);
-      render.axes(svg, scales);
+      render.axes(svg, data, scales);
 
       render.origin(svg, scales);
       render.interactionOverlay(svg, data, scales, selectCircleRadius);
@@ -208,7 +219,7 @@ list.ScatterPlot = function () {
       render.colormap(svg, data, scales);
       render.selectionOnColormap(svg, data, scales);
     } else if (pointSizeFn !== null) {
-      render.sizemap(svg, scales);
+      render.sizemap(svg, data, scales);
       render.selectionOnSizemap(svg, data, scales);
       render.sizemapBrush(svg, data, scales);
     }
@@ -487,7 +498,7 @@ list.ScatterPlot = function () {
       data.brushExtent = extent;
 
       data.points.forEach(function (d) {
-        var value = pointSizeFn(d);
+        var value = xyContribution(d, data);
         setNotSelected(d);
 
         if (value >= extent[0] && value <= extent[1]) {
@@ -524,7 +535,7 @@ list.ScatterPlot = function () {
   };
 
   // Renders a colormap with scale on the right side of the plot
-  render.sizemap = function (svg, scales) {
+  render.sizemap = function (svg, data, scales) {
     var gPoints = svg.select("g.points"),
       plotWidth = size.width - svgMargins.right - svgMargins.left,
       plotHeight = size.height - svgMargins.top - svgMargins.bottom,
@@ -532,15 +543,18 @@ list.ScatterPlot = function () {
       axisGroup,
       ellipses = [
         {
-          y: 0,
+          y: -8,
+          x: 10,
           size: 10
         },
         {
-          y: plotHeight,
+          y: plotHeight + 3,
+          x: 18,
           size: 2
         }
       ],
-      lines = [-1, 1];
+      line,
+      sortedPoints;
 
     axis = d3.svg.axis()
       .scale(scales.colormap)
@@ -553,7 +567,7 @@ list.ScatterPlot = function () {
     axisGroup
       .transition()
       .duration(1500)
-      .attr("transform", "translate(" + (plotWidth + 20 - 1) + ", 0)")
+      .attr("transform", "translate(" + (plotWidth + 20) + ", 0)")
       .call(axis);
 
     ellipses = gPoints.selectAll("ellipse.sizemap").data(ellipses);
@@ -570,28 +584,52 @@ list.ScatterPlot = function () {
       .attr("ry", function (d) {
         return d.size / 4;
       })
-      .attr("cx", plotWidth + 10)
+      .attr("cx", function (d) {
+        return plotWidth + d.x;
+      })
       .attr("cy", function (d) {
         return d.y;
       })
       .style("fill", "grey");
 
-    lines = gPoints.selectAll("line.sizemap").data(lines);
-    lines
+    sortedPoints = data.points.slice();
+
+    sortedPoints.sort(function (point1, point2) {
+      return xyContribution(point1, data) - xyContribution(point2, data);
+    });
+
+    line = gPoints.selectAll("path.sizemap").data([true]);
+    line
       .enter()
-      .append("line")
+      .append("path")
       .attr("class", "sizemap");
-    lines
+    line
       .transition()
       .duration(1500)
-      .attr("x1", function (mult) {
-        return plotWidth + 10 + mult * 10;
+      .attr("d", function () {
+        var path = "",
+          xPrevious = -1000,
+          yPrevious = -1000;
+
+        sortedPoints.forEach(function (point, pointIdx) {
+          var x = Math.round(plotWidth + 20 - pointSizeFunction(point, scales) * 2),
+            y = Math.round(scales.colormap(xyContribution(point, data)));
+
+          if (xPrevious !== x || yPrevious !== y) {
+            if (pointIdx !== 0) {
+              path += " L ";
+            } else {
+              path += "M ";
+            }
+            path += x + " " + y;
+          }
+
+          xPrevious = x;
+          yPrevious = y;
+        });
+        return path;
       })
-      .attr("y1", 0)
-      .attr("x2", function (mult) {
-        return plotWidth + 10 + mult * 2;
-      })
-      .attr("y2", plotHeight)
+      .style("fill", "none")
       .style("stroke-width", "1px")
       .style("stroke", "gray");
   };
@@ -614,9 +652,11 @@ list.ScatterPlot = function () {
       .attr("ry", function (d) {
         return pointSizeFunction(d, scales) / 4;
       })
-      .attr("cx", plotWidth + 10)
+      .attr("cx", function (d) {
+        return plotWidth + 20 - pointSizeFunction(d, scales);
+      })
       .attr("cy", function (d) {
-        return scales.colormap(pointSizeFn(d));
+        return scales.colormap(xyContribution(d, data));
       })
       .style("fill", "steelblue");
 
@@ -679,40 +719,104 @@ list.ScatterPlot = function () {
 
   };
 
+  render.axisArrows = function (gPoints, plotWidth, plotHeight) {
+    var lines,
+      marker;
+
+    marker = gPoints.selectAll("marker.arrow").data([true]);
+    marker.enter()
+      .append("marker")
+      .attr("id", "dimredplot-arrow")
+      .attr("class", "arrow")
+      .attr("markerHeight", 5)
+      .attr("markerWidth", 5)
+      .attr("markerUnits", "strokeWidth")
+      .attr("orient", "auto")
+      .attr("refX", 0)
+      .attr("refY", 0)
+      .attr("viewBox", "-5 -5 10 10")
+      .append("path")
+        .attr("d", "M 0,0 m -5,-5 L 5,0 L -5,5 Z")
+        .attr("fill", "black");
+
+    lines = [
+      {x1: plotWidth - 35, x2: plotWidth - 10, y1: plotHeight + 2, y2: plotHeight + 2},
+      {x1: 0, x2: 0, y1: 30, y2: 5}
+    ];
+
+    lines = gPoints.selectAll("line.arrow").data(lines);
+    lines.enter()
+      .append("line")
+      .attr("class", "arrow");
+    lines
+      .attr("x1", function (d) {return d.x1; })
+      .attr("x2", function (d) {return d.x2; })
+      .attr("y1", function (d) {return d.y1; })
+      .attr("y2", function (d) {return d.y2; })
+      .attr("stroke", "black")
+      .attr("stroke-width", 1)
+      .attr("marker-end", "url(#dimredplot-arrow)");
+  };
+
   // Renders the x and y axes
-  render.axes = function (svg, scales) {
+  render.axes = function (svg, data, scales) {
     var gPoints = svg.select("g.points"),
       plotHeight = size.height - svgMargins.top - svgMargins.bottom,
+      plotWidth = size.width - svgMargins.left - svgMargins.right,
       xAxis,
       yAxis,
-      axisGroup;
+      axisGroup,
+      axisLabel;
 
-    xAxis = d3.svg.axis()
-      .scale(scales.x)
-      .orient("bottom");
+    axisLabel = gPoints.selectAll("text.xaxis").data([true]);
+    axisLabel.enter()
+      .append("text")
+      .attr("class", "xaxis")
+      .style("font-size", "10px");
+    axisLabel
+      .text(Math.round(data.xVariance * 100) / 100 + "%")
+      .attr("y", plotHeight - 2)
+      .attr("x", plotWidth - axisLabel.node().getBBox().width - 4);
 
-    yAxis = d3.svg.axis()
-      .scale(scales.y)
-      .orient("left");
+    axisLabel = gPoints.selectAll("text.yaxis").data([true]);
+    axisLabel.enter()
+      .append("text")
+      .attr("class", "yaxis")
+      .style("font-size", "10px");
+    axisLabel
+      .text(Math.round(data.yVariance * 100) / 100 + "%")
+      .attr("y", axisLabel.node().getBBox().height)
+      .attr("x", 4);
 
-    axisGroup = gPoints.selectAll("g.xaxis").data([true]);
-    axisGroup.enter()
-      .append("g")
-      .attr("class", "xaxis");
-    axisGroup
-      .attr("transform", "translate(0, " + plotHeight + ")")
-      .transition()
-      .duration(1500)
-      .call(xAxis);
+    if (showAxes) {
+      xAxis = d3.svg.axis()
+        .scale(scales.x)
+        .orient("bottom");
 
-    axisGroup = gPoints.selectAll("g.yaxis").data([true]);
-    axisGroup.enter()
-      .append("g")
-      .attr("class", "yaxis");
-    axisGroup
-      .transition()
-      .duration(1500).call(yAxis);
+      yAxis = d3.svg.axis()
+        .scale(scales.y)
+        .orient("left");
 
+      axisGroup = gPoints.selectAll("g.xaxis").data([true]);
+      axisGroup.enter()
+        .append("g")
+        .attr("class", "xaxis");
+      axisGroup
+        .attr("transform", "translate(0, " + plotHeight + ")")
+        .transition()
+        .duration(1500)
+        .call(xAxis);
+
+      axisGroup = gPoints.selectAll("g.yaxis").data([true]);
+      axisGroup.enter()
+        .append("g")
+        .attr("class", "yaxis");
+      axisGroup
+        .transition()
+        .duration(1500).call(yAxis);
+    } else {
+      render.axisArrows(gPoints, plotWidth, plotHeight);
+    }
   };
 
   render.selectionOnColormap = function (svg, data, scales) {
@@ -1006,7 +1110,8 @@ list.ScatterPlot = function () {
       rightGroup,
       plotHeight = size.height - svgMargins.top - svgMargins.bottom,
       numColumns,
-      datum;
+      datum,
+      tooltipText;
 
     // Get selected points bounding box
     points.forEach(function (d) {
@@ -1036,12 +1141,16 @@ list.ScatterPlot = function () {
     // If only one point is selected we show an extended tooltip
     if (numSelected === 1) {
       datum = group.data()[0];
-      list.DimRedPlot.setTooltip(datum.label,
-        "x factor: " + datum.x + "<br>" +
-        "y factor: " + datum.y + "<br>" +
-        "x contribution: " + datum.xContribution + "<br>" +
-        "y contribution: " + datum.yContribution + "<br>" +
-        "mass: " + datum.mass);
+      tooltipText = "x factor: " + datum.x + "<br>" +
+                    "y factor: " + datum.y + "<br>" +
+                    "x contribution: " + datum.xContribution + "<br>" +
+                    "y contribution: " + datum.yContribution;
+
+      if (datum.mass !== undefined) {
+        tooltipText += "<br>" + "mass: " + datum.mass;
+      }
+
+      list.DimRedPlot.setTooltip(datum.label, tooltipText);
       return;
     }
     list.DimRedPlot.removeTooltip();
@@ -1166,6 +1275,24 @@ list.ScatterPlot = function () {
   sp.pointSize = function (_) {
     if (!arguments.length) {return pointSizeFn; }
     pointSizeFn = _;
+    return sp;
+  };
+
+  sp.xDomain = function (_) {
+    if (!arguments.length) {return xDomain; }
+    xDomain = _;
+    return sp;
+  };
+
+  sp.yDomain = function (_) {
+    if (!arguments.length) {return yDomain; }
+    yDomain = _;
+    return sp;
+  };
+
+  sp.showAxes = function (_) {
+    if (!arguments.length) {return showAxes; }
+    showAxes = _;
     return sp;
   };
 
