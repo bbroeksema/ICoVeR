@@ -137,6 +137,8 @@ list.DimRedPlot = function () {
     automaticResize = false,
     contributionBrushExtents,
     colormapBrushExtent = {},
+    invertPlotOrder = false,
+    plotOrderChanged = false,
     color = {
       colorFn: null,
       variableName: "contribution",
@@ -217,8 +219,20 @@ list.DimRedPlot = function () {
     parts.scatterplot.width.variable = parts.scatterplot.totalWidth / 2;
 
     render.variancePercentageBar(div, data);
-    render.scatterplots(div, data, flags);
-    render.contributions(div, data);
+
+    if (plotOrderChanged) {
+      div.selectAll("div.scatterplot, div.barplots").remove();
+
+      plotOrderChanged = false;
+    }
+
+    if (invertPlotOrder) {
+      render.contributions(div, data);
+      render.scatterplots(div, data, flags);
+    } else {
+      render.scatterplots(div, data, flags);
+      render.contributions(div, data);
+    }
   };
 
   render.scatterplots = function (div, data, flags) {
@@ -254,17 +268,19 @@ list.DimRedPlot = function () {
     if (!individualsPresent) {
       parts.scatterplot.width.variable = parts.scatterplot.totalWidth;
       parts.scatterplot.width.individual = 0;
+    } else if (status.variable.isSelected === false) {
+      checkStatus("individual", "variable");
+    }
+
+    if (variablesPresent && invertPlotOrder) {
+      render.scatterplot(div, data, "variable", status.variable, flags);
     }
 
     if (individualsPresent) {
-      if (status.variable.isSelected === false) {
-        checkStatus("individual", "variable");
-      }
-
       render.scatterplot(div, data, "individual", status.individual, flags);
     }
 
-    if (variablesPresent) {
+    if (variablesPresent && !invertPlotOrder) {
       render.scatterplot(div, data, "variable", status.variable, flags);
     }
   };
@@ -862,6 +878,16 @@ list.DimRedPlot = function () {
   drp.automaticResize = function (_) {
     if (!arguments.length) {return automaticResize; }
     automaticResize = _;
+    return drp;
+  };
+
+  drp.invertPlotOrder = function (_) {
+    if (!arguments.length) {return invertPlotOrder; }
+    if (_ !== invertPlotOrder) {
+      plotOrderChanged = true;
+    }
+
+    invertPlotOrder = _;
     return drp;
   };
 
