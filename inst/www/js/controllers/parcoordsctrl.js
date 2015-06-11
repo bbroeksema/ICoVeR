@@ -269,8 +269,9 @@ angular.module('contigBinningApp.controllers')
 
       if (ParCoords.variableSorting !== "none") {
         setDimensions();
-        d.parcoords.render();
       }
+
+      d.parcoords.render();
     });
 
     $scope.$on("ParCoords::variableSortingChanged", function () {
