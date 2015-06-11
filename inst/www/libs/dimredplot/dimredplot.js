@@ -457,9 +457,7 @@ list.DimRedPlot = function () {
     scatterPlotDiv
       .style("display", "inline-block")
       .style("vertical-align", "top")
-      .style("width", function (datum) {
-        return 100 * parts.scatterplot.width[type] + "%";
-      })
+      .style("width", 100 * parts.scatterplot.width[type] + "%")
       .style("height", 100 * parts.scatterplot.height + "%")
       .style("outline-style", "solid")
       .style("outline-width", "1px")
