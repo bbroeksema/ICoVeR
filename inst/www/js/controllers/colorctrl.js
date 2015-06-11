@@ -7,7 +7,8 @@ angular.module('contigBinningApp.controllers')
     'use strict';
 
     var d = {
-      methods: undefined
+      methods: undefined,
+      initialSchemaLoad: true
     };
 
     function onMethodChange() {
@@ -85,10 +86,21 @@ angular.module('contigBinningApp.controllers')
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
       /*jslint unparam: true */
       updateVariables(schema);
-      $scope.colorVariable = undefined;
-    });
 
-    $scope.$watch('colorVariable', onVariableChange);
-    $scope.$watch('colorMethod', onMethodChange);
-    $scope.$watch('opacity', onOpacityChange);
+      if (d.initialSchemaLoad) {
+        // We only want to change the color scheme implicitly the first time we
+        // recieve data. Afterwards it's up to the user to change the color
+        // scheme to his or her likening.
+        d.initialSchemaLoad = false;
+
+        $scope.colorVariable = _.find(schema, { 'name': 'GC_CONTENT' });
+        $scope.colorMethod = "Decile";
+        $scope.colorScheme = "yellow_to_red";
+        $scope.applyColoring();
+
+        $scope.$watch('colorVariable', onVariableChange);
+        $scope.$watch('colorMethod', onMethodChange);
+        $scope.$watch('opacity', onOpacityChange);
+      }
+    });
   });
