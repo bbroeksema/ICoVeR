@@ -2,56 +2,25 @@
 /*global angular, _*/
 
 angular.module('contigBinningApp.controllers')
-  .controller('ExportCtrl', function (DataSet, $rootScope, $scope) {
+  .controller('ExportCtrl', function ($rootScope, $scope, OpenCPU) {
 
     'use strict';
 
     var d = {
-      rows: [],
-      variables: [],
-      rowIdMap: {}
+      rows: []
     };
 
-    $scope.idStrings = "";
+    $scope.url = undefined;
     $scope.exportMethods = ["all"];
     $scope.exportMethod = $scope.exportMethods[0];
 
     /*jslint unparam: true */
-    $scope.$on('DataSet::schemaLoaded', function (e, schema) {
-      var idFields, hasIdFields = true;
-
-      idFields = _.chain(schema)
-        .filter({ 'group_type': 'Id' })
-        .pluck('name')
-        .value();
-
-      if (idFields.length === 0) {
-        idFields.push(schema[0].name);
-        hasIdFields = false;
-      }
-
-      DataSet.get(idFields, function (data) {
-        d.rows = data;
-        d.rowIdMap = {};
-
-        if (hasIdFields) {
-          _.each(data, function (datum) {
-            var idFieldStrings = _.map(idFields, function (field) {
-              return field + ": " + datum[field];
-            });
-            d.rowIdMap[datum.row] = idFieldStrings.join(', ');
-          });
-        } else {
-          _.each(data, function (datum) {
-            d.rowIdMap[datum.row] = "row: " + datum.row;
-          });
-        }
-      });
-    });
-
-    /*jslint unparam: true */
     $rootScope.$on("DataSet::brushed", function (ev, rows) {
       d.rows = rows;
+      // Reset the url on brush change to avoid confusion of what is being
+      // exported when clicking the url.
+      $scope.url = undefined;
+
       if (rows.length > 0) {
         $scope.exportMethods = ["all", "brushed"];
         $scope.exportMethod = $scope.exportMethods[1];
@@ -63,13 +32,15 @@ angular.module('contigBinningApp.controllers')
     /*jslint unparam: false */
 
     $scope.export = function () {
-      var idStrings = "",
-        rows = d.rows.length > 0 ? d.rows : _.keys(d.rowIdMap);
+      var rows = _.map(d.rows, function (row) { return row.row; });
 
-      _.map(rows, function (datum) {
-        idStrings += d.rowIdMap[datum.row] + "\n";
+      $scope.url = undefined;
+
+      OpenCPU.call("contigs.export", { rows: rows }, function (session) {
+        $scope.$apply(function () {
+          $scope.url = session.getFileURL("x.fasta");
+        });
       });
-      $scope.idStrings = idStrings;
     };
 
   });
