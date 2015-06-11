@@ -151,6 +151,12 @@ angular.module('contigBinningApp.controllers')
     });
     /*jslint unparam: false */
 
+    $scope.$on('Analytics::dimensionalityReduced', function () {
+      $scope.configurationInvalid =
+        $scope.selectedVariables.length === 0
+        || $scope.selectedDimRedMethod === undefined;
+    });
+
     $scope.openSelectionDialog = function () {
       var dialog = $modal.open({
         templateUrl: 'js/templates/selectvars.html',
