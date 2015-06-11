@@ -72,15 +72,3 @@ PrepareDataForInteractiveBinning <- function(dataset.name, file.fasta, file.abun
   # Okay, we're done. Files with data properly saved.
   TRUE
 }
-
-setwd("~/Research/publications/wip-bmc-contig-binning/publication-guide")
-source("R.preprocessing/preprocessing.R")
-
-PrepareDataForInteractiveBinning(
-  dataset.name = "cstr",
-  file.fasta  = "data//cstr_assembled.fasta",
-  file.abundance = "data//cstr_avg_coverage.csv",
-  dir.result = "data//prepared"
-)
-
-
