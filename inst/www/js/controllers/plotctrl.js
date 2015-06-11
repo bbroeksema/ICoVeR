@@ -85,8 +85,10 @@ angular.module('contigBinningApp.controllers')
         index = _.findIndex($scope.analyses, {'method': data.method});
 
         if (index === -1) {
+          data.plotIdx = $scope.analyses.length;
           $scope.analyses.push(data);
         } else {
+          data.plotIdx = index;
           $scope.analyses[index] = data;
         }
 

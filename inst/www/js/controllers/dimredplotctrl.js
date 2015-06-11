@@ -30,6 +30,7 @@ angular.module('contigBinningApp.controllers')
     $scope.$on("DimRedPlot::resize", function (e, numOfPlots) {
       /*jslint unparam:true*/
       dimredplot.automaticResize(numOfPlots === 1);
+      dimredplot.invertPlotOrder(numOfPlots === 2 && $scope.analysis.plotIdx === 0);
 
       resize();
     });
