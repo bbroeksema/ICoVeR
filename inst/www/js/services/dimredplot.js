@@ -35,83 +35,23 @@ angular.module('contigBinningApp.services')
     };
 
     function resetStates() {
-      if (_.keys(d.processedData).length === 0) {
-        return;
-      }
+      d.selections.individual = {};
+      d.influences.individual = {};
+      d.selections.variable = {};
+      d.influences.variable = {};
 
       _.forEach(d.processedData, function (data) {
         /*jslint unparam:true*/
-        _.forEach(data, function (row) {
-          d.selections.individual[row.name] = list.selected.NONE;
-          d.influences.individual[row.name] = 0;
-          d.selectedMeans.individual[row.name] = 0;
-          d.totalMeans.individual[row.name] = 0;
-          d.notSelectedMeans.individual[row.name] = 0;
+        _.forEach(data.rowNames, function (rowIdx, rowName) {
+          d.selections.individual[rowName] = list.selected.NONE;
+          d.influences.individual[rowName] = 0;
         });
 
-        _.forEach(data[0], function (value, variable) {
+        _.forEach(data.columnNames, function (varIdx, variable) {
           d.selections.variable[variable] = list.selected.NONE;
           d.influences.variable[variable] = 0;
         });
       });
-    }
-
-    /* Functions for handling dimredplot events and updates */
-    function updateStates(influencedComponent, selectedComponent, variablesAreInfluenced) {
-      var max = 0,
-        dataIsSelected = false,
-        stateKey;
-
-      // influenced points need their influence to be reset
-      _.forEach(d.influences[influencedComponent], function (val, key) {
-        /*jslint unparam:true*/
-        d.influences[influencedComponent][key] = 0;
-      });
-
-      // If points are influenced then they are not selected
-      _.forEach(d.selections[influencedComponent], function (val, key) {
-        /*jslint unparam:true*/
-        d.selections[influencedComponent][key] = list.selected.NONE;
-      });
-
-      _.forEach(d.processedData, function (data) {
-        _.forEach(data, function (row) {
-          var colName,
-            influencedName,
-            selectedName;
-
-          if (variablesAreInfluenced === false || d.selections[selectedComponent][row.name] !== list.selected.NONE) {
-            for (colName in row) {
-              if (row.hasOwnProperty(colName)) {
-                if (variablesAreInfluenced) {
-                  influencedName = colName;
-                  selectedName = row.name;
-                } else {
-                  influencedName = row.name;
-                  selectedName = colName;
-                }
-
-                if (d.selections[selectedComponent][selectedName] !== list.selected.NONE && colName !== "name") {
-                  dataIsSelected = true;
-                  d.influences[influencedComponent][influencedName] += row[colName];
-                  max = Math.max(max, d.influences[influencedComponent][influencedName]);
-                }
-              }
-            }
-          }
-        });
-      });
-
-      if (!dataIsSelected) {
-        return;
-      }
-
-      // Influence lies between 0 and 1
-      for (stateKey in d.influences[influencedComponent]) {
-        if (d.influences[influencedComponent].hasOwnProperty(stateKey)) {
-          d.influences[influencedComponent][stateKey] /= max;
-        }
-      }
     }
 
     function variableName(variable) {
@@ -123,52 +63,49 @@ angular.module('contigBinningApp.services')
       return variable;
     }
 
-    function updateMCAvariableMetrics() {
-      var selectedCount = {},
-        nonSelectedCount = {},
-        totalCount = {},
-        avgInfluence = {},
-        catCount = {};
+    function updateMCAvariableMetrics(processedData) {
+      var selectedCount = [],
+        nonSelectedCount = [],
+        totalCount = [],
+        avgInfluence = [],
+        catCount = [],
+        firstIteration = true;
 
-      if (d.processedData.mca === undefined) {
-        return;
-      }
+      _.forEach(processedData.rowNames, function (rowIdx, rowName) {
+        var selected = d.selections.individual[rowName];
 
-      _.forEach(d.processedData.mca, function (row) {
-        var selected = d.selections.individual[row.name];
-
-        _.forEach(row, function (value, variable) {
-          if (nonSelectedCount[variable] === undefined) {
-            nonSelectedCount[variable] = 0;
-            selectedCount[variable] = 0;
-            totalCount[variable] = 0;
+        _.forEach(processedData.data[rowIdx], function (value, varIdx) {
+          if (firstIteration) {
+            nonSelectedCount.push(0);
+            selectedCount.push(0);
+            totalCount.push(0);
           }
 
-          totalCount[variable] += value;
+          totalCount[varIdx] += value;
 
           if (selected === list.selected.NONE) {
-            nonSelectedCount[variable] += value;
+            nonSelectedCount[varIdx] += value;
           } else {
-            selectedCount[variable] += value;
+            selectedCount[varIdx] += value;
           }
         });
+
+        firstIteration = false;
       });
 
-      _.forEach(selectedCount, function (count, variable) {
-        /*jslint unparam:true*/
-        d.influences.variable[variable] = Math.abs(nonSelectedCount[variable] / totalCount[variable] - selectedCount[variable] / totalCount[variable]);
-
+      _.forEach(processedData.columnNames, function (varIdx, variable) {
         var catVariableName = variableName(variable);
+
         if (avgInfluence[catVariableName] === undefined) {
           avgInfluence[catVariableName] = 0;
           catCount[catVariableName] = 0;
         }
 
-        avgInfluence[catVariableName] += d.influences.variable[variable];
+        avgInfluence[catVariableName] += Math.abs(nonSelectedCount[varIdx] / totalCount[varIdx] - selectedCount[varIdx] / totalCount[varIdx]);
         catCount[catVariableName] += 1;
       });
 
-      _.forEach(selectedCount, function (count, variable) {
+      _.forEach(processedData.columnNames, function (varIdx, variable) {
         /*jslint unparam:true*/
         var catVariableName = variableName(variable);
 
@@ -176,51 +113,54 @@ angular.module('contigBinningApp.services')
       });
     }
 
-    function updatePCAvariableMetrics() {
-      var selectedMeans = {},
+    function updatePCAvariableMetrics(processedData) {
+      var selectedMeans = [],
         selectedCount = 0,
-        nonSelectedMeans = {},
-        numOfRows = 0;
+        nonSelectedMeans = [],
+        numOfRows = processedData.data.length,
+        firstIteration = true;
 
-      /*jslint unparam:true*/
-      _.forEach(["pca", "ca"], function (method) {
-        if (d.processedData[method] === undefined) {
-          return;
+      _.forEach(processedData.rowNames, function (rowIdx, rowName) {
+        var selected = d.selections.individual[rowName];
+
+        if (selected !== list.selected.NONE) {
+          selectedCount += 1;
         }
 
-        numOfRows = d.processedData[method].length;
-
-        _.forEach(d.processedData[method], function (row) {
-          var selected = d.selections.individual[row.name];
-
-          if (selected !== list.selected.NONE) {
-            selectedCount += 1;
+        _.forEach(processedData.data[rowIdx], function (value, varIdx) {
+          if (firstIteration) {
+            nonSelectedMeans.push(0);
+            selectedMeans.push(0);
           }
 
-          _.forEach(row, function (value, variable) {
-            if (nonSelectedMeans[variable] === undefined) {
-              nonSelectedMeans[variable] = 0;
-              selectedMeans[variable] = 0;
-            }
-
-            if (selected === list.selected.NONE) {
-              nonSelectedMeans[variable] += value;
-            } else {
-              selectedMeans[variable] += value;
-            }
-          });
+          if (selected === list.selected.NONE) {
+            nonSelectedMeans[varIdx] += value;
+          } else {
+            selectedMeans[varIdx] += value;
+          }
         });
+
+        firstIteration = false;
       });
 
-      _.forEach(selectedMeans, function (mean, variable) {
-        /*jslint unparam:true*/
+      _.forEach(processedData.columnNames, function (varIdx, variable) {
         if (selectedCount !== 0) {
-          selectedMeans[variable] /= selectedCount;
+          selectedMeans[varIdx] /= selectedCount;
         }
         if (numOfRows !== selectedCount) {
-          nonSelectedMeans[variable] /= (numOfRows - selectedCount);
+          nonSelectedMeans[varIdx] /= (numOfRows - selectedCount);
         }
-        d.influences.variable[variable] = Math.abs(selectedMeans[variable] - nonSelectedMeans[variable]);
+        d.influences.variable[variable] = Math.abs(selectedMeans[varIdx] - nonSelectedMeans[varIdx]);
+      });
+    }
+
+    function updateVariableMetrics() {
+      _.forEach(d.processedData, function (data, method) {
+        if (method === "mca") {
+          updateMCAvariableMetrics(data);
+        } else {
+          updatePCAvariableMetrics(data); // This can do both PCA and CA
+        }
       });
     }
 
@@ -282,14 +222,21 @@ angular.module('contigBinningApp.services')
     d.addProcessedData = function (method, processedData) {
       /*jslint unparam:true*/
       if (d.processedData[method] === undefined) {
-        d.processedData[method] = processedData;
-      } else {
-        _.forEach(processedData, function (row, rowIdx) {
-          _.forEach(row, function (value, variable) {
-            d.processedData[method][rowIdx][variable] = value;
-          });
-        });
+        d.processedData[method] = {
+          rowNames: {},
+          columnNames: {}
+        };
       }
+
+      _.forEach(processedData.rowNames, function (rowName, rowIdx) {
+        d.processedData[method].rowNames[rowName] = rowIdx;
+      });
+
+      _.forEach(processedData.columnNames, function (columnName, colIdx) {
+        d.processedData[method].columnNames[columnName] = colIdx;
+      });
+
+      d.processedData[method].data = processedData.data;
 
       resetStates();
     };
@@ -309,22 +256,20 @@ angular.module('contigBinningApp.services')
     };
 
     d.changeVariableSelection = function (method, variableSelection) {
-      var variablesSelected = false,
-        stateKey,
-        nonSelectedVariables = [],
+      var nonSelectedVariables = [],
         selectedVariables = [],
         variableSelectedPairs = [];
 
       d.selections.variable = variableSelection;
 
-      for (stateKey in d.selections.variable) {
+      /*for (stateKey in d.selections.variable) {
         if (d.selections.variable.hasOwnProperty(stateKey) && d.selections.variable[stateKey] !== list.selected.NONE) {
           variablesSelected = true;
           break;
         }
       }
 
-      updateStates("individual", "variable", false);
+      //updateStates("individual", "variable", false);
       //updateMeans();
 
       if (variablesSelected) {
@@ -335,7 +280,7 @@ angular.module('contigBinningApp.services')
         $rootScope.$broadcast("DimRedPlot::analyticsRemoved", "influence");
         //$rootScope.$broadcast("DimRedPlot::analyticsRemoved", "mean");
         //$rootScope.$broadcast("DimRedPlot::analyticsRemoved", "mean_difference");
-      }
+      }*/
 
       _.forEach(d.selections.variable, function (selection, variable) {
         if (selection === list.selected.NONE) {
@@ -396,9 +341,7 @@ angular.module('contigBinningApp.services')
         });
       }
 
-      updateStates("variable", "individual", true);
-      updatePCAvariableMetrics();
-      updateMCAvariableMetrics();
+      updateVariableMetrics();
 
       $rootScope.$broadcast("DimRedPlot::selectionUpdated", method);
     });

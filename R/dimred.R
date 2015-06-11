@@ -60,6 +60,23 @@ p.projections <- function(dim.red.res, column.results) {
   projections
 }
 
+p.generate.structure <- function(processedData, individualProjections, variableProjections, explainedVariance, method) {
+  # We send processedData as a matrix, to make the JSON smaller and computations in the front-end faster
+  processedList <- list(
+    rowNames = rownames(processedData),
+    columnNames = colnames(processedData),
+    data = data.matrix(processedData)
+  )
+
+  list(
+    processedData = processedList,
+    individualProjections = individualProjections,
+    variableProjections = variableProjections,
+    explainedVariance = explainedVariance,
+    method = method
+  )
+}
+
 p.plotdata <- function(dim.red.res, labels, processedData, type) {
   varName <- "var"
   indName <- "ind"
@@ -82,10 +99,10 @@ p.plotdata <- function(dim.red.res, labels, processedData, type) {
 
   # TODO: optimise processedData storage, currently it is a data.frame,
   #       which means that every column name is present in every row
-  analysis <- list(
+  analysis <- p.generate.structure(
     processedData = processedData,
-    variableProjections = p.projections(dim.red.res, column.results = varName),
     individualProjections = individualProjections,
+    variableProjections = p.projections(dim.red.res, column.results = varName),
     explainedVariance = dim.red.res$eig$"percentage of variance",
     method = type
   )
@@ -107,8 +124,7 @@ dimred.pca <- function(rows=c(), vars) {
   processedData <- as.data.frame(t(t(data)/columnNorms))
 
   colnames(processedData) <- colnames(data)
-  processedData$name <- rownames(data)
-  rownames(processedData) <- NULL
+  rownames(processedData) <- rownames(data)
 
   p.plotdata(FactoMineR::PCA(data, ncp=length(vars), graph=F), labels = res$labels, processedData = processedData, type = "pca")
 }
@@ -126,8 +142,6 @@ dimred.ca <- function(rows=c(), vars) {
 
   # CAres$call$X contains the normalised data
   processedData <- CAres$call$X
-  processedData$name <- rownames(processedData)
-  rownames(processedData) <- NULL
 
   p.plotdata(CAres, labels = res$labels, processedData = processedData, type = "ca")
 }
@@ -142,7 +156,7 @@ p.mca.plotdata <- function(dim.red.res, labels, processedData, nd) {
   variableProjections$contrib <- dim.red.res$colctr[,1:nd]
 
   individualProjections <- data.frame(matrix(NA, nrow=nrow(dim.red.res$rowcoord), ncol=4))
-  individualProjections$id <- processedData$name
+  individualProjections$id <- rownames(processedData)
   individualProjections$mass <- rep(1 / nrow(processedData), nrow(processedData))
   individualProjections$coord <- dim.red.res$rowcoord[,1:nd]
   individualProjections$contrib <- dim.red.res$rowcoord[,1:nd]^2
@@ -159,7 +173,7 @@ p.mca.plotdata <- function(dim.red.res, labels, processedData, nd) {
 
   # TODO: optimise processedData storage, currently it is a data.frame,
   #       which means that every column name is present in every row
-  analysis <- list(
+  analysis <- p.generate.structure(
     processedData = processedData,
     variableProjections = variableProjections,
     individualProjections = individualProjections,
@@ -170,7 +184,7 @@ p.mca.plotdata <- function(dim.red.res, labels, processedData, nd) {
   if (!includeIndividuals) {
     analysis$individualProjections <- NULL
   }
-  
+
   analysis
 }
 
@@ -186,8 +200,7 @@ dimred.mca <- function(rows=c(), vars) {
   MCAres$indmat <- as.data.frame(MCAres$indmat)
 
   colnames(MCAres$indmat) <- MCAres$levelnames
-  MCAres$indmat$name <- rownames(data)
-  rownames(MCAres$indmat) <- NULL
+  rownames(MCAres$indmat) <- rownames(data)
 
   # For some reason MJCA gives a lot of very small PC's, here we indicate how many we really want.
   nd <- length(which(MCAres$inertia.e > 0.01))
