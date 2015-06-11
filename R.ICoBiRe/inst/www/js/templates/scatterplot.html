@@ -1,0 +1,46 @@
+<div id="scatterplotControlAndVis">
+  <div id="scatterplotControl" class="col-lg-6">
+    <form role="form" class="form-horizontal"
+          ng-controller="ScatterplotCtrl">
+      <div class="form-group">
+        <div class="row">
+          <label class="col-lg-2 control-label text-right">Dimension Reduction:</label>
+            <div class="col-lg-4 adjusted-right-padding">
+              <select class="form-control input-sm"
+                ng-model="dimensionalityReductionType"
+                ng-options="dimensionalityReductionType for dimensionalityReductionType in dimensionalityReductionTypes">
+              </select>
+            </div>
+            <div class="col-lg-4 no-left-padding">
+              <button type="button" class="btn btn-default btn-sm"
+                ng-click="openSelectionDialog()"
+                popover={{selectionTextLong}}
+                popover-trigger="mouseenter">{{selectionText}}</button>
+              <button type="button" class="btn btn-default btn-sm"
+                ng-disabled="configurationInvalid"
+                ng-click="executeDimensionalityReduction()">Execute</button>
+            </div>
+          </div>
+        </div>
+      <div class="form-group">
+        <div class="row">
+          <label class="col-lg-2 control-label text-right">Data Type:</label>
+          <div class="col-lg-2 adjusted-right-padding">
+            <select class="form-control input-sm"
+              ng-model="scatterPlotDataType"
+              ng-options="scatterDataType for scatterDataType in scatterDataTypes">
+              <option value="">-- choose variable --</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="checkbox">
+            <label class="col-lg-2 control-label text-right">
+              <input type="checkbox" ng-model="squareScatterplotSides">Square
+            </label>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

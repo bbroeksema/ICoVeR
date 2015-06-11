@@ -1,0 +1,113 @@
+html, body {
+  height: calc(100% - 35px);
+}
+.form-control.ng-invalid {
+  border: 2px solid red;
+}
+
+.navbar {
+  margin-bottom: 0px;
+}
+
+.navbar .progress {
+  margin-bottom: 0px;
+  margin-right: 1em;
+  width: 150px;
+}
+
+.tab-content {
+  padding-top: 5px;
+}
+
+.adjusted-right-padding {
+   padding-right: 5px !important;
+   margin-right: 0 !important;
+}
+
+.adjusted-left-padding {
+   padding-left: 9px !important;
+   margin-left: 0 !important;
+}
+
+.no-left-padding {
+   padding-left: 0 !important;
+   margin-left: 0 !important;
+}
+
+.no-right-padding {
+   padding-right: 0 !important;
+   margin-right: 0 !important;
+}
+
+.form-group {
+  margin-bottom: 5px;
+}
+
+.modal-body select[multiple] {
+  min-height: 200px;
+}
+
+.modal-footer {
+  padding: 10px 15px;
+}
+
+.colorpatch {
+    display: block;
+    vertical-align: middle;
+    width: 37px;
+    height: 22px;
+}
+
+#SwitchOptions {
+  float: right;
+}
+
+#main {
+  height: 100%;
+  width: 100%;
+  margin: 50px auto 0px;
+}
+
+#top {
+  height: 60%;
+  margin-bottom: 10px;
+}
+
+#bottom {
+  height: 40%;
+}
+
+#options {
+  float: left;
+  position: absolute;
+  z-index: 3;
+}
+
+#parcoords,
+#colourmap,
+#parcoords div,
+#colourmap div {
+  height: 100%;
+}
+
+#charts {
+  height: 100%;
+}
+
+.tab-content {
+    height: calc(100% - 40px);
+}
+
+.tab-pane, .ng-isolate-scope, #dimRedPlots {
+    height: 100%;
+}
+
+#dimRedPlot {
+    height: 100%;
+}
+
+#twodmap {
+    height: 100%;
+    padding-left: 0px;
+    padding-right: 0px;
+}

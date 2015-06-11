@@ -1,0 +1,51 @@
+<div ng-controller="ParCoordsVarsCtrl">
+  <form role="form" class="form-horizontal">
+    <div class="form-group">
+      <label class="col-sm-3 adjusted-right-padding control-label text-right">Variables:</label>
+
+      <div class="col-sm-9 no-left-padding">
+        <button type="button" class="btn btn-default btn-sm"
+                ng-click="openSelectionDialog()"
+                popover={{parcoords.selectionTextLong}}
+                popover-trigger="mouseenter">{{parcoords.selectionText}}</button>
+      </div>
+    </div>
+  </form>
+  <form role="form" class="form-horizontal">
+    <div class="form-group">
+      <label class="col-sm-3 adjusted-right-padding control-label text-right">Brush predicate:</label>
+
+      <div class="col-sm-9 no-left-padding">
+        <select class="form-control input-sm"
+              ng-model="brushPredicate"
+              ng-options="predicate for predicate in parcoords.brushPredicates">
+        </select>
+      </div>
+    </div>
+  </form>
+  <form role="form" class="form-horizontal">
+    <div class="form-group">
+      <label class="col-sm-3 adjusted-right-padding control-label text-right">Variable sorting:</label>
+
+      <div class="col-sm-9 no-left-padding">
+        <select class="form-control input-sm"
+                ng-model="variableSorting">
+          <option value="none" >-- none --</option>
+          <option value="average">Average</option>
+        </select>
+      </div>
+    </div>
+  </form>
+  <form role="form" class="form-horizontal">
+    <div class="form-group">
+      <label class="col-sm-3 adjusted-right-padding control-label text-right">Share scale:</label>
+
+      <div class="col-sm-9 no-left-padding">
+        <button type="button" class="btn btn-default btn-sm"
+                ng-click="openScaleBindDialog()"
+                popover={{parcoords.scaleTextLong}}
+                popover-trigger="mouseenter">{{parcoords.scaleText}}</button>
+      </div>
+    </div>
+  </form>
+</div>

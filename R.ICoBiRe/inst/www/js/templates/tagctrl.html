@@ -1,0 +1,70 @@
+<form role="form" class="form-horizontal"
+      ng-controller="TagCtrl">
+  <div class="form-group row" ng-show="itemsBrushed">
+    <label class="col-sm-3 control-label adjusted-right-padding text-right">Tag name:</label>
+
+    <div class="col-sm-3 no-left-padding adjusted-right-padding">
+      <input type="text" ng-model="modifyTag" maxlength="30"
+             typeahead="tag for tag in tags | filter:$viewValue | limitTo:8"
+             class="form-control input-sm">
+    </div>
+    <div class="col-sm-6 no-left-padding">
+      <button type="button" class="btn btn-sm btn-default"
+              ng-show="modifyTagExists" ng-click="addToTag()">
+        Add to tag</button>
+      <button type="button" class="btn btn-sm btn-warning"
+              ng-show="modifyTagExists" ng-click="createTag()">
+        Replace tag</button>
+
+      <button type="button" class="btn btn-sm btn-default"
+              ng-show="!modifyTagExists" ng-click="createTag()"
+              ng-disabled="modifyTag.length === 0">
+        Create tag
+      </button>
+    </div>
+  </div>
+  <div class="form-group row" ng-show="tags.length !== 0">
+    <label class="col-sm-3 control-label adjusted-right-padding text-right">Select tags:</label>
+    <div class="col-sm-6 no-left-padding adjusted-right-padding">
+      <select class="form-control"
+              ng-model="selectedTags"
+              ng-options="tag for tag in tags" multiple>
+      </select>
+    </div>
+    <div class="col-sm-3 no-left-padding" ng-show="tags.length !== 0">
+      <button type="button" class="btn btn-sm btn-default btn-block"
+              ng-click="selectTagged()"
+              ng-show="selectedTags.length !== 0">
+        Select tagged
+      </button>
+      <button type="button" class="btn btn-sm btn-default btn-block"
+              ng-click="deselectTags()"
+              ng-show="enableDeselect">
+        Reset selection
+      </button>
+      <button type="button" class="btn btn-sm btn-success btn-block"
+              ng-click="keepSelected()"
+              ng-disabled="filteringInProgress"
+              ng-show="selectedTags.length !== 0">
+        Keep tagged</button>
+      <button type="button" class="btn btn-sm btn-danger btn-block"
+              ng-click="removeSelected()"
+              ng-disabled="filteringInProgress"
+              ng-show="selectedTags.length !== 0">
+        Remove tagged</button>
+
+      <button type="button" class="btn btn-sm btn-default btn-block"
+              ng-show="dataFiltered"
+              ng-click="reloadData()"
+              ng-disabled="filteringInProgress">
+        Reload data</button>
+
+      <button type="button" class="btn btn-sm btn-danger btn-block"
+              ng-click="removeTags()"
+              ng-show="selectedTags.length !== 0">
+        Delete selected tags
+      </button>
+
+    </div>
+  </div>
+</form>

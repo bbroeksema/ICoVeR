@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="contigBinningApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+
+    <link href="libs/fontawesome/css/font-awesome.css" rel="stylesheet">
+    <link href="libs/parcoords/d3.parcoords.css" rel="stylesheet">
+    <link href="libs/dimredplot/dimredplot.css" rel="stylesheet">
+    <link href="css/light.css" rel="stylesheet" id="maincss">
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand">Interactive Contig Binning and Refinement</a>
+        </div>
+
+        <form class="navbar-form navbar-right form-inline">
+          <div class="btn-group" ng-controller="ManualColoringCtrl" ng-show="manualColoringEnabled" dropdown>
+            <button type="button" class="btn btn-default" ng-disabled="!itemsBrushed" ng-style="{'background-color': colors[0]}">Apply color to selection</button>
+            <button type="button" class="btn btn-default dropdown-toggle" ng-disabled="!itemsBrushed" dropdown-toggle>
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu brush-color" role="menu" id="brush-color-menu">
+              <li ng-repeat="color in colors">
+                <a href="#" ng-style="{'background-color': color}" ng-click="colorSelection(color)">
+                  <span class="colorpatch"></span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="form-group" ng-controller="NameHighlightCtrl" ng-hide="noHighlightAvailable">
+            <label class="control-label col-lg-4" for="rowNameHighlight">Highlight</label>
+            <input type="text" id="rowNameHighlight" class = "col-lg-5 input-sm"  ng-model="rowName" ng-change="highlightRow()">
+          </div>
+          <div class="form-group" ng-controller="DataIndicatorCtrl">
+            <progress ng-click="changeScale()" max="1" animate="false">
+              <bar ng-repeat="bar in counts track by $index"
+                   value="bar.rows / rowCount"
+                   type="{{bar.type}}">
+                <b ng-hide="(bar.rows / rowCount) < 0.15">{{bar.rows}}</b>
+              </bar>
+            </progress>
+          </div>
+          <div class="form-group" ng-controller="ThemeCtrl">
+            <label class="control-label">Theme:</label>
+            <div class="btn-group">
+              <label class="btn btn-default" ng-model="theme" btn-radio="'light'">Light</label>
+              <label class="btn btn-default" ng-model="theme" btn-radio="'dark'">Dark</label>
+            </div>
+          </div>
+        </form>
+      </div>
+    </nav>
+
+    <div id="main" class="container-fluid">
+      <!-- Top half of the sceen -->
+      <div id="top" class="row">
+        <!--<div id="colourmap"  class="col-lg-1">
+          <div class="colourmap" ng-controller="ColourmapCtrl">
+          </div>
+        </div>-->
+        <div id="parcoords" class="col-lg-12">
+          <div class="parcoords" ng-controller="ParcoordsCtrl">
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom half of the sceen -->
+      <div id="bottom" class="row" ng-controller="PlotCtrl">
+        <div id="options" ng-style="sliding">
+          <ng-include src="'js/templates/options.html'"></ng-include>
+        </div>
+        <div class="col-lg-1">
+        </div>
+        <!-- Scatterplot -->
+        <div id="charts" class="col-lg-11" ng-controller="ChartsCtrl">
+          <div class="row" id="dimRedPlots">
+            <div id="dimRedPlot" class="tab-pane container-fluid active" ng-class="dimredplotWidth" ng-repeat="analysis in analyses" ng-controller="DimRedPlotCtrl">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="libs/lodash/lodash-3.9.0.min.js"></script>
+    <script src="libs/jquery/jquery-1.11.1.min.js"></script>
+    <script src="libs/opencpu/opencpu-0.5.js"></script>
+    <script src="libs/d3/d3.min.js"></script>
+    <script src="libs/d3/d3.svg.multibrush.js"></script>
+    <script src="libs/d3/colorbrewer.js"></script>
+    <script src="libs/parcoords/d3.parcoords.js"></script>
+    <script src="libs/dimredplot/dimredplot.js"></script>
+    <script src="libs/dimredplot/scatterplot.js"></script>
+    <script src="libs/dimredplot/barplot.js"></script>
+    <script src="libs/dimredplot/variancepercentageplot.js"></script>
+    <script src="libs/dimredplot/colourmap.js"></script>
+    <script src="libs/mapplot/mapplot.js"></script>
+    <script src="libs/angularjs/angular-1.2.21.min.js"></script>
+    <script src="libs/ui-bootstrap/ui-bootstrap-tpls-0.12.1.min.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/services/dataset.js"></script>
+    <script src="js/controllers/namehighlightctrl.js"></script>
+    <script src="js/controllers/chartsctrl.js"></script>
+    <script src="js/controllers/clusterctrl.js"></script>
+    <script src="js/controllers/clusterconfigctrl.js"></script>
+    <script src="js/controllers/dataindicatorctrl.js"></script>
+    <script src="js/controllers/exportctrl.js"></script>
+    <script src="js/controllers/mapctrl.js"></script>
+    <script src="js/controllers/parcoordsctrl.js"></script>
+    <script src="js/controllers/parcoordsvarsctrl.js"></script>
+    <script src="js/controllers/scatterplotctrl.js"></script>
+    <script src="js/controllers/filterctrl.js"></script>
+    <script src="js/controllers/dimredctrl.js"></script>
+    <script src="js/controllers/dimredplotctrl.js"></script>
+    <script src="js/controllers/colorctrl.js"></script>
+    <script src="js/controllers/manualcoloringctrl.js"></script>
+    <script src="js/controllers/themectrl.js"></script>
+    <script src="js/controllers/plotctrl.js"></script>
+    <script src="js/controllers/variableselectionctrl.js"></script>
+    <script src="js/controllers/dimreddisplayctrl.js"></script>
+    <script src="js/controllers/colourmapctrl.js"></script>
+    <script src="js/controllers/tagctrl.js"></script>
+    <script src="js/controllers/nameselectionctrl.js"></script>
+    <script src="js/services/analytics.js"></script>
+    <script src="js/services/assert.js"></script>
+    <script src="js/services/color.js"></script>
+    <script src="js/services/opencpu.js"></script>
+    <script src="js/services/parcoords.js"></script>
+    <script src="js/services/dimredplot.js"></script>
+    <script src="js/services/tag.js"></script>
+    <script src="js/services/r.js"></script>
+  </body>
+</html>

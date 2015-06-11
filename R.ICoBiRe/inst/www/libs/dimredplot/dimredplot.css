@@ -1,0 +1,75 @@
+.dimredplot-tooltip {
+    background: #eee;
+    box-shadow: 0 0 5px #999999;
+    color: #333;
+    display: none;
+    font-size: 12px;
+    padding: 10px;
+    position: fixed;
+    text-align: center;
+    z-index: 10;
+}
+
+.dimredplot {
+    position: relative;
+    text-align: right;
+}
+
+.dimredplot .xaxis path,
+.dimredplot .xaxis line,
+.dimredplot .yaxis path,
+.dimredplot .yaxis line,
+.dimredplot .coloraxis path,
+.dimredplot .coloraxis line{
+    fill: none;
+    stroke: #000;
+}
+
+.dimredplot .xaxis text,
+.dimredplot .yaxis text,
+.dimredplot .coloraxis text{
+    font-size: 12px;
+}
+
+.dimredplot .scatterplot .pointlabel line {
+    fill: none;
+    stroke: #000;
+    stroke-width: 1px;
+}
+
+.dimredplot .scatterplot .pointlabel rect {
+    fill-opacity: 0.5;
+    fill: #fff;
+    stroke-width: 1px;
+    stroke: #000;
+}
+
+
+.dimredplot .scatterplot .origin {
+  fill: none;
+  stroke: #bbb;
+  stroke-width: 1px;
+}
+
+.dimredplot .barplot .contribution,
+.dimredplot .variancepercentageplot .variance {
+  fill: steelblue;
+  fill-opacity: 1;
+  stroke-width: 0px;
+}
+
+.dimredplot .variancepercentageplot .variance.active {
+  fill: lightblue;
+}
+
+.dimredplot .variances .bg {
+  fill: white;
+  fill-opacity: 0;
+  cursor: ns-resize;
+}
+
+.dimredplot .brush .extent {
+  stroke: #000;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
