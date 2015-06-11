@@ -4,7 +4,9 @@
     <label class="col-sm-3 control-label adjusted-right-padding text-right">Tag name:</label>
 
     <div class="col-sm-3 no-left-padding adjusted-right-padding">
-      <input type="text" ng-model="modifyTag" maxlength="30" typeahead="tag for tag in tags | filter:$viewValue | limitTo:8" class="form-control">
+      <input type="text" ng-model="modifyTag" maxlength="30"
+             typeahead="tag for tag in tags | filter:$viewValue | limitTo:8"
+             class="form-control input-sm">
     </div>
     <div class="col-sm-6 no-left-padding">
       <button type="button" class="btn btn-sm btn-default"
