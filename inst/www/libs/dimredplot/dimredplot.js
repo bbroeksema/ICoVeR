@@ -614,7 +614,8 @@ list.DimRedPlot = function () {
     controlDiv = barplotsDiv.selectAll("div.sortcontrol").data([true]);
     controlDiv.enter()
       .append("div")
-      .attr("class", "sortcontrol");
+      .attr("class", "sortcontrol")
+      .style("font-size", "12px");
 
     selectionSortCheck = controlDiv.selectAll("input#selectionSort").data([true]);
     selectionSortCheck.enter()

@@ -132,8 +132,9 @@ list.VariancePercentagePlot = function () {
       .transition()
       .duration(1500)
       .attr("x", function (d, i) {
-        /*jslint unparam:true*/
-        return size.width * (varianceOffsets[i] / 100);
+        var rectWidth = size.width * (d / 100);
+
+        return size.width * (varianceOffsets[i] / 100) + (rectWidth - this.getBBox().width) / 2;
       })
       .style("visibility", function (d, i) {
         /*jslint unparam:true*/
@@ -143,7 +144,7 @@ list.VariancePercentagePlot = function () {
       })
       .attr("y", function (d, i) {
         /*jslint unparam:true*/
-        return (0.7) * this.getBBox().height;
+        return (size.height + 0.7 * this.getBBox().height) / 2;
       })
       .style("pointer-events", "none");
 
