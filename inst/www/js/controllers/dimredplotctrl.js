@@ -23,8 +23,6 @@ angular.module('contigBinningApp.controllers')
       dimredplot
         .width(div.node().clientWidth)
         .height(div.node().clientHeight);
-
-      changeSelection();
     }
 
     $scope.$on("DimRedPlot::resize", function (e, numOfPlots) {
@@ -33,6 +31,7 @@ angular.module('contigBinningApp.controllers')
       dimredplot.invertPlotOrder(numOfPlots === 2 && $scope.analysis.plotIdx === 0);
 
       resize();
+      changeSelection();
     });
 
     angular.element($window).bind('resize', resize);
@@ -59,12 +58,16 @@ angular.module('contigBinningApp.controllers')
     function setColor() {
       /*jslint todo:true*/
       var variable = Color.colorVariable(),
+        schema;
+
+      if (variable !== undefined) {
         schema = _.find(DataSet.schema(), "name", variable);
+      }
 
       // TODO: Currently there is no support for colour mapping categorical variables,
       // so for now we will just ignore these. In the future we may just want to upgrade
       // the colourmap chart or not show a colour map, just colour the points.
-      if (schema === undefined || (schema.type !== "numeric" && schema.type !== "integer")) {
+      if (schema === undefined) {
         return;
       }
 
@@ -104,9 +107,6 @@ angular.module('contigBinningApp.controllers')
         DataSet.addVariable($scope.analysis.method[0].toUpperCase() + " x+y contribution", xyContributions, "numeric", "Analytics");
       }
 
-      calculateContribution([0, 1]);
-      setColor();
-
       dimredplot
         .originSize(30)
         .originVisible(true)
@@ -130,6 +130,9 @@ angular.module('contigBinningApp.controllers')
         .variableInfluences(DimRedPlot.influences.variable);
 
       resize();
+      calculateContribution([0, 1]);
+      setColor();
+      changeSelection();
     }
 
 

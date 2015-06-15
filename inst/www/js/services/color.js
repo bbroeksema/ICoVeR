@@ -277,6 +277,9 @@ angular.module('contigBinningApp.services')
         });
 
         d.coloring.variable = "Manual selection";
+        d.coloring.colorFn = function (colorVal) {
+          return colorVal; // The values of this variable are actually colors
+        };
 
         DataSet.addVariable("Manual selection", rowColors, "factor", "Colors", "steelblue");
 
