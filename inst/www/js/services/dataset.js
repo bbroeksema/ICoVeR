@@ -111,15 +111,6 @@ angular.module('contigBinningApp.services')
       }
     }
 
-    $rootScope.$on('DimRedPlot::analyticsAdded', function (e, variableName, analytics) {
-      var variableSchema = addVariable(variableName, analytics, "numeric", "Analytics");
-      $rootScope.$broadcast("DataSet::analyticsDataAvailable", variableSchema);
-    });
-
-    $rootScope.$on('DimRedPlot::analyticsRemoved', function (e, variableName) {
-      removeVariable(variableName);
-    });
-
     // Listen to the analytics service to store the results of various
     // analytical actions.
     $rootScope.$on("Analytics::dataUpdated", function (ev, identifier) {

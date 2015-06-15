@@ -99,14 +99,11 @@ angular.module('contigBinningApp.services')
     /*jslint unparam: true */
     $rootScope.$on('DimRedPlot::variablesSelected', function (e, method, variableSelection) {
       var groupList = [],
-        typeList = [],
-        variablesSelected = false;
+        typeList = [];
 
       _.forEach(variableSelection, function (variable) {
         if (variable.selected) {
           var variableSchema = _.find(d.variables, "name", variable.name);
-
-          variablesSelected = true;
 
           groupList.push(variableSchema.group);
           typeList.push(variableSchema.type);

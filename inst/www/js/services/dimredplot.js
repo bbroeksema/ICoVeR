@@ -273,13 +273,9 @@ angular.module('contigBinningApp.services')
       //updateMeans();
 
       if (variablesSelected) {
-        $rootScope.$broadcast("DimRedPlot::analyticsAdded", "influence", d.influences.individual);
-        //$rootScope.$broadcast("DimRedPlot::analyticsAdded", "mean", d.selectedMeans.individual);
-        //$rootScope.$broadcast("DimRedPlot::analyticsAdded", "mean_difference", d.meanDifferences.individual);
+        DataSet.addVariable("influence", d.influences.individual, "numeric", "Analytics");
       } else {
-        $rootScope.$broadcast("DimRedPlot::analyticsRemoved", "influence");
-        //$rootScope.$broadcast("DimRedPlot::analyticsRemoved", "mean");
-        //$rootScope.$broadcast("DimRedPlot::analyticsRemoved", "mean_difference");
+        DataSet.removeVariable("influence");
       }*/
 
       _.forEach(d.selections.variable, function (selection, variable) {
