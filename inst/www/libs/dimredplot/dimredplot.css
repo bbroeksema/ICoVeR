@@ -45,22 +45,36 @@
     stroke: #000;
 }
 
-
 .dimredplot .scatterplot .origin {
   fill: none;
   stroke: #bbb;
   stroke-width: 1px;
 }
 
-.dimredplot .barplot .contribution,
+/* color settings */
+.dimredplot .variable.scatterplot .point,
+.dimredplot .barplot .contribution {
+     fill: steelblue;
+ }
+
+.dimredplot .individual.scatterplot .selected {
+    fill: black;
+    stroke: black;
+}
+
+.dimredplot .variable.scatterplot .selected,
+.dimredplot .barplot .selected {
+    fill: red;
+}
+
 .dimredplot .variancepercentageplot .variance {
-  fill: steelblue;
-  fill-opacity: 1;
-  stroke-width: 0px;
+    fill: steelblue;
+    fill-opacity: 1;
+    stroke-width: 0px;
 }
 
 .dimredplot .variancepercentageplot .variance.active {
-  fill: lightblue;
+    fill: lightblue;
 }
 
 .dimredplot .variances .bg {

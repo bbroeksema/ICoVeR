@@ -127,7 +127,7 @@ list.DimRedPlot = function () {
       }
     },
     render = {},
-    events = d3.dispatch.apply(this, ["changeVariableSelection", "changeIndividualSelection"]),
+    events = d3.dispatch.apply(this, ["changeVariableSelection", "changeIndividualSelection", "changeAxes"]),
     actives = {
       first: 0,
       second: 1,
@@ -324,7 +324,13 @@ list.DimRedPlot = function () {
       colormap = d3.interpolateLab("green", "purple"),
       colorscale = d3.scale.linear(),
       colorVariableValues = {},
-      colorFn = null;
+      colorFn = null,
+      influenceScale = d3.scale.linear(),
+      maxInfluence = -1000,
+      minInfluence = 1000;
+
+    influenceScale
+      .range([0.2, 1.0]);
 
     // Initialise the plot data
     projections.forEach(function (projection) {
@@ -334,6 +340,9 @@ list.DimRedPlot = function () {
       if (projection.label !== undefined) {
         label = projection.label;
       }
+
+      maxInfluence = Math.max(maxInfluence, influence);
+      minInfluence = Math.min(minInfluence, influence);
 
       if (unifyAxesScaling) {
         // Calculate the domains used when using uniform domains
@@ -369,11 +378,14 @@ list.DimRedPlot = function () {
       yContributionSum += projection.contrib[actives.second];
     });
 
+    influenceScale.domain([minInfluence, maxInfluence]);
+
     plotdatum.points.forEach(function (d) {
       d.xContribution /= xContributionSum / 10000;
       d.yContribution /= yContributionSum / 10000;
       d.xContribution = Math.round(d.xContribution) / 100;
       d.yContribution = Math.round(d.yContribution) / 100;
+      d.influence = influenceScale(d.influence);
     });
 
     if (!plotdatum.isInfluenced) {
@@ -777,6 +789,8 @@ list.DimRedPlot = function () {
         resetContributionBrushExtents();
         resetColormapBrushExtent();
         render.dimredplot(div, data, {pointsChanged: true});
+
+        events.changeAxes(drp, [actives.first, actives.second]);
       });
 
     barPlotDiv = div.selectAll("div.variancepercentageplot").data(plotdata);

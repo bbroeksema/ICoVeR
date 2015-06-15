@@ -639,10 +639,10 @@ list.ScatterPlot = function () {
       plotWidth = size.width - svgMargins.right - svgMargins.left,
       ellipses;
 
-    ellipses = gPoints.selectAll("ellipse.selection").data(data.points);
+    ellipses = gPoints.selectAll("ellipse.map.selected").data(data.points);
     ellipses.enter()
       .append("ellipse")
-      .attr("class", "selection");
+      .attr("class", "map selected");
     ellipses
       .transition()
       .duration(1500)
@@ -657,8 +657,7 @@ list.ScatterPlot = function () {
       })
       .attr("cy", function (d) {
         return scales.colormap(xyContribution(d, data));
-      })
-      .style("fill", "steelblue");
+      });
 
     ellipses
       .style("visibility", function (d) {
@@ -824,10 +823,10 @@ list.ScatterPlot = function () {
       plotWidth = size.width - svgMargins.right - svgMargins.left,
       colors;
 
-    colors = gPoints.selectAll("line.selection").data(data.points);
+    colors = gPoints.selectAll("line.map.selected").data(data.points);
     colors.enter()
       .append("line")
-      .attr("class", "selection");
+      .attr("class", "map selected");
     colors
       .transition()
       .duration(1500)
@@ -839,8 +838,7 @@ list.ScatterPlot = function () {
       })
       .attr("x1", plotWidth + 3)
       .attr("x2", plotWidth + 20 - 3)
-      .style("stroke-width", "1px")
-      .style("stroke", "black");
+      .style("stroke-width", "1px");
 
     colors
       .style("visibility", function (d) {
@@ -854,47 +852,33 @@ list.ScatterPlot = function () {
   // all that is needed for an update.
   render.colorPoints = function (svg, data) {
     var colorMap = color.colorFn,
-      points = svg.select("g.points").selectAll("ellipse.point"),
-      isSelected = false;
+      points = svg.select("g.points").selectAll("ellipse.point");
 
-    isSelected = data.brushExtent[0] !== data.brushExtent[1] || data.points.some(function (d) {
+    points.classed("selected", function (d) {
       return d.selected !== list.selected.NONE;
     });
 
-    if (isSelected || data.isInfluenced) {
-      points.style("fill", function (d, idx) {
-        var pointColor = "steelblue",
-          influence = data.points[idx].influence;
-
-        if (color.useColouring) {
-          pointColor = colorMap(color.variableValues[d.id]);
-        }
-
-        if (isSelected) {
-          influence = 0;
-        }
-
-        if (data.points[idx].selected !== list.selected.NONE) {
-          influence = 1;
-        }
-
-        // When selecting points it is not necessary to calculate the expensive interpolate function
-        if (influence === 0) {
-          return "rgb(230, 230, 230)";
-        }
-        if (influence === 1) {
-          return pointColor;
-        }
-        return d3.interpolateHsl("rgb(255, 255, 255)", pointColor)(influence * 0.9 + 0.1);
-      });
+    if (color.useColouring) {
+      points
+        .style("fill", function (d) {
+          if (d.selected === list.selected.NONE) {
+            return colorMap(color.variableValues[d.id]);
+          }
+          return null;
+        });
+    } else if (data.isInfluenced) {
+      points
+        .filter(function (d) {
+          return d.selected === list.selected.NONE;
+        })
+        .style("fill-opacity", function (d) {
+          return d.influence;
+        });
     } else {
-      points.style("fill", function (d) {
-        if (color.useColouring) {
-          return colorMap(color.variableValues[d.id]);
-        }
-        return "steelblue";
-      });
+      points.style("fill-opacity", 1);
     }
+
+
   };
 
   // Renders labels by first clustering the points that need a label and then rendering
