@@ -14,3 +14,8 @@
 .parcoords text {
   fill: #c8c8c8;
 }
+
+.dimredplot .individual.scatterplot .selected {
+    fill: white;
+    stroke: white;
+}
