@@ -20,7 +20,8 @@ list.ScatterPlot = function () {
       colorFn: null,
       variableName: "contribution",
       variableValues: null,
-      useColouring: false
+      useColouring: false,
+      renderColourmap: false
     },
     pointSizeFn = null,
     events = d3.dispatch.apply(this, ["selectionEnd", "brushEnd", "resize"]),
@@ -38,7 +39,7 @@ list.ScatterPlot = function () {
   }
 
   function updateScales(div, data, scales) {
-    var domain, range,  // output range
+    var domain = [0, 1], range = [0, 1],  // output range
       rangeRatio,
       domainRatio,
       rangeDiff,
@@ -58,7 +59,9 @@ list.ScatterPlot = function () {
 
     // Update the colormap scale
     if (color.useColouring) {
-      domain = d3.extent(data.points, function (d) { return color.variableValues[d.id]; });
+      if (color.variableValues !== null) {
+        domain = d3.extent(data.points, function (d) { return color.variableValues[d.id]; });
+      }
     } else {
       domain = d3.extent(data.points, function (d) { return xyContribution(d, data); });
     }
@@ -140,7 +143,8 @@ list.ScatterPlot = function () {
           colormap: d3.scale.linear(),
           color: d3.scale.linear(),
           size: d3.scale.linear()
-        };
+        },
+        key;
 
       if (!data) {return; }
       if (!data.points) {throw "ScatterPlot expects a 'points' property on the data"; }
@@ -152,14 +156,27 @@ list.ScatterPlot = function () {
         .append("g")
         .attr("class", "points");
 
-      if (!showAxes) {
-        svgMargins = { top: 20, bottom: 10, left: 5, right: 50 };
-      }
-
       if (color.colorFn !== null && color.variableValues !== null) {
         color.useColouring = true;
-      } else if (color.colorFn !== null || color.variableValues !== null) {
-        throw "If coloring is desired then both colorFunction and colorVariableValures have to be set";
+        color.renderColourmap = true;
+
+        for (key in color.variableValues) {
+          // It makes no sense to render a colourmap for factor data, so we don't
+          if (color.variableValues.hasOwnProperty(key) && typeof color.variableValues[key] !== "number") {
+            color.renderColourmap = false;
+            break;
+          }
+        }
+
+      } else if (color.colorFn !== color.variableValues) {
+        throw "If coloring is desired then both colorFunction and colorVariableValues have to be set";
+      }
+
+      if (!showAxes) {
+        svgMargins = {top: 20, bottom: 10, left: 5, right: 5};
+        if (color.renderColourmap || pointSizeFn !== null) {
+          svgMargins.right += 45;
+        }
       }
 
       updateScales(d3.select(this), data, scales);
@@ -706,16 +723,20 @@ list.ScatterPlot = function () {
       .on("brushEnd", brushEnd);
 
     colourMapGroup = gPoints.selectAll("g.colourmap").data([true]);
-    colourMapGroup.enter()
-      .append("g")
-      .attr("class", "colourmap")
-      .attr("transform", "translate(" + plotWidth + ", 0)"); // This line avoids animation on first render
-    colourMapGroup
-      .transition()
-      .duration(1500)
-      .attr("transform", "translate(" + plotWidth + ", 0)")
-      .call(colourMap);
 
+    if (!color.renderColourmap) {
+      colourMapGroup.remove();
+    } else {
+      colourMapGroup.enter()
+        .append("g")
+        .attr("class", "colourmap")
+        .attr("transform", "translate(" + plotWidth + ", 0)"); // This line avoids animation on first render
+      colourMapGroup
+        .transition()
+        .duration(1500)
+        .attr("transform", "translate(" + plotWidth + ", 0)")
+        .call(colourMap);
+    }
   };
 
   render.axisArrows = function (gPoints, plotWidth, plotHeight) {
@@ -824,28 +845,33 @@ list.ScatterPlot = function () {
       colors;
 
     colors = gPoints.selectAll("line.map.selected").data(data.points);
-    colors.enter()
-      .append("line")
-      .attr("class", "map selected");
-    colors
-      .transition()
-      .duration(1500)
-      .attr("y1", function (d) {
-        return scales.colormap(color.variableValues[d.id]);
-      })
-      .attr("y2", function (d) {
-        return scales.colormap(color.variableValues[d.id]);
-      })
-      .attr("x1", plotWidth + 3)
-      .attr("x2", plotWidth + 20 - 3)
-      .style("stroke-width", "1px");
 
-    colors
-      .style("visibility", function (d) {
-        return d.selected !== list.selected.NONE ? "visible" : "hidden";
-      });
+    if (!color.renderColourmap) {
+      colors.remove();
+    } else {
+      colors.enter()
+        .append("line")
+        .attr("class", "map selected");
+      colors
+        .transition()
+        .duration(1500)
+        .attr("y1", function (d) {
+          return scales.colormap(color.variableValues[d.id]);
+        })
+        .attr("y2", function (d) {
+          return scales.colormap(color.variableValues[d.id]);
+        })
+        .attr("x1", plotWidth + 3)
+        .attr("x2", plotWidth + 20 - 3)
+        .style("stroke-width", "1px");
 
-    colors.exit().remove();
+      colors
+        .style("visibility", function (d) {
+          return d.selected !== list.selected.NONE ? "visible" : "hidden";
+        });
+
+      colors.exit().remove();
+    }
   };
 
   // Sets the color of the points, this is separated from the points function because sometimes a recolour is
