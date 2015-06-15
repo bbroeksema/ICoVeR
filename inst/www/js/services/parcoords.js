@@ -12,6 +12,7 @@ angular.module('contigBinningApp.services')
     var d = {
         variables: [],         // List of variables that can be displayed in parcoords.
         selectedVariables: [], // List of variables currently displayed in parcoords.
+        variablesToUpdate: [], // List of variables that need to be updated because they have changed.
 
         sharedScaleVariables: [], // List of variables for which the same scale should be used.
         scaleText: "None",
@@ -150,19 +151,16 @@ angular.module('contigBinningApp.services')
       }
     });
 
-    $rootScope.$on('DataSet::analyticsDataAvailable', function (e, clusterVariable) {
-      if (!_.any(d.selectedVariables, { name: clusterVariable.name })) {
-        d.selectedVariables.push(clusterVariable);
-        d.updateSelectedVariables(d.selectedVariables);
-      }
-    });
-
-    $rootScope.$on("DimRedPlot::analyticsRemoved", function (ev, variableName) {
-      var variableIdx = _.findIndex(d.selectedVariables, { name: variableName });
-
-      if (variableIdx !== -1) {
-        d.selectedVariables.splice(variableIdx, 1);
-        d.updateSelectedVariables(d.selectedVariables);
+    $rootScope.$on('DataSet::analyticsUpdated', function (e, analyticsVariable) {
+      // If the analytics have not been in the data before we can add them normally
+      if (!_.any(d.selectedVariables, { name: analyticsVariable.name })) {
+        if (analyticsVariable.name.indexOf("contribution") === -1) {
+          d.selectedVariables.push(analyticsVariable);
+          d.updateSelectedVariables(d.selectedVariables);
+          d.variablesToUpdate.push(analyticsVariable);
+        }
+      } else {
+        d.variablesToUpdate.push(analyticsVariable);
       }
     });
     /*jslint unparam: false */

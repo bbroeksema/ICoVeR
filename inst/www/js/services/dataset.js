@@ -70,6 +70,9 @@ angular.module('contigBinningApp.services')
       if (newVariable) {
         $rootScope.$broadcast('DataSet::schemaLoaded', d.backend.schema);
       }
+      if (group === "Analytics") {
+        $rootScope.$broadcast('DataSet::analyticsUpdated', variableSchema);
+      }
 
       // Tags need to be added to the actual database
       // Preferably, R should get a function addVariable and the DataSet should not have to care what
@@ -124,10 +127,10 @@ angular.module('contigBinningApp.services')
         // We send the current timestamp as arg to avoid caching to happen here
         OpenCPU.json("data.schema", {timestamp: Date.now()}, function (session, schema) {
           updateSchema(schema);
-          $rootScope.$broadcast("DataSet::analyticsDataAvailable", d.backend.schemaIndex[identifier]);
+          $rootScope.$broadcast("DataSet::analyticsUpdated", d.backend.schemaIndex[identifier]);
         });
       } else {
-        $rootScope.$broadcast("DataSet::analyticsDataAvailable", d.backend.schemaIndex[identifier]);
+        $rootScope.$broadcast("DataSet::analyticsUpdated", d.backend.schemaIndex[identifier]);
       }
     });
 

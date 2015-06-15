@@ -11,9 +11,8 @@ angular.module('contigBinningApp.controllers')
 
     $scope.itemsBrushed = false;
 
-    $scope.$on("Colors::changed", function (e, rowColors, colorFunction, colorCriterion) {
-      /*jslint unparam:true*/
-      if (colorCriterion === "Manual selection") {
+    $scope.$on("Colors::changed", function () {
+      if (Color.colorVariable() === "Manual selection") {
         if (!$scope.manualColoringEnabled || $scope.colors !== Color.colorScheme()) { // Manual selection is already on
           $scope.manualColoringEnabled = true;
           $scope.colors = Color.colorScheme();

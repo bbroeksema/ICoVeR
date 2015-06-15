@@ -74,14 +74,26 @@ angular.module('contigBinningApp.controllers')
 
       // Make sure that the manual selection option is on top
       var manualIndex = _.findIndex($scope.variables, "name", "Manual selection"),
-        manualSelectionVar;
+        manualSelectionVar,
+        colorVariable;
 
       if (manualIndex !== -1) {
         manualSelectionVar = $scope.variables[manualIndex];
         $scope.variables.splice(manualIndex, 1);
         $scope.variables.splice(0, 0, manualSelectionVar);
       }
+
+      if ($scope.colorVariable !== undefined) {
+        colorVariable = _.find($scope.variables, "name", $scope.colorVariable.name);
+        $scope.colorVariable = colorVariable;
+      }
     }
+
+    $scope.$on('Colors::changed', function () {
+      $scope.colorVariable = _.find($scope.variables, "name", Color.colorVariable());
+      $scope.colorMethod = Color.colorMethod();
+      $scope.colorScheme = Color.colorSchemeName();
+    });
 
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
       /*jslint unparam: true */

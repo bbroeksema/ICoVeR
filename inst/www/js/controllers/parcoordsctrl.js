@@ -248,9 +248,15 @@ angular.module('contigBinningApp.controllers')
       } else {
         if (newVariables.length > 0) {
           DataSet.get(newVariables, loadAdditionalData);
-        } else if (missingVariables.length > 0) {
+        } else if (missingVariables.length > 0 || ParCoords.variablesToUpdate.length !== 0) {
+          if (ParCoords.variablesToUpdate.length !== 0) {
+            DataSet.get(ParCoords.variablesToUpdate, loadAdditionalData);
+          }
+
           setDimensions();
           render();
+
+          ParCoords.variablesToUpdate = [];
         }
       }
     });

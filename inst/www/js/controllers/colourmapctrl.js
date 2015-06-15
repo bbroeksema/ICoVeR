@@ -69,7 +69,7 @@ angular.module('contigBinningApp.controllers')
     $(document).ready(resize);
 
     /// Scope extensions
-    $scope.$on("Colors::changed", function (e, rowColors, colorFunction, variable) {
+    $scope.$on("Colors::changed", function (e, rowColors) {
       /*jslint unparam:true todo:true*/
       //$scope.renderColourmap = true;
       //TODO fix this so it actualles uses ng-show
@@ -77,9 +77,9 @@ angular.module('contigBinningApp.controllers')
 
       //d.colourMapScale.domain(domain);
       d.colourMap.scale(d.colourMapScale);
-      d.colourMap.colourFunction(colorFunction);
+      d.colourMap.colourFunction(Color.colorFn());
 
-      d.title.text(variable);
+      d.title.text(Color.colorVariable());
       resize();
     });
   });
