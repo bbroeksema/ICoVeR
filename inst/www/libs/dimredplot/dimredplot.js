@@ -426,6 +426,8 @@ list.DimRedPlot = function () {
       .originSize(parts.scatterplot.origin.size)
       .unifyAxesScaling(true) // In the case of scatterplot this just refers two the shown axes
       .automaticResize(automaticResize)
+      .showAxes(false)
+      .showWarning(true)
       .on("selectionEnd", select)
       .on("brushEnd", brushed)
       .on("resize", function (sp, newWidth) {
@@ -439,9 +441,10 @@ list.DimRedPlot = function () {
       });
 
     if (unifyAxesScaling) {
-      scatterPlotChart.showAxes(false);
-      scatterPlotChart.xDomain(projectionDomain.x);
-      scatterPlotChart.yDomain(projectionDomain.y);
+      scatterPlotChart
+        .showWarning(false)
+        .xDomain(projectionDomain.x)
+        .yDomain(projectionDomain.y);
     }
 
     if (type === "individual") {
@@ -788,8 +791,8 @@ list.DimRedPlot = function () {
 
         resetContributionBrushExtents();
         resetColormapBrushExtent();
-        render.dimredplot(div, data, {pointsChanged: true});
 
+        render.dimredplot(div, data, {pointsChanged: true});
         events.changeAxes(drp, [actives.first, actives.second]);
       });
 

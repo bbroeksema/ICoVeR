@@ -15,7 +15,9 @@ list.ColourMap = function () {
     colourFunction = d3.interpolateLab("steelblue", "brown"),
     scale = d3.scale.linear(),
     extent = [0, 0],
-    events = d3.dispatch.apply(this, ["brushStart", "brush", "brushEnd"]);
+    events = d3.dispatch.apply(this, ["brushStart", "brush", "brushEnd"]),
+    axis = d3.svg.axis(),
+    text;
 
   function cm(selection) {
     selection.each(function () {
@@ -35,15 +37,15 @@ list.ColourMap = function () {
       frame,
       colors,
       colorGroup,
-      axis,
       axisGroup,
-      idx;
+      idx,
+      label;
 
     for (idx = 0; idx !== numColors; idx += 1) {
       colorData.push(idx);
     }
 
-    axis = d3.svg.axis()
+    axis
       .scale(scale)
       .orient(axisSide);
 
@@ -72,6 +74,7 @@ list.ColourMap = function () {
       .attr("class", "colors");
     colorGroup
       .attr("transform", "translate(0, " + minRange + ")");
+
 
     frame = colorGroup.selectAll("rect.colorframe").data([true]);
     frame
@@ -102,6 +105,20 @@ list.ColourMap = function () {
       .style("stroke", function (d) {
         return colourFunction(scale.invert(d));
       });
+
+    label = element.selectAll("text.text").data([true]);
+    label
+      .enter()
+      .append("text")
+      .attr("class", "text")
+      .attr("transform", "rotate(90)")
+      .style("font-size", (size.width - 2) + "px")
+      .style("text-anchor", "middle")
+      .style("dominant-baseline", "middle");
+    label
+      .text(text)
+      .attr("x", (maxRange - minRange) / 2)
+      .attr("y", -size.width / 2);
   };
 
   render.colormapBrush = function (element) {
@@ -174,6 +191,14 @@ list.ColourMap = function () {
     colourFunction = _;
     return cm;
   };
+
+  cm.text = function (_) {
+    if (!arguments.length) {return text; }
+    text = _;
+    return cm;
+  };
+
+  cm.tickFormat = axis.tickFormat;
 
   d3.rebind(cm, events, "on");
   return cm;

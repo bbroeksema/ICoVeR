@@ -8,12 +8,13 @@ list.ScatterPlot = function () {
   "use strict";
 
   var size = { width: 500, height: 500 },
-    svgMargins = { top: 20, bottom: 20, left: 35, right: 50 },
+    svgMargins = { top: 20, bottom: 20, left: 35, right: 5 },
     pointMargin = 5,
     render = {},
     xDomain = null,
     yDomain = null,
     showAxes = true,
+    showWarning = false,
     unifyAxesScaling = true,
     automaticResize = true,
     color = {
@@ -174,9 +175,10 @@ list.ScatterPlot = function () {
 
       if (!showAxes) {
         svgMargins = {top: 20, bottom: 10, left: 5, right: 5};
-        if (color.renderColourmap || pointSizeFn !== null) {
-          svgMargins.right += 45;
-        }
+      }
+
+      if (color.renderColourmap || pointSizeFn !== null) {
+        svgMargins.right += 50;
       }
 
       updateScales(d3.select(this), data, scales);
@@ -577,6 +579,10 @@ list.ScatterPlot = function () {
       .scale(scales.colormap)
       .orient("right");
 
+    if (color.variableName.indexOf("contribution") !== -1) {
+      axis.tickFormat(function (tick) { return tick + "%"; });
+    }
+
     axisGroup = gPoints.selectAll("g.coloraxis").data([true]);
     axisGroup.enter()
       .append("g")
@@ -718,18 +724,23 @@ list.ScatterPlot = function () {
       .extent(data.brushExtent)
       .scale(scales.colormap)
       .axisSide("right")
+      .text(color.variableName)
       .colourFunction(color.colorFn)
       .on("brush", brush)
       .on("brushEnd", brushEnd);
 
-    colourMapGroup = gPoints.selectAll("g.colourmap").data([true]);
+    if (color.variableName.indexOf("contribution") !== -1) {
+      colourMap.tickFormat(function (tick) { return tick + "%"; });
+    }
+
+    colourMapGroup = gPoints.selectAll("g.colormap").data([true]);
 
     if (!color.renderColourmap) {
       colourMapGroup.remove();
     } else {
       colourMapGroup.enter()
         .append("g")
-        .attr("class", "colourmap")
+        .attr("class", "colormap")
         .attr("transform", "translate(" + plotWidth + ", 0)"); // This line avoids animation on first render
       colourMapGroup
         .transition()
@@ -739,7 +750,7 @@ list.ScatterPlot = function () {
     }
   };
 
-  render.axisArrows = function (gPoints, plotWidth, plotHeight) {
+  render.axisArrows = function (gPoints, plotWidth, plotHeight, axisColor) {
     var lines,
       marker;
 
@@ -756,8 +767,10 @@ list.ScatterPlot = function () {
       .attr("refY", 0)
       .attr("viewBox", "-5 -5 10 10")
       .append("path")
-        .attr("d", "M 0,0 m -5,-5 L 5,0 L -5,5 Z")
-        .attr("fill", "black");
+        .attr("d", "M 0,0 m -5,-5 L 5,0 L -5,5 Z");
+
+    marker
+      .style("fill", axisColor);
 
     lines = [
       {x1: plotWidth - 35, x2: plotWidth - 10, y1: plotHeight + 2, y2: plotHeight + 2},
@@ -773,7 +786,7 @@ list.ScatterPlot = function () {
       .attr("x2", function (d) {return d.x2; })
       .attr("y1", function (d) {return d.y1; })
       .attr("y2", function (d) {return d.y2; })
-      .attr("stroke", "black")
+      .attr("stroke", axisColor)
       .attr("stroke-width", 1)
       .attr("marker-end", "url(#dimredplot-arrow)");
   };
@@ -786,7 +799,12 @@ list.ScatterPlot = function () {
       xAxis,
       yAxis,
       axisGroup,
-      axisLabel;
+      axisLabel,
+      axisColor = "black";
+
+    if (showWarning) {
+      axisColor = "red";
+    }
 
     axisLabel = gPoints.selectAll("text.xaxis").data([true]);
     axisLabel.enter()
@@ -796,7 +814,8 @@ list.ScatterPlot = function () {
     axisLabel
       .text(Math.round(data.xVariance * 100) / 100 + "%")
       .attr("y", plotHeight - 2)
-      .attr("x", plotWidth - axisLabel.node().getBBox().width - 4);
+      .attr("x", plotWidth - axisLabel.node().getBBox().width - 4)
+      .style("fill", axisColor);
 
     axisLabel = gPoints.selectAll("text.yaxis").data([true]);
     axisLabel.enter()
@@ -806,7 +825,8 @@ list.ScatterPlot = function () {
     axisLabel
       .text(Math.round(data.yVariance * 100) / 100 + "%")
       .attr("y", axisLabel.node().getBBox().height)
-      .attr("x", 4);
+      .attr("x", 4)
+      .style("fill", axisColor);
 
     if (showAxes) {
       xAxis = d3.svg.axis()
@@ -835,7 +855,7 @@ list.ScatterPlot = function () {
         .transition()
         .duration(1500).call(yAxis);
     } else {
-      render.axisArrows(gPoints, plotWidth, plotHeight);
+      render.axisArrows(gPoints, plotWidth, plotHeight, axisColor);
     }
   };
 
@@ -1303,6 +1323,12 @@ list.ScatterPlot = function () {
   sp.showAxes = function (_) {
     if (!arguments.length) {return showAxes; }
     showAxes = _;
+    return sp;
+  };
+
+  sp.showWarning = function (_) {
+    if (!arguments.length) {return showWarning; }
+    showWarning = _;
     return sp;
   };
 
