@@ -18,7 +18,9 @@ angular.module('contigBinningApp.services')
         schemes: {
           numeric: {
             value: {
-              blue_to_brown: ["steelblue", "brown"]
+              blue_to_brown: ["steelblue", "brown"],
+              blue_to_yellow: ["blue", "yellow"],
+              cool: ["#00FFFF", "magenta"]
             },
             decile: {
               yellow_to_red: d3.colorbrewer.YlOrRd[10],
