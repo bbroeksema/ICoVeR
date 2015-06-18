@@ -52,7 +52,7 @@ db.init <- function() {
 
 # This function makes sure column names are suitable for sqlite. It also prevents SQL injection.
 p.db.escape.name <- function (name) {
-  name <- paste("`", name, "`", sep="")
+  name <- paste("\"", name, "\"", sep="")
 }
 
 p.db.connection <-function() {
@@ -111,7 +111,7 @@ p.db.extend.schema <- function(name, type, group, group_type) {
   count <- unlist(DBI::dbGetQuery(con, q))
   if (count == 0) {
     values <- paste("'", c(name, type, group, group_type), "'", sep="", collapse=", ")
-    q <- paste("INSERT INTO schema (name, type, `group`, group_type) VALUES(", values , ")", sep="")
+    q <- paste("INSERT INTO schema (name, type, \"group\", group_type) VALUES(", values , ")", sep="")
     res <- DBI::dbSendQuery(con, q)
     DBI::dbClearResult(res)
   }
@@ -173,8 +173,8 @@ p.db.types <- function(variables) {
 
   # NOTE: for now value is expected to be a numeric value.
   con <- p.db.connection()
-  q <- paste("SELECT name, type FROM schema WHERE name in (\""
-             , paste(variables, collapse="\", \""), "\")", sep="")
+  q <- paste("SELECT name, type FROM schema WHERE name in ("
+             , paste(variables, collapse=", "), ")", sep="")
   data <- DBI::dbGetQuery(con, q)
   DBI::dbDisconnect(con)
   data
