@@ -139,6 +139,8 @@ angular.module('contigBinningApp.controllers')
     /// Initialization
     d.parcoords
       .mode("queue")
+      .brushedColor("black")
+      .brushedRenderMode("color")
       .rate(250)
       .alpha(0.05)
       .render()
@@ -259,6 +261,12 @@ angular.module('contigBinningApp.controllers')
           ParCoords.variablesToUpdate = [];
         }
       }
+    });
+
+    $scope.$on("ParCoords::brushedColorChanged", function (e, color) {
+      /*jslint unparam:true*/
+      d.parcoords.brushedColor(color);
+      d.parcoords.render();
     });
 
     $scope.$on("DataSet::brushed", function (ev, brushed, method) {

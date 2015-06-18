@@ -96,6 +96,16 @@ angular.module('contigBinningApp.services')
       }
     };
 
+    d.changeTheme = function (newTheme) {
+      var brushedColor = "white";
+
+      if (newTheme === 'light') {
+        brushedColor = "black";
+      }
+
+      $rootScope.$broadcast("ParCoords::brushedColorChanged", brushedColor);
+    };
+
     /*jslint unparam: true */
     $rootScope.$on('DimRedPlot::variablesSelected', function (e, method, variableSelection) {
       var groupList = [],

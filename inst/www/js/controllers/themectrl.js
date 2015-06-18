@@ -2,7 +2,7 @@
 /*global angular, $ */
 
 angular.module('contigBinningApp.controllers')
-  .controller('ThemeCtrl', function ($scope) {
+  .controller('ThemeCtrl', function ($scope, ParCoords) {
 
     'use strict';
 
@@ -14,5 +14,7 @@ angular.module('contigBinningApp.controllers')
       if (link.attr('href') !== url) {
         link.attr('href', url);
       }
+
+      ParCoords.changeTheme(newTheme);
     });
   });
