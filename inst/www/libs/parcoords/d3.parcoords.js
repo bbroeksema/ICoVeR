@@ -13,6 +13,8 @@ d3.parcoords = function(config) {
     height: 300,
     margin: { top: 24, right: 0, bottom: 12, left: 0 },
     color: "#069",
+    brushedColor: "#000",
+    brushedRenderMode: "keep",
     composite: "source-over",
     alpha: 0.7,
     bundlingStrength: 0.5,
@@ -78,6 +80,9 @@ var side_effects = d3.dispatch.apply(this,d3.keys(__))
   .on("rate", function(d) { rqueue.rate(d.value); })
   .on("data", function(d) {
     if (flags.shadows){paths(__.data, ctx.shadows);}
+  })
+  .on("brushed", function (d) {
+    tagBrushed();
   })
   .on("dimensions", function(d) {
     xscale.domain(__.dimensions);
@@ -226,14 +231,9 @@ pc.autoscale = function() {
 };
 
 pc.scale = function(d, domain) {
-  if (arguments.length >= 2) {
-    yscale[d].domain(domain);
-    return this;
-  } else if (arguments.length === 1) {
-    return yscale[d];
-  } else {
-    return yscale;
-  }
+	yscale[d].domain(domain);
+
+	return this;
 };
 
 pc.flip = function(d) {
@@ -317,16 +317,28 @@ pc.render = function() {
   return this;
 };
 
+function renderPaths(renderFn) {
+  // Reset the rendering parameters in case we changed
+  // __.brushedRenderMode from "color" to "keep"
+  ctx.globalCompositeOperation = __.composite;
+  ctx.globalAlpha = __.alpha;
+
+  if (__.brushed  && __.brushedRenderMode === "keep") {
+    renderFn(__.brushed);
+    __.highlighted.forEach(path_highlight);
+  } else {
+    renderFn(__.data);
+    __.highlighted.forEach(path_highlight);
+  }
+};
+
 pc.render['default'] = function() {
   pc.clear('foreground');
   pc.clear('highlight');
-  if (__.brushed) {
-    __.brushed.forEach(path_foreground);
-    __.highlighted.forEach(path_highlight);
-  } else {
-    __.data.forEach(path_foreground);
-    __.highlighted.forEach(path_highlight);
-  }
+
+  renderPaths(function (data) {
+    data.forEach(path_foreground);
+  });
 };
 
 var rqueue = d3.renderQueue(path_foreground)
@@ -337,13 +349,7 @@ var rqueue = d3.renderQueue(path_foreground)
   });
 
 pc.render.queue = function() {
-  if (__.brushed) {
-    rqueue(__.brushed);
-    __.highlighted.forEach(path_highlight);
-  } else {
-    rqueue(__.data);
-    __.highlighted.forEach(path_highlight);
-  }
+  renderPaths(rqueue);
 };
 function compute_cluster_centroids(d) {
 
@@ -470,7 +476,21 @@ function single_curve(d, ctx) {
 
 // draw single polyline
 function color_path(d, i, ctx) {
-	ctx.strokeStyle = d3.functor(__.color)(d, i);
+  if (__.brushedRenderMode === "color") {
+    // When coloring based on selection we need the selected points
+    // to be rendered over the rest of the points or they might be occluded,
+    // defeating the purpose. Because the CompositeOperation is used for this
+    // changing __.composite has no effect when coloring based on selection.
+    if (d.__brushed) {
+      ctx.strokeStyle = __.brushedColor;
+      ctx.globalCompositeOperation = 'source-over';
+    } else {
+      ctx.strokeStyle = d3.functor(__.color)(d, i);
+      ctx.globalCompositeOperation = 'destination-over';
+    }
+  } else {
+    ctx.strokeStyle = d3.functor(__.color)(d, i);
+  }
 	ctx.beginPath();
 	if ((__.bundleDimension !== null && __.bundlingStrength > 0) || __.smoothness > 0) {
 		single_curve(d, ctx);
@@ -542,6 +562,10 @@ function rotateLabels() {
   d3.event.preventDefault();
 }
 
+function dimensionLabels(d) {
+  return d in __.dimensionTitles ? __.dimensionTitles[d] : d;  // dimension display names
+}
+
 pc.createAxes = function() {
   if (g) pc.removeAxes();
 
@@ -565,9 +589,7 @@ pc.createAxes = function() {
         "x": 0,
         "class": "label"
       })
-      .text(function(d) {
-        return d in __.dimensionTitles ? __.dimensionTitles[d] : d;  // dimension display names
-      })
+      .text(dimensionLabels)
       .on("dblclick", flipAxisAndUpdatePCP)
       .on("wheel", rotateLabels);
 
@@ -600,7 +622,7 @@ pc.updateAxes = function() {
         "x": 0,
         "class": "label"
       })
-      .text(String)
+      .text(dimensionLabels)
       .on("dblclick", flipAxisAndUpdatePCP)
       .on("wheel", rotateLabels);
 
@@ -615,7 +637,7 @@ pc.updateAxes = function() {
   g_data.select(".label")
     .transition()
       .duration(1100)
-      .text(String)
+      .text(dimensionLabels)
       .attr("transform", "translate(0,-5) rotate(" + __.dimensionTitleRotation + ")");
 
   // Exit
@@ -705,9 +727,17 @@ pc.reorderable = function() {
 pc.reorder = function(rowdata) {
   var dims = __.dimensions.slice(0);
   __.dimensions.sort(function(a, b) {
-    return yscale[a](rowdata[a]) - yscale[b](rowdata[b]);
-  });
+    var pixelDifference = yscale[a](rowdata[a]) - yscale[b](rowdata[b]);
 
+    // Array.sort is not necessarily stable, this means that if pixelDifference is zero
+    // the ordering of dimensions might change unexpectedly. This is solved by sorting on
+    // variable name in that case.
+    if (pixelDifference === 0) {
+      return a.localeCompare(b);
+    } // else
+    return pixelDifference;
+  });
+  
   // NOTE: this is relatively cheap given that:
   // number of dimensions < number of data items
   // Thus we check equality of order to prevent rerendering when this is the case.
@@ -760,13 +790,51 @@ var brush = {
   }
 };
 
+function isEmpty(object) {
+  for (var key in object) {
+    if (object.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// This function adds a __brushed attribute to every row in the data.
+// The attribute indicates whether a row is brushed, which we need to know
+// in the color_path function.
+function tagBrushed() {
+  if (__.brushedRenderMode === "color") {
+
+    if (!isEmpty(brush.currentMode().brushState()) && __.brushed.length === __.data.length) {
+      // Everything is brushed
+      __.data.forEach(function (d) {
+        d.__brushed = true;
+      });
+
+      return;
+    }
+
+    // Resets the __brushed attribute
+    __.data.forEach(function (d) {
+      d.__brushed = false;
+    });
+
+    if (__.brushed !== false && __.brushed.length !== __.data.length) {
+      __.brushed.forEach(function (d) {
+        d.__brushed = true;
+      });
+    }
+  }
+}
+
+
 // This function can be used for 'live' updates of brushes. That is, during the
 // specification of a brush, this method can be called to update the view.
 //
 // @param newSelection - The new set of data items that is currently contained
 //                       by the brushes
 function brushUpdated(newSelection) {
-  __.brushed = newSelection;
+  pc.brushed(newSelection);
   events.brush.call(pc,__.brushed);
   pc.render();
 }
@@ -780,7 +848,7 @@ function brushPredicate(predicate) {
   }
 
   brush.predicate = predicate;
-  __.brushed = brush.currentMode().selected();
+  pc.brushed(brush.currentMode().selected());
   pc.render();
   return pc;
 }
@@ -878,7 +946,7 @@ pc.brushMode = function(mode) {
     var extents = {};
     __.dimensions.forEach(function(d) {
       var brush = brushes[d];
-      if (!brush.empty()) {
+      if (brush !== undefined && !brush.empty()) {
         var extent = brush.extent();
         extent.sort(d3.ascending);
         extents[d] = extent;
@@ -905,7 +973,7 @@ pc.brushMode = function(mode) {
   }
 
   function brushReset(dimension) {
-    __.brushed = false;
+    pc.brushed(false);
     if (g) {
       g.selectAll('.brush')
         .each(function(d) {
@@ -945,7 +1013,8 @@ pc.brushMode = function(mode) {
       delete pc.brushExtents;
       delete pc.brushReset;
     },
-    selected: selected
+    selected: selected,
+    brushState: brushExtents
   }
 })();
 // brush mode: 2D-strums
@@ -1159,7 +1228,7 @@ pc.brushMode = function(mode) {
 
       brushed = selected(strums);
       strums.active = undefined;
-      __.brushed = brushed;
+      pc.brushed(brushed);
       pc.render();
       events.brushend.call(pc, __.brushed);
     };
@@ -1264,7 +1333,8 @@ pc.brushMode = function(mode) {
 
       strumRect = undefined;
     },
-    selected: selected
+    selected: selected,
+    brushState: function () { return strums; }
   };
 
 }());
@@ -1274,7 +1344,6 @@ pc.brushMode = function(mode) {
 
 (function() {
   if (typeof d3.svg.multibrush !== 'function') {
-	  console.log("multibrush requires d3.svg.multibrush");
 	  return;
   }
   var brushes = {};
@@ -1334,7 +1403,7 @@ pc.brushMode = function(mode) {
     var extents = {};
     __.dimensions.forEach(function(d) {
       var brush = brushes[d];
-      if (!brush.empty()) {
+      if (brush !== undefined && !brush.empty()) {
         var extent = brush.extent();
         extents[d] = extent;
       }
@@ -1377,7 +1446,7 @@ pc.brushMode = function(mode) {
   }
 
   function brushReset(dimension) {
-    __.brushed = false;
+    pc.brushed(false);
     if (g) {
       g.selectAll('.brush')
         .each(function(d) {
@@ -1417,7 +1486,8 @@ pc.brushMode = function(mode) {
       delete pc.brushExtents;
       delete pc.brushReset;
     },
-    selected: selected
+    selected: selected,
+    brushState: brushExtents
   }
 })();
 pc.interactive = function() {
