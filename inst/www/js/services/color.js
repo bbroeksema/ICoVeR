@@ -36,7 +36,8 @@ angular.module('contigBinningApp.services')
               "set3 (12 colors)": d3.colorbrewer.Set3[12],
               "category A (20 colors)": d3.scale.category20().range(),
               "category B (20 colors)": d3.scale.category20b().range(),
-              "category C (20 colors)": d3.scale.category20c().range()
+              "category C (20 colors)": d3.scale.category20c().range(),
+              "red_yellow_blue (11 colors)": d3.colorbrewer.RdYlBu[11]
               // the qualitiative set will calulate the number of clusters before application
               // qualitative_set: [] //rainbow_hcl(30, c = 50, l = 70, start = 0, end = 360*(30-1)/30)
             }
