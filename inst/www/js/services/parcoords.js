@@ -28,18 +28,6 @@ angular.module('contigBinningApp.services')
         highlightFunction: undefined
       };
 
-    function setVariables(schema) {
-      if (schema === undefined) {
-        d.variables = [];
-      } else {
-        d.variables = _.filter(schema, function (variable) {
-          return R.is.numeric(variable.type) ||
-            R.is.factor(variable.type);
-        });
-        d.selectedVariables = [];
-      }
-    }
-
     d.updateSelectedVariables = function (variables) {
       var text = _.reduce(variables, function (str, variable) {
         return str === "" ? variable.name : str + ", " + variable.name;
@@ -147,16 +135,28 @@ angular.module('contigBinningApp.services')
     });
 
     $rootScope.$on('DataSet::schemaLoaded', function (e, schema) {
-      var firstLoad = d.variables.length < 1,
-        previousVariables =  d.selectedVariables;
-      // set variables will empty d.selectedVariables
-      setVariables(schema);
-      if (firstLoad) {
-        d.resetSelectedVariables();
+      if (schema === undefined) {
+        d.variables = [];
       } else {
-        d.updateSelectedVariables(previousVariables);
+        d.variables = _.filter(schema, function (variable) {
+          return R.is.numeric(variable.type) ||
+            R.is.factor(variable.type);
+        });
+
+        // It could be that variables have been removes, so we need to check this.
+        var intersection = _.intersection(_.pluck(d.selectedVariables, "name"), _.pluck(d.variables, "name"));
+
+        if (intersection.length !== d.selectedVariables.length) {
+          intersection = _.map(intersection, function (name) {
+            return _.find(d.variables, "name", name);
+          });
+
+          d.updateSelectedVariables(intersection);
+        }
       }
     });
+
+    $rootScope.$on('DataSet::initialDataLoaded', d.resetSelectedVariables);
 
     $rootScope.$on('DataSet::analyticsUpdated', function (e, analyticsVariable) {
       // If the analytics have not been in the data before we can add them normally
