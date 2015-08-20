@@ -63,7 +63,9 @@ angular.module('contigBinningApp.controllers')
     $scope.opacity = 0.05;
 
     $scope.applyColoring = function () {
-      Color.color($scope.colorVariable.name, $scope.colorMethod, $scope.colorScheme);
+      if ($scope.colorVariable !== undefined) {
+        Color.color($scope.colorVariable.name, $scope.colorMethod, $scope.colorScheme);
+      }
     };
 
     function updateVariables(schema) {
