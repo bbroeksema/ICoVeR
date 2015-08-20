@@ -59,10 +59,10 @@ gulp.task('scripts', () =>
     'js/services/tag.js',
     'js/services/r.js'
   ])
-    .pipe($.concat('main.min.js'))
+    .pipe($.concat('app.min.js'))
     .pipe($.uglify({preserveComments: 'some', mangle: false}))
     // Output files
-    .pipe(gulp.dest('js'))
+    .pipe(gulp.dest('.'))
     .pipe($.size({title: 'scripts'}))
 );
 
@@ -70,19 +70,12 @@ gulp.task('scripts', () =>
 gulp.task('html', () => {
   const assets = $.useref.assets({searchPath: '{., ./css}'});
 
-  return gulp.src('index.html')
-    .pipe($.rename('index-min.html'))
+  return gulp.src('index-raw.html')
+    .pipe($.rename('index.html'))
     .pipe(assets)
     // Remove any unused CSS
-    // Note: If not using the Style Guide, you can delete it from
-    //       the next line to only include styles your project uses.
     .pipe($.if('css/*.css', $.uncss({
-      html: ['index.html'],
-      // CSS Selectors for UnCSS to ignore
-      ignore: [
-        /.navdrawer-container.open/,
-        /.app-bar.open/
-      ]
+      html: ['index-raw.html']
     })))
 
     // Concatenate and minify styles
