@@ -9,6 +9,9 @@ angular.module('contigBinningApp.services')
     // For testing without having to re-install the R-plugin over and over again
     // enable the following line, adjust the path, and run:
     // rparcoords/inst/www $ python -m SimpleHTTPServer
+    //
+    // NOTE: Make sure that this line is disabled when you run gulp to generate
+    //       the minimized version!
     //ocpu.seturl("//localhost/ocpu/user/bertjan/library/RParcoords/R", false);
 
     function asJson(callback) {
