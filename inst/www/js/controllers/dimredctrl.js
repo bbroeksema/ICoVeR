@@ -147,7 +147,6 @@ angular.module('contigBinningApp.controllers')
       $scope.dimRedMethods = _.filter(methods, function (m) { return m.name === "ca"; });
       $scope.selectedDimRedMethod = $scope.dimRedMethods[0];
       setVariables();
-      updateCaOnTnf();
     });
     /*jslint unparam: false */
 
