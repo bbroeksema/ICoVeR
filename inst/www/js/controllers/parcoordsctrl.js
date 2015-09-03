@@ -175,16 +175,16 @@ angular.module('contigBinningApp.controllers')
 
     function updateSharedAxes() {
       var dims = _.pluck(ParCoords.sharedScaleVariables, "name"),
-        domain = d.parcoords.scale(dims[0]).domain();
+        domain;
 
       // First we determine the min/max required extents of the domain
-      domain = _.reduce(dims, function (widest, current) {
-        current = d.parcoords.scale(current).domain();
+      domain = _.reduce(dims, function (widest, variable) {
+        var current = d.parcoords.yscale[variable].domain();
         return [
-          Math.min(domain[0], current[0]),
-          Math.max(domain[1], current[1])
+          Math.min(widest[0], current[0]),
+          Math.max(widest[1], current[1])
         ];
-      }, domain);
+      }, [Infinity, -Infinity]);
 
       // Next, we change the domain of the variables that have to share scale.
       _.each(dims, function (dim) {
