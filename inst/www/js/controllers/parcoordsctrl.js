@@ -293,7 +293,13 @@ angular.module('contigBinningApp.controllers')
       d.parcoords.render();
     });
 
-    $scope.$on("ParCoords::scaleSharingVariablesChanged", updateSharedAxes);
+    $scope.$on("ParCoords::scaleSharingVariablesChanged", function () {
+      if (ParCoords.sharedScaleVariables.length > 0) {
+        updateSharedAxes();
+      } else {
+        d.parcoords.autoscale().updateAxes();
+      }
+    });
 
     $scope.$on("ParCoords::brushPredicateChanged", function () {
       d.parcoords.brushPredicate(ParCoords.brushPredicate).render();

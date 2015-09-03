@@ -70,6 +70,13 @@ angular.module('contigBinningApp.services')
       $rootScope.$broadcast("ParCoords::scaleSharingVariablesChanged");
     };
 
+    d.resetScales = function () {
+      d.scaleText = "None";
+      d.scaleTextLong = "No variables share the same scale.";
+      d.sharedScaleVariables = [];
+      $rootScope.$broadcast("ParCoords::scaleSharingVariablesChanged");
+    };
+
     d.updateBrushPredicate = function (newPredicate) {
       if (d.brushPredicate !== newPredicate) {
         d.brushPredicate = newPredicate;

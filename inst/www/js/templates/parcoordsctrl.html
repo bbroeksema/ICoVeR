@@ -45,6 +45,9 @@
                 ng-click="openScaleBindDialog()"
                 popover={{parcoords.scaleTextLong}}
                 popover-trigger="mouseenter">{{parcoords.scaleText}}</button>
+        <button type="button" class="btn btn-default btn-sm"
+                ng-disabled="noSharedScales"
+                ng-click="resetScales()">Reset scales</button>
       </div>
     </div>
   </form>

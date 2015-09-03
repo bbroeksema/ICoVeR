@@ -9,6 +9,7 @@ angular.module('contigBinningApp.controllers')
     $scope.parcoords = ParCoords;
     $scope.brushPredicate = $scope.parcoords.brushPredicates[0];
     $scope.variableSorting = "none";
+    $scope.noSharedScales = true;
 
     $scope.openSelectionDialog = function () {
       var dialog = $modal.open({
@@ -47,7 +48,15 @@ angular.module('contigBinningApp.controllers')
         }
       });
 
-      dialog.result.then($scope.parcoords.shareScales);
+      dialog.result.then(function (variables) {
+        $scope.parcoords.shareScales(variables);
+        $scope.noSharedScales = variables.length === 0;
+      });
+    };
+
+    $scope.resetScales = function () {
+      $scope.parcoords.resetScales();
+      $scope.noSharedScales = true;
     };
 
     $scope.$watch("brushPredicate", function (newPredicate) {
