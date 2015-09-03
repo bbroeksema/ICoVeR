@@ -2,15 +2,17 @@
 /*global angular, _*/
 
 angular.module('contigBinningApp.controllers')
-  .controller('ExportCtrl', function ($rootScope, $scope, OpenCPU) {
+  .controller('ExportCtrl', function ($rootScope, $scope, DataSet) {
 
     'use strict';
 
     var d = {
+      all: [],
       rows: []
     };
 
     $scope.url = undefined;
+    $scope.idStrings = "";
     $scope.exportMethods = ["all"];
     $scope.exportMethod = $scope.exportMethods[0];
 
@@ -31,16 +33,21 @@ angular.module('contigBinningApp.controllers')
     });
     /*jslint unparam: false */
 
-    $scope.export = function () {
-      var rows = _.map(d.rows, function (row) { return row.row; });
-
-      $scope.url = undefined;
-
-      OpenCPU.call("contigs.export", { rows: rows }, function (session) {
-        $scope.$apply(function () {
-          $scope.url = session.getFileURL("x.fasta");
-        });
+    /*jslint unparam: true */
+    $scope.$on('DataSet::schemaLoaded', function (e, schema) {
+      DataSet.get(["CONTIG"], function (data) {
+        d.all = data;
       });
+    });
+    /*jslint unparam: false */
+
+    $scope.export = function () {
+      var data = d.rows.length > 0 ? d.rows : d.all,
+        rows = _.map(data, function (row) { return row.CONTIG; });
+
+      $scope.idStrings = _.reduce(rows, function (str, id) {
+        return str + (str.length > 0 ? "\n" : "") + id;
+      }, "");
     };
 
   });
