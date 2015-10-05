@@ -17,13 +17,15 @@ PrepareDataForInteractiveBinning <- function(dataset.name, file.fasta, file.abun
 
   data.consensus_length <- Biostrings::width(fasta)
   data.gc_content <- as.vector(Biostrings::letterFrequency(fasta, letters="CG", as.prob = TRUE))
-  data.tnf <- SymmetrizedSignatures(FrequenciesSignatures(fasta, as.prob = TRUE))
+  data.tnf <- SymmetrizedSignatures(FrequenciesSignatures(fasta, width = 4, as.prob = TRUE))
+  data.pnf <- SymmetrizedSignatures(FrequenciesSignatures(fasta, width = 5, as.prob = TRUE))
 
   data <- data.frame(row.names = NULL,
                      CONTIG = names(fasta),
                      GC_CONTENT = data.gc_content,
                      LENGTH = data.consensus_length,
-                     data.tnf)
+                     data.tnf,
+                     data.pnf)
 
   abundance <- read.csv(file.abundance)
   colnames(abundance) <- toupper(colnames(abundance))
@@ -45,21 +47,25 @@ PrepareDataForInteractiveBinning <- function(dataset.name, file.fasta, file.abun
   assign(dataset.name, merge(data, abundance, by="CONTIG"))
 
   nnucleotides <- dim(data.tnf)[2]
-  nsamples <- ncol(get(dataset.name)) - 3 - nnucleotides # 3: contig, gc, length
+  npentanucleotides <- dim(data.pnf)[2]
+  nsamples <- ncol(get(dataset.name)) - 3 - nnucleotides - npentanucleotides # 3: contig, gc, length
 
   # Now create the schema
-  type <- c("character",                  # contig                 Id
-            "numeric",                    # GC                     Contig Properties
-            "integer",                    # Consensus_length       Contig Properties
-            rep("numeric", nnucleotides), # Tetra nucleotide frequencies
-            rep("integer", nsamples))     # Sample Abundances
+  type <- c("character",                       # contig           Id
+            "numeric",                         # GC               Contig Properties
+            "integer",                         # Consensus_length Contig Properties
+            rep("numeric", nnucleotides),      # Tetra nucleotide frequencies
+            rep("numeric", npentanucleotides), # Penta nucleotide frequencies
+            rep("integer", nsamples))          # Sample Abundances
   group <- c("Id",
              rep("Contig properties", 2),
              rep("Tetra nucleotide frequencies", nnucleotides),
+             rep("Penta nucleotide frequencies", npentanucleotides),
              rep("Sample abundances", nsamples))
   group_type <- c("Id",
                   rep("Characteristics", 2),
                   rep("Frequencies", nnucleotides),
+                  rep("Frequencies", npentanucleotides),
                   rep("TimeSeries", nsamples))
   assign(paste(dataset.name, "schema", sep="."),
          data.frame(name = names(get(dataset.name)), type = type, group = group, group_type = group_type))
