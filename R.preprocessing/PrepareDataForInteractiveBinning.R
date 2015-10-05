@@ -43,7 +43,9 @@ PrepareDataForInteractiveBinning <- function(dataset.name, file.fasta, file.abun
     return(FALSE)
   }
 
-  assign(paste(dataset.name, "fasta", sep="."), fasta)
+  # We're currently not using the fasta in the prototype so let's not add it ot
+  # the dataset for now.
+  #assign(paste(dataset.name, "fasta", sep="."), fasta)
   assign(dataset.name, merge(data, abundance, by="CONTIG"))
 
   nnucleotides <- dim(data.tnf)[2]
@@ -70,7 +72,7 @@ PrepareDataForInteractiveBinning <- function(dataset.name, file.fasta, file.abun
   assign(paste(dataset.name, "schema", sep="."),
          data.frame(name = names(get(dataset.name)), type = type, group = group, group_type = group_type))
 
-  save(list = c(as.character(dataset.name), paste(dataset.name, "fasta", sep=".")),
+  save(list = c(as.character(dataset.name)),
        file = file.path(dir.result, paste(dataset.name, ".rda", sep="")))
   save(list = c(paste(dataset.name, "schema", sep=".")),
        file = file.path(dir.result, paste(dataset.name, ".schema.rda", sep="")))
