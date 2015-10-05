@@ -8,4 +8,4 @@ Maintainer: Bertjan Broeksema <bertjan.broeksema@list.lu>
 Description: An application for interactive binning of contigs and bin refinement.
 License: MIT
 LazyData: true
-Depends: FactoMineR, RColorBrewer, RSQLite, Hmisc, colorspace, ca
+Depends: FactoMineR, RColorBrewer, RSQLite, Hmisc, ca
