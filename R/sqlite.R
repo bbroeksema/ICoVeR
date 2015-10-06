@@ -25,6 +25,12 @@ p.db.dataset <- "cstr"
 #          such two calls to data.schema() can yield different results. This
 #          doesn't happen when the opencpu cache is enabled, as it will cache
 #          results of a function for given parameter configuration.
+#
+#       3) Make sure that OpenCPU can write large enough files from R. To
+#          achieve this edit /etc/opencpu/server.conf:
+#
+#          "rlimit.fsize": 1e9,
+#
 p.db.file.path <- paste(.Platform$file.sep, paste("tmp", "RParcoords", sep=.Platform$file.sep), sep="")
 p.db.file.name <- paste(p.db.file.path, paste(p.db.dataset, "cache.db", sep="-"), sep=.Platform$file.sep)
 
