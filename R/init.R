@@ -4,7 +4,7 @@ app.init <- function(timestamp = Sys.time()) {
 
   db.init()
 
-  schema <- data.schema(timestamp = timestamp);
+  schema <- data.schema(timestamp = timestamp)
 
   data = list(
     schema = schema,
