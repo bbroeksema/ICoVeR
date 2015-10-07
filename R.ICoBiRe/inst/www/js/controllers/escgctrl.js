@@ -2,7 +2,7 @@
 /*global angular, _*/
 
 angular.module('contigBinningApp.controllers')
-  .controller('ESCGCtrl', function ($rootScope, $scope) {
+  .controller('ESCGCtrl', function ($rootScope, $scope, DataSet) {
 
     'use strict';
 
@@ -13,13 +13,7 @@ angular.module('contigBinningApp.controllers')
     $scope.missingGenes = 0;
     $scope.totalGenes = 0;
 
-    /*jslint unparam: true */
-    $rootScope.$on('App::configurationLoaded', function (e, cfg) {
-      d.asseccesions = cfg.escg.asseccion;
-      d.contigs = cfg.escg.contigs;
-    });
-
-    $rootScope.$on('DataSet::brushed', function (e, data) {
+    function updateGeneCounts(data) {
       var contigs = d.contigs,
         escg = {},
         multiCopyGenes = 0,
@@ -49,6 +43,25 @@ angular.module('contigBinningApp.controllers')
       $scope.multiCopyGenes = multiCopyGenes + ' / ' + additionalCopies;
       $scope.missingGenes = d.asseccesions.length - $scope.uniqueGenes;
       $scope.totalGenes = $scope.uniqueGenes + additionalCopies;
+    }
+
+    /*jslint unparam: true */
+    $rootScope.$on('App::configurationLoaded', function (e, cfg) {
+      d.asseccesions = cfg.escg.asseccion;
+      d.contigs = cfg.escg.contigs;
+      DataSet.get('CONTIG', updateGeneCounts);
+    });
+
+    $rootScope.$on('DataSet::brushed', function (e, data) {
+      if (data.length > 0) {
+        updateGeneCounts(data);
+      } else {
+        updateGeneCounts(DataSet.data());
+      }
+    });
+
+    $rootScope.$on('DataSet::filtered', function (e, data) {
+      updateGeneCounts(data);
     });
 
     /*jslint unparam: false */
