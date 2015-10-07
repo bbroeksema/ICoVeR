@@ -140,7 +140,7 @@ angular.module('contigBinningApp.controllers')
     d.parcoords
       .mode("queue")
       .brushedColor("black")
-      .brushedRenderMode("color")
+      .alphaOnBrushed(0.5)
       .rate(250)
       .alpha(0.05)
       .render()
@@ -266,7 +266,7 @@ angular.module('contigBinningApp.controllers')
     $scope.$on("ParCoords::brushedColorChanged", function (e, color) {
       /*jslint unparam:true*/
       d.parcoords.brushedColor(color);
-      d.parcoords.render();
+      d.parcoords.renderBrushed();
     });
 
     $scope.$on("DataSet::brushed", function (ev, brushed, method) {
@@ -283,9 +283,10 @@ angular.module('contigBinningApp.controllers')
 
       if (ParCoords.variableSorting !== "none") {
         setDimensions();
+        d.parcoords.render();
       }
 
-      d.parcoords.render();
+      d.parcoords.renderBrushed();
     });
 
     $scope.$on("ParCoords::variableSortingChanged", function () {
@@ -302,7 +303,7 @@ angular.module('contigBinningApp.controllers')
     });
 
     $scope.$on("ParCoords::brushPredicateChanged", function () {
-      d.parcoords.brushPredicate(ParCoords.brushPredicate).render();
+      d.parcoords.brushPredicate(ParCoords.brushPredicate).renderBrushed();
     });
 
     $scope.$on("DataSet::dataLoaded", function (ev, data) {
