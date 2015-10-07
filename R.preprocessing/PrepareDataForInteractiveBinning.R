@@ -1,4 +1,8 @@
-PrepareDataForInteractiveBinning <- function(dataset.name, file.fasta, file.abundance, dir.result) {
+PrepareDataForInteractiveBinning <- function(dataset.name,
+                                             file.fasta,
+                                             file.abundance,
+                                             file.escg,
+                                             dir.result) {
   # Process a fasta file and an abundance file, in order to generate the two rda
   # files which are required for the interactive contig binning system.
   #
@@ -46,6 +50,7 @@ PrepareDataForInteractiveBinning <- function(dataset.name, file.fasta, file.abun
   # We're currently not using the fasta in the prototype so let's not add it ot
   # the dataset for now.
   #assign(paste(dataset.name, "fasta", sep="."), fasta)
+  assign(paste(dataset.name, "escg", sep="."), ExtractESCG(file.escg))
   assign(dataset.name, merge(data, abundance, by="CONTIG"))
 
   nnucleotides <- dim(data.tnf)[2]
@@ -76,6 +81,8 @@ PrepareDataForInteractiveBinning <- function(dataset.name, file.fasta, file.abun
        file = file.path(dir.result, paste(dataset.name, ".rda", sep="")))
   save(list = c(paste(dataset.name, "schema", sep=".")),
        file = file.path(dir.result, paste(dataset.name, ".schema.rda", sep="")))
+  save(list = c(paste(dataset.name, "escg", sep=".")),
+       file = file.path(dir.result, paste(dataset.name, ".escg.rda", sep="")))
 
   # Okay, we're done. Files with data properly saved.
   TRUE
