@@ -12,7 +12,7 @@ angular.module('contigBinningApp.services')
     //
     // NOTE: Make sure that this line is disabled when you run gulp to generate
     //       the minimized version!
-    //ocpu.seturl("//localhost/ocpu/user/bertjan/library/RParcoords/R", false);
+    //ocpu.seturl("//localhost/ocpu/user/bertjan/library/ICoBiRe/R", false);
 
     function asJson(callback) {
       return function (session) {
