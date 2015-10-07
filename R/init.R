@@ -6,6 +6,10 @@ app.init <- function(timestamp = Sys.time()) {
 
   schema <- data.schema(timestamp = timestamp)
 
+  # The Essential Single Copy gene information is stored in ${p.db.dataset}.rda
+  data(list=list(paste(p.db.dataset, ".escg", sep="")))
+  escg <- .GlobalEnv[[paste(p.db.dataset, ".escg", sep="")]]
+
   data = list(
     schema = schema,
     dimensions = list(rows = p.db.rowcount(table = "data"), cols = nrow(schema))
@@ -13,5 +17,5 @@ app.init <- function(timestamp = Sys.time()) {
   cluster <- p.cluster.methods()
   dimred <- p.dimred.methods()
 
-  list(data = data, cluster = cluster, dimred = dimred)
+  list(data = data, cluster = cluster, dimred = dimred, escg = escg)
 }
