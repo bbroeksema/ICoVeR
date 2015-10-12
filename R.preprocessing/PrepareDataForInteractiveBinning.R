@@ -2,6 +2,7 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
                                              file.fasta,
                                              file.abundance,
                                              file.escg,
+                                             file.clusterings = NULL,
                                              dir.result) {
   # Process a fasta file and an abundance file, in order to generate the two rda
   # files which are required for the interactive contig binning system.
@@ -46,12 +47,20 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
     warning("Not all contig identifiers from the fasta and the abundance file are equal.")
     return(FALSE)
   }
+  data <- merge(data, abundance, by="CONTIG")
+  cluster.results <- NA
+  if (!is.null(file.clusterings)) {
+    cluster.results <- read.csv(file.clusterings)
+    names(cluster.results) <- toupper(names(cluster.results))
+    stopifnot("CONTIG" %in% names(cluster.results))
+    data <- merge(data, cluster.results, by="CONTIG")
+  }
 
   # We're currently not using the fasta in the prototype so let's not add it ot
   # the dataset for now.
   #assign(paste(dataset.name, "fasta", sep="."), fasta)
   assign(paste(dataset.name, "escg", sep="."), ExtractESCG(file.escg))
-  assign(dataset.name, merge(data, abundance, by="CONTIG"))
+  assign(dataset.name, data)
 
   nnucleotides <- dim(data.tnf)[2]
   npentanucleotides <- dim(data.pnf)[2]
@@ -74,8 +83,24 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
                   rep("Frequencies", nnucleotides),
                   rep("Frequencies", npentanucleotides),
                   rep("TimeSeries", nsamples))
-  assign(paste(dataset.name, "schema", sep="."),
-         data.frame(name = names(get(dataset.name)), type = type, group = group, group_type = group_type))
+
+  schema <- data.frame(name = names(get(dataset.name)),
+                       type = type,
+                       group = group,
+                       group_type = group_type)
+
+  if (!is.na(cluster.results)) {
+    clusterMethods <- names(cluster.results)[2:length(names(cluster.results))]
+
+    schema <- schema[-c((nrow(schema) - length(clusterMethods) + 1):nrow(schema)), ]
+    c.df <- data.frame(name = clusterMethods,
+                       type = rep("factor", length(clusterMethods)),
+                       group = rep("Analytics", length(clusterMethods)),
+                       group_type = rep("Clusterings", length(clusterMethods)))
+    schema <- rbind(schema, c.df)
+  }
+
+  assign(paste(dataset.name, "schema", sep="."), schema)
 
   save(list = c(as.character(dataset.name)),
        file = file.path(dir.result, paste(dataset.name, ".rda", sep="")))

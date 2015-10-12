@@ -12,6 +12,7 @@ PrepareDataForInteractiveBinning(
  file.fasta  = "data//cstr_assembled.fasta",
  file.abundance = "data//cstr_avg_coverage.csv",
  file.escg = "data/cstr_escg.csv",
+ file.clusterings = "data//cstr_metabat.csv",
  dir.result = "R.ICoBiRe//data"
 )
 
