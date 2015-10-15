@@ -86,9 +86,9 @@ p.plotdata <- function(dim.red.res, labels, processedData, type) {
   }
 
   # If we have a large number of individuals the JSON will be too big and the visualisation will fail.
-  # TODO: fine-tune the 1000 individuals threshold
+  # TODO: fine-tune the 2500 individuals threshold
   individualProjections <- NULL
-  includeIndividuals <- nrow(dim.red.res[[indName]]$coord) < 1000
+  includeIndividuals <- nrow(dim.red.res[[indName]]$coord) < 2500
   if (includeIndividuals) {
     individualProjections <- p.projections(dim.red.res, column.results = indName)
 
@@ -165,8 +165,8 @@ p.mca.plotdata <- function(dim.red.res, labels, processedData, nd) {
   }
 
   # If we have a large number of individuals the JSON will be too big and the visualisation will fail.
-  # TODO: fine-tune the 1000 individuals threshold
-  includeIndividuals <- nrow(processedData) < 1000
+  # TODO: fine-tune the 2500 individuals threshold
+  includeIndividuals <- nrow(processedData) < 2500
   if (!includeIndividuals) {
     individualProjections <- NULL
   }
