@@ -190,7 +190,10 @@ angular.module('contigBinningApp.controllers')
       _.each(dims, function (dim) {
         d.parcoords.scale(dim, domain);
       });
-      d.parcoords.updateAxes();
+      d.parcoords
+        .brushReset()
+        .updateAxes()
+        .render();
     }
 
     // function to be used as callback when data is requested
@@ -298,7 +301,10 @@ angular.module('contigBinningApp.controllers')
       if (ParCoords.sharedScaleVariables.length > 0) {
         updateSharedAxes();
       } else {
-        d.parcoords.autoscale().updateAxes();
+        d.parcoords
+          .autoscale()
+          .updateAxes()
+          .render();
       }
     });
 
