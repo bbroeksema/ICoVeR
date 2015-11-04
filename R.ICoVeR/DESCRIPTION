@@ -6,6 +6,6 @@ Date: 2015-06-11
 Author: Bertjan Broeksema <bertjan.broeksema@list.lu>
 Maintainer: Bertjan Broeksema <bertjan.broeksema@list.lu>
 Description: An application for interactive binning of contigs and bin refinement.
-License: MIT
+License: GPLv3
 LazyData: true
 Depends: FactoMineR, RSQLite, Hmisc, ca
