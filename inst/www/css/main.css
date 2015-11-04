@@ -83,6 +83,10 @@ html, body {
   z-index: 3;
 }
 
+.parcoords {
+  background-color: transparent
+}
+
 #parcoords,
 #colourmap,
 #parcoords div,
