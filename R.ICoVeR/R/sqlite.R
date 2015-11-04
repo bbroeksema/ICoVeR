@@ -16,8 +16,8 @@ p.db.dataset <- "cstr"
 #          create a cache. The file: /etc/apparmor.d/opencpu.d/custom needs the
 #          following lines:
 #
-#          /tmp/ICoBiRe/ rw,
-#          /tmp/ICoBiRe/** rwkmix,
+#          /tmp/ICoVeR/ rw,
+#          /tmp/ICoVeR/** rwkmix,
 #
 #       2) The OpenCPU cache service must be disabled. Rationale: opencpu
 #          assumes each function to be pure (which is a reasonable assumption).
@@ -31,7 +31,7 @@ p.db.dataset <- "cstr"
 #
 #          "rlimit.fsize": 1e9,
 #
-p.db.file.path <- paste(.Platform$file.sep, paste("tmp", "ICoBiRe", sep=.Platform$file.sep), sep="")
+p.db.file.path <- paste(.Platform$file.sep, paste("tmp", "ICoVeR", sep=.Platform$file.sep), sep="")
 p.db.file.name <- paste(p.db.file.path, paste(p.db.dataset, "cache.db", sep="-"), sep=.Platform$file.sep)
 
 db.init <- function() {

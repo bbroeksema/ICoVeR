@@ -142,7 +142,7 @@ angular.module('contigBinningApp.controllers')
 
     /*jslint unparam: true */
     $scope.$on('Analytics::dimRedMethodsAvailable', function (e, methods) {
-      // ICoBiRe: For now we only suppor CA on (T|P)NF, so we filter out all
+      // ICoVeR: For now we only suppor CA on (T|P)NF, so we filter out all
       //          other dim. red. methods.
       $scope.dimRedMethods = _.filter(methods, function (m) { return m.name === "ca"; });
       $scope.selectedDimRedMethod = $scope.dimRedMethods[0];

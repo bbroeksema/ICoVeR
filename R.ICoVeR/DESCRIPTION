@@ -1,4 +1,4 @@
-Package: ICoBiRe
+Package: ICoVeR
 Type: Package
 Title: An application for interactive binning of contigs and bin refinement
 Version: 0.1.0
