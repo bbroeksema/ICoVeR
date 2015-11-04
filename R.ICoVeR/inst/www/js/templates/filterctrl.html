@@ -1,0 +1,22 @@
+<form role="form" class="form-horizontal" ng-controller="FilterCtrl"
+                    ng-show="itemsBrushed || dataFiltered">
+  <div class="form-group row">
+    <label class="col-sm-3 control-label adjusted-right-padding text-right">Filter:</label>
+
+    <div class="col-sm-9 no-left-padding">
+      <button type="button" class="btn btn-sm btn-success"
+              ng-show="itemsBrushed" ng-click="keepSelected()"
+              ng-disabled="filteringInProgress">
+        Keep selected</button>
+      <button type="button" class="btn btn-sm btn-danger"
+              ng-show="itemsBrushed" ng-click="removeSelected()"
+              ng-disabled="filteringInProgress">
+        Remove selected</button>
+      <i class="fa fa-circle-o-notch fa-spin" ng-show="filteringInProgress"></i>
+      <button type="button" class="btn btn-sm btn-default"
+              ng-show="dataFiltered" ng-click="reloadData()"
+              ng-disabled="filteringInProgress">
+        Reload data</button>
+    </div>
+  </div>
+</form>

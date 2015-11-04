@@ -1,0 +1,6 @@
+@import url("../libs/bootstrap/css/bootstrap.min.css");
+@import url("main.css");
+
+.progress-bar-brushed {
+  background-color: #5ec6ff;
+}

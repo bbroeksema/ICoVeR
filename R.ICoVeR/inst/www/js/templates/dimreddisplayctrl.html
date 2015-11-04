@@ -1,0 +1,11 @@
+<form role="form" class="form-horizontal" ng-controller="DimRedDisplayCtrl">
+  <div class="form-group">
+    <label class="col-sm-3 control-label adjusted-right-padding text-right">Cluster count:</label>
+    <div class="col-sm-9 no-left-padding">
+      <select class="form-control input-sm"
+          ng-model="cluster"
+          ng-options="cluster.label for cluster in clusters">
+      </select>
+    </div>
+  </div>
+</form>

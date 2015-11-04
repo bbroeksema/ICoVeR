@@ -1,0 +1,57 @@
+<div class="modal-header">
+  <h3 class="modal-title">Configure clustering </h3>
+</div>
+<div class="modal-body">
+  <form class="form-horizontal" role="form">
+    <fieldset>
+      <div class="form-group" ng-hide="options.methods.length <= 1">
+        <label for="sltMethod" class="col-sm-3 control-label">Method:</label>
+        <div class="col-sm-9">
+          <select id="sltMethod" class="form-control input-sm"
+                  ng-disabled="options.methods.length <= 1"
+                  ng-model="specified.method"
+                  ng-options="method.name for method in options.methods">
+          </select>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset>
+      <div class="form-group">
+        <label class="col-sm-3 control-label" for="inpIdentifier">Identifier:</label>
+        <div class="col-sm-9">
+          <input id="inpIdentifier" class="form-control" ng-model="specified.identifier"
+                 placeholder="Cluster results column name" ng-pattern="/^[a-zA-Z]([a-zA-z]|[0-9]|_)*$/">
+          </input>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset><!-- TODO: Only show for KMEANS-->
+      <div class="form-group">
+        <label class="col-sm-3 control-label" for="inpIdentifier"
+               ng-hide="hideCenters()">Cluster count:</label>
+        <div class="col-sm-9">
+          <input class="form-control" placeholder="Cluster count (min: 2, max: #rows)"
+                 type="number" min="2" ng-pattern="/^\d+$/" ng-model="specified.centers"
+                 ng-hide="hideCenters()">
+                 <!-- TODO: this hardcoding for kmeans should be repaired. parameter should be those passed from the back end-->
+          </input>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset>
+      <div class="from-group">
+        <label class="col-sm-3 control-label" for="inpIdentifier">Cluster variables:</label>
+        <div class="col-sm-9 adjusted-left-padding no-right-padding">
+          <select class="form-control"
+            ng-model="specified.variables"
+            ng-options="variable.name group by variable.group for variable in options.variables" multiple>
+          </select>
+        </div>
+      </fieldset>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-sm btn-primary" ng-disabled="configurationInvalid" ng-click="ok()">OK</button>
+  <button class="btn btn-sm btn-warning" ng-click="cancel()">Cancel</button>
+</div>
