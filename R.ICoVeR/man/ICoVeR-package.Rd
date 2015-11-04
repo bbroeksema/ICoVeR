@@ -1,27 +1,27 @@
-\name{RParcoords-package}
-\alias{RParcoords-package}
-\alias{RParcoords}
+\name{ICoVeR-package}
+\alias{ICoVeR-package}
+\alias{ICoVeR}
 \docType{package}
-\title{
-Provides Parallel Coordinates for R Data frames.
-}
+\title{Interactive Contig-bin Verification and Refinement}
 \description{
 Provides Parallel Coordinates for R Data frames.
 }
 \details{
 \tabular{ll}{
-Package: \tab RParcoords\cr
+Package: \tab ICoVeR\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
-Date: \tab 2014-07-16\cr
-License: \tab What license is it under?\cr
+Date: \tab 2015-11-04\cr
+License: \tab GPLv3\cr
 }
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-Bertjan Broeksema <broeksem@lippmann.lu>
+Bertjan Broeksema <research@broeksemaatjes.nl>,
+Magdalena Calusinska <magdalena.calusinska@list.lu>,
+Fintan McGee <fintan.mcgee@list.lu>
 
-Maintainer: Bertjan Broeksema <broeksem@lippmann.lu>
+Maintainer: Bertjan Broeksema <research@broeksemaatjes.nl>
 }
 \references{}
 

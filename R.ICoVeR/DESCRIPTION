@@ -3,8 +3,8 @@ Type: Package
 Title: An application for interactive binning of contigs and bin refinement
 Version: 0.1.0
 Date: 2015-06-11
-Author: Bertjan Broeksema <bertjan.broeksema@list.lu>
-Maintainer: Bertjan Broeksema <bertjan.broeksema@list.lu>
+Author: Bertjan Broeksema <research@broeksemaatjes.nl>
+Maintainer: Bertjan Broeksema <research@broeksemaatjes.nl>
 Description: An application for interactive binning of contigs and bin refinement.
 License: GPLv3
 LazyData: true
