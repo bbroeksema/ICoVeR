@@ -1,11 +1,18 @@
 Package: ICoVeR
 Type: Package
 Title: An application for interactive binning of contigs and bin refinement
-Version: 0.1.0
+Version: 1.0.0
 Date: 2015-06-11
+Authors@R: c(person("Bertjan", "Broeksema", role = c("aut", "cre"),
+                     email = "research@broeksemaatjes.nl"),
+             person("Magdalena", "Calusinska", role = "aut",
+                    email = "magdalena.calusinska@list.lu"),
+             person("Fintan", "McGee", role = "aut",
+	                  email = "fintan.mcgee@list.lu"),
+             person("Klaas", "Winter", role = "aut"))
 Author: Bertjan Broeksema <research@broeksemaatjes.nl>
 Maintainer: Bertjan Broeksema <research@broeksemaatjes.nl>
 Description: An application for interactive binning of contigs and bin refinement.
-License: GPLv3
+License: GPL-3
 LazyData: true
 Depends: FactoMineR, RSQLite, Hmisc, ca

@@ -17,11 +17,12 @@ License: \tab GPLv3\cr
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-Bertjan Broeksema <research@broeksemaatjes.nl>,
-Magdalena Calusinska <magdalena.calusinska@list.lu>,
-Fintan McGee <fintan.mcgee@list.lu>
+  Bertjan Broeksema <research@broeksemaatjes.nl>,
+  Magdalena Calusinska <magdalena.calusinska@list.lu>,
+  Fintan McGee <fintan.mcgee@list.lu>,
+  Klaas Winter,
 
-Maintainer: Bertjan Broeksema <research@broeksemaatjes.nl>
+  Maintainer: Bertjan Broeksema <research@broeksemaatjes.nl>
 }
 \references{}
 
