@@ -1,0 +1,13 @@
+# Site settings
+title: Interactive Contig Binning
+email: bertjan.broeksema@list.lu
+description: > # this means to ignore newlines until "baseurl:"
+  This site provides data, scripts and a tutorial to replicate the contig binning
+  results presented in [](PAPER titel).
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://bbroeksema.github.io" # the base hostname & protocol for your site
+twitter_username: looslycoupled
+github_username:  bbroeksema
+
+# Build settings
+markdown: kramdown
