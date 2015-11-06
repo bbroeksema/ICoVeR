@@ -4,7 +4,8 @@
 /*
     ICoVeR - Interactive Contig-bin Verification and Refinement
     
-    Copyright 2015 Luxembourg Institute of Science and technology. All rights reserved.
+    Copyright 2015 Luxembourg Institute of Science and technology <tto@list.lu>.
+                   All rights reserved.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
