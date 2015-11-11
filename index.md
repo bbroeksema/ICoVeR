@@ -9,5 +9,5 @@ Its interactive visualization features help to get deeper insight in the structu
 
 <iframe style="display:block; margin: 0 auto;"
   width="600" height="480" frameborder="0" 
-  src="http://www.youtube.com/embed/59ZDtmP8ZjA?vq=hd720" 
+  src="//www.youtube.com/embed/59ZDtmP8ZjA?vq=hd720"
   allowfullscreen></iframe>
