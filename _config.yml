@@ -1,11 +1,21 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
 # Site settings
-title: Interactive Contig Binning
-email: bertjan.broeksema@list.lu
+title: ICoVeR - Interactive Contig-bin Verification and Refinement
+email: research@broeksemaatjes.nl
 description: > # this means to ignore newlines until "baseurl:"
-  This site provides data, scripts and a tutorial to replicate the contig binning
-  results presented in [](PAPER titel).
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://bbroeksema.github.io" # the base hostname & protocol for your site
+  ICoVeR is an interactive visualization tool for binning of metagenomics data.
+  It allows comparing results of multiple automated binning techniques and
+  provides means to analyze bins in more detail. Its interactive visualization
+  features help to get deeper insight in the structure of bins and interaction
+  between bins.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "http://broeksema.github.io/ICoVeR/" # the base hostname & protocol for your site
 twitter_username: looslycoupled
 github_username:  bbroeksema
 
