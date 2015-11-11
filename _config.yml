@@ -14,8 +14,8 @@ description: > # this means to ignore newlines until "baseurl:"
   provides means to analyze bins in more detail. Its interactive visualization
   features help to get deeper insight in the structure of bins and interaction
   between bins.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://broeksema.github.io/ICoVeR/" # the base hostname & protocol for your site
+baseurl: "/ICoVeR" # the subpath of your site, e.g. /blog
+url: "http://broeksema.github.io/ICoVeR" # the base hostname & protocol for your site
 twitter_username: looslycoupled
 github_username:  bbroeksema
 
