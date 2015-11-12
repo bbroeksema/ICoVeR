@@ -1,10 +1,7 @@
-# Interactive Contig Binning guide
+# Interactive Contig-bin Verification and Refinement
 
-This project contains data, scripts and tutorials on how to assemble individual
-microbial genomes from meta genomes as described in:
+This project contains data, scripts, application and tutorials on how to
+compare, verify and refine interactively binning results from automated
+methods.
 
-**TITLE OF OUR PAPER**
-
-_List of authors_
-
-See associated [](online guide) for detailed information.
+For more details visit [the website](http://bbroeksema.github.io/ICoVeR/)
