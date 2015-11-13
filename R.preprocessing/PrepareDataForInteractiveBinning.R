@@ -46,13 +46,13 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
     warning("Not all contig identifiers from the fasta and the abundance file are equal.")
     return(FALSE)
   }
-  data <- merge(data, abundance, by="CONTIG")
+  data <- plyr::join(data, abundance, by="CONTIG")
   cluster.results <- NA
   if (!is.null(file.clusterings)) {
     cluster.results <- read.csv(file.clusterings)
     names(cluster.results) <- toupper(names(cluster.results))
     stopifnot("CONTIG" %in% names(cluster.results))
-    data <- merge(data, cluster.results, by="CONTIG")
+    data <- plyr::join(data, cluster.results, by="CONTIG")
   }
 
   # We're currently not using the fasta in the prototype so let's not add it ot
