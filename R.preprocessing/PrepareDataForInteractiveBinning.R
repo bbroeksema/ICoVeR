@@ -21,7 +21,7 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
   print("* Reading fasta...")
   fasta <- Biostrings::readDNAStringSet(file.fasta)
 
-  print("* Extracting lengt, gc_content and tnf...")
+  print("* Extracting length, gc_content and tnf...")
   data.consensus_length <- Biostrings::width(fasta)
   data.gc_content <- as.vector(Biostrings::letterFrequency(fasta, letters="CG", as.prob = TRUE))
   data.tnf <- SymmetrizedSignatures(FrequenciesSignatures(fasta, width = 4, as.prob = TRUE))
