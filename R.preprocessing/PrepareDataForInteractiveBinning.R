@@ -36,7 +36,7 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
 
   # Some basic error checking
   if(! ("CONTIG" %in% colnames(abundance))) {
-    warning("Required field 'contig' not found in abundance file.")
+    warning("Required field 'CONTIG' not found in abundance file.")
     return(FALSE)
   }
 
