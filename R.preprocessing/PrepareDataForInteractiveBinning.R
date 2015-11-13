@@ -18,8 +18,10 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
   if (!dir.exists(dir.result)) {
     dir.create(dir.result, recursive = T)
   }
+  print("* Reading fasta...")
   fasta <- Biostrings::readDNAStringSet(file.fasta)
 
+  print("* Extracting lengt, gc_content and tnf...")
   data.consensus_length <- Biostrings::width(fasta)
   data.gc_content <- as.vector(Biostrings::letterFrequency(fasta, letters="CG", as.prob = TRUE))
   data.tnf <- SymmetrizedSignatures(FrequenciesSignatures(fasta, width = 4, as.prob = TRUE))
@@ -31,6 +33,7 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
                      LENGTH = data.consensus_length,
                      data.tnf) #, data.pnf)
 
+  print("* Reading average coverages...")
   abundance <- read.csv(file.abundance)
   colnames(abundance) <- toupper(colnames(abundance))
 
@@ -49,15 +52,18 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
   data <- plyr::join(data, abundance, by="CONTIG")
   cluster.results <- NA
   if (!is.null(file.clusterings)) {
+    print("* Reading clustering results...")
     cluster.results <- read.csv(file.clusterings)
     names(cluster.results) <- toupper(names(cluster.results))
     stopifnot("CONTIG" %in% names(cluster.results))
     data <- plyr::join(data, cluster.results, by="CONTIG")
   }
 
+  print("* Reading essential single copy genes...")
   assign(paste(dataset.name, "escg", sep="."), ExtractESCG(file.escg))
   assign(dataset.name, data)
 
+  print("* COnstructing schema...")
   nnucleotides <- dim(data.tnf)[2]
   #npentanucleotides <- dim(data.pnf)[2]
   nsamples <- ncol(get(dataset.name)) - 3 - nnucleotides #- npentanucleotides # 3: contig, gc, length
@@ -98,6 +104,7 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
 
   assign(paste(dataset.name, "schema", sep="."), schema)
 
+  print("* Saving rda files...")
   save(list = c(as.character(dataset.name)),
        file = file.path(dir.result, paste(dataset.name, ".rda", sep="")))
   save(list = c(paste(dataset.name, "schema", sep=".")),
@@ -105,6 +112,7 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
   save(list = c(paste(dataset.name, "escg", sep=".")),
        file = file.path(dir.result, paste(dataset.name, ".escg.rda", sep="")))
 
+  print("* Done!")
   # Okay, we're done. Files with data properly saved.
   TRUE
 }
