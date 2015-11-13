@@ -55,9 +55,6 @@ PrepareDataForInteractiveBinning <- function(dataset.name,
     data <- plyr::join(data, cluster.results, by="CONTIG")
   }
 
-  # We're currently not using the fasta in the prototype so let's not add it ot
-  # the dataset for now.
-  #assign(paste(dataset.name, "fasta", sep="."), fasta)
   assign(paste(dataset.name, "escg", sep="."), ExtractESCG(file.escg))
   assign(dataset.name, data)
 
