@@ -1,12 +1,2 @@
-.Rproj.user
+.Rproj*
 .Rhistory
-.RData
-data
-*.swp
-data.raw/*
-data/*
-.idea/*
-inst/www/libs/dimredplot/*
-inst/www/node_modules
-cstr.db
-/rScratch
