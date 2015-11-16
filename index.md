@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Overview
+title: Home
 ---
 
 ICoVeR is an interactive visualization tool for binning of metagenomics data.
