@@ -24,6 +24,9 @@ cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=
 
   if (is.na(centers)) centers <- floor(sqrt(nrow(clusterData)))
 
+  # Make sure that the data is standardised
+  clusterData <- scale(clusterData)
+
   clusters <- as.factor(stats::kmeans(clusterData, centers, iter.max)$cluster)
   clusters <- data.frame(row = clusterRows, cluster = clusters)
 
