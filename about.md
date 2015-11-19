@@ -18,6 +18,7 @@ ICoVeR is the result of collaborative work of members from the e-Science researc
 * [Magdalena Calusinska](https://be.linkedin.com/in/magdalena-calusinska-21052642/en)
 * [Fintan McGee](https://lu.linkedin.com/in/fintan-mcgee-3a60a22)
 * [Klaas Winter](https://nl.linkedin.com/in/klaas-winter-27662252)
+* Xavier Goux
 * [Mohammad Ghoniem](https://lu.linkedin.com/in/mohammadghoniem/en)
 * [Philippe Delfosse](https://lu.linkedin.com/in/philippe-delfosse-23252a5)
 
