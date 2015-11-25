@@ -35,7 +35,7 @@ To this end run the following command in R or RStudio.
 
 {% endhighlight %}
 
-To get started with the guide you will have to download our [prepared package](link.to.package) or clone the [github repository](github.com).
+To get started with the guide you will have to download our [prepared package](https://github.com/bbroeksema/ICoVeR/archive/v1.0.0.zip) or clone the [github repository](github.com).
 In the remainder of this guide we will assume that the package is extracted in
 your home directory: `~/ICoVeR/`.
 
