@@ -127,13 +127,13 @@ Start R studio and type the following commands.
 # continue installing the interactive binning application.
 > library(devtools)
 
-# NOTE: Before installing you should check the file R.ICoBiRe/R/sqlite.R. At the
+# NOTE: Before installing you should check the file R.ICoVeR/R/sqlite.R. At the
 #       top there is a variable declared named: p.db.dataset. The value for this
 #       variable must match the data set you want to analyze (i.e. "wrighton" in
 #       this case).
 #
 #       If you want to bin a different data set, you must change this value
-#       **before** installing the R.ICoBiRe package.
+#       **before** installing the R.ICoVeR package.
 > install_local(file.path(getwd(), "R.ICoVeR"))
 {% endhighlight %}
 
