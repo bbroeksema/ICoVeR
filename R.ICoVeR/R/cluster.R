@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # cluster.kmeans(vars=c("M4", "M20", "M28", "M36", "M40", "M44", "M48"), identifier="kmeans_30_7", centers=30)
-cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=10) {
+cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=10, standardize = T) {
   clusterData <- data.get(rows, vars)
   clusterRows <- clusterData$row
   clusterData$row <- NULL
@@ -25,7 +25,7 @@ cluster.kmeans <- function(rows = c(), vars, identifier, centers = NA, iter.max=
   if (is.na(centers)) centers <- floor(sqrt(nrow(clusterData)))
 
   # Make sure that the data is standardised
-  clusterData <- scale(clusterData)
+  if (standardize) clusterData <- scale(clusterData)
 
   clusters <- as.factor(stats::kmeans(clusterData, centers, iter.max)$cluster)
   clusters <- data.frame(row = clusterRows, cluster = clusters)

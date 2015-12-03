@@ -39,6 +39,16 @@
       </div>
     </fieldset>
     <fieldset>
+      <div class="form-group">
+        <div class="col-sm-3" ng-hide="hideStandardization()"></div>
+        <div class="col-sm-9">
+          <button type="button" class="btn btn-sm btn-default" ng-model="specified.standardize" btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false" ng-hide="hideStandardization()">
+            Standardize data before clustering
+          </button>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset>
       <div class="from-group">
         <label class="col-sm-3 control-label" for="inpIdentifier">Cluster variables:</label>
         <div class="col-sm-9 adjusted-left-padding no-right-padding">

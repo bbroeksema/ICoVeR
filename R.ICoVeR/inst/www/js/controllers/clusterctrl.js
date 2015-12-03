@@ -42,11 +42,12 @@ angular.module('contigBinningApp.controllers')
       //        every clustering method we add.
       if (config.method.name === "kmeans") {
         args.centers = config.centers;
+        args.standardize = config.standardize;
       } else if (config.method.name !== "correlation") {
         //FIXME get rid of this hard coded value, change it to a simple else
         throw "Unknown clustering method: " + config.method.name;
       }
-
+      
       Analytics.cluster(
         config.method.name,
         _.map(config.variables,

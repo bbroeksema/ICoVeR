@@ -48,6 +48,7 @@ angular.module('contigBinningApp.controllers')
       method: $scope.options.methods[0],
       identifier: $scope.options.methods[0].name + '_' + previousCentersCount + '_0',
       centers: previousCentersCount, // NOTE: The naming is kmeans specific
+      standardize: true,
       variables: []
     };
 
@@ -57,6 +58,10 @@ angular.module('contigBinningApp.controllers')
 
     $scope.ok = function () {
       $modalInstance.close($scope.specified);
+    };
+
+    $scope.hideStandardization = function () {
+      return $scope.specified.method.name !== "kmeans";
     };
 
     $scope.hideCenters = function () {
