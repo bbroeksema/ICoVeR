@@ -573,7 +573,8 @@ list.ScatterPlot = function () {
         }
       ],
       line,
-      sortedPoints;
+      sortedPoints,
+      label;
 
     axis = d3.svg.axis()
       .scale(scales.colormap)
@@ -655,6 +656,20 @@ list.ScatterPlot = function () {
       .style("fill", "none")
       .style("stroke-width", "1px")
       .style("stroke", "gray");
+      
+    label = gPoints.selectAll("text.text").data([true]);
+    label
+      .enter()
+      .append("text")
+      .attr("class", "text")
+      .attr("transform", "rotate(90)")
+      .style("font-size", "18px")
+      .style("text-anchor", "middle")
+      .style("dominant-baseline", "middle");
+    label
+      .text("x+y contribution")
+      .attr("x", plotHeight / 2)
+      .attr("y", -plotWidth - 10);
   };
 
   render.selectionOnSizemap = function (svg, data, scales) {
