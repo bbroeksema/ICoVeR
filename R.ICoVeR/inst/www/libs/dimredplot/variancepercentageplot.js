@@ -84,8 +84,10 @@ list.VariancePercentagePlot = function () {
         }
 
         if (update) {
-          events.activesChanged(vpp);
+          // Do not reverse these calls! after the event this variancepercentageplot entity will be unreferenced,
+          // yet it will still rerender everything with old settings!
           render.variances(svg, data);
+          events.activesChanged(vpp);
         }
       });
 
@@ -165,6 +167,7 @@ list.VariancePercentagePlot = function () {
         actives.lastChanged = actives.lastChanged === "first" ? "second" : "first";
       }
 
+      render.variances(svg, data);
       events.activesChanged(vpp);
     }
 
@@ -209,7 +212,6 @@ list.VariancePercentagePlot = function () {
           actives.lastChanged = activeToChange;
 
           changeActives();
-          render.variances(svg, data);
         } else {
           draggedActive = actives.first === i ? "first" : "second";
           dragging = true;
