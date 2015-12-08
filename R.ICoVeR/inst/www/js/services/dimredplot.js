@@ -1,5 +1,5 @@
 /*jslint white: false, indent: 2, nomen: true */
-/*global angular, _, list, d3 */
+/*global angular, _, list, d3, ocpu */
 
 /*
     ICoVeR - Interactive Contig-bin Verification and Refinement
@@ -27,6 +27,8 @@ angular.module('contigBinningApp.services')
     'use strict';
 
     var d = {
+      dimRedMethods: [],
+      analyses: [],
       processedData: {},
       selections: {
         variable: {},
@@ -53,6 +55,107 @@ angular.module('contigBinningApp.services')
         variable: {}
       }
     };
+
+    // Makes sure that the labels of points are no longer than 80px
+    function createWrappedLabels(points) {
+      var testText = d3.select("body").append("div").style("float", "left");
+
+      testText.style("font-size", "8px");
+
+      function wrap(d, i) {
+        /*jslint unparam:true*/
+        var textLength,
+            string,
+            desiredStringLength,
+            label = d.id;
+
+        if (d.label !== undefined) {
+          label = d.label;
+        }
+
+        testText.text(label);
+        textLength = testText.node().offsetWidth;
+
+        string = label;
+        desiredStringLength = Math.ceil(80 / textLength * string.length);
+
+        string = string.slice(0, desiredStringLength);
+        testText.text(string);
+        textLength = testText.node().clientWidth;
+
+        while (textLength > 80 && string.length > 0) {
+          string = string.slice(0, -1);
+          testText.text(string);
+          textLength = testText.node().clientWidth;
+        }
+
+        d.wrappedLabel = string;
+      }
+
+      points.forEach(wrap);
+
+      testText.remove();
+    }
+
+    function processDimRedResults(variables) {
+      return function (data) {  
+        var index;
+
+        d.addProcessedData(data.method[0], data.processedData);
+
+        if (data.variableProjections !== undefined) {
+          createWrappedLabels(data.variableProjections);
+        }
+        if (data.individualProjections !== undefined) {
+          createWrappedLabels(data.individualProjections);
+        }
+        
+        // Add a list of variables for automatic redoing of dim. red.
+        data.usedVariables = variables;
+        
+        index = _.findIndex(d.analyses, {'method': data.method});
+
+        if (index === -1) {
+          data.plotIdx = d.analyses.length;
+          d.analyses.push(data);
+        } else {
+          data.plotIdx = index;
+          d.analyses[index] = data;
+        }
+        
+        $rootScope.$broadcast("DimRedPlot::dimensionalityReduced", data);
+      };
+    }
+
+    $rootScope.$on("App::configurationLoaded", function (ev, appConfig) {
+      /*jslint unparam: true */
+      d.dimRedMethods = _.reduce(_.keys(appConfig.dimred), function (methods, method) {
+        var cfg = appConfig.dimred[method];
+        cfg.name = method;
+        methods.push(cfg);
+        return methods;
+      }, []);
+      $rootScope.$broadcast("DimRedPlot::dimRedMethodsAvailable", d.dimRedMethods);
+    });
+
+    d.reduce = function (method, variables) {
+      var fnArgs = {
+        vars: variables
+      };
+      if (DataSet.rows()) {
+        fnArgs.rows = DataSet.rows();
+      }
+
+      ocpu.call("dimred." + method, fnArgs, function (session) {
+        session.getObject(processDimRedResults(variables));
+      });
+    };
+
+    $rootScope.$on('DataSet::filtered', function () {
+      d.analyses.forEach(function (analysis) {
+        d.reduce(analysis.method[0], analysis.usedVariables);
+      });
+    });
 
     function resetStates() {
       d.selections.individual = {};
@@ -347,7 +450,7 @@ angular.module('contigBinningApp.services')
 
       // If this brushing is done outside of dimredplot we need to set the selection
       // type to BAR.
-      if (_.findIndex(Analytics.dimRedMethods(), "name", method) === -1) {
+      if (_.findIndex(d.dimRedMethods, "name", method) === -1) {
         _.forEach(d.selections.individual, function (val, key) {
           d.selections.individual[key] = list.selected.NONE;
         });

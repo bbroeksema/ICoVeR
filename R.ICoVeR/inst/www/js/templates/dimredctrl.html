@@ -10,6 +10,7 @@
          class="col-sm-3 no-left-padding adjusted-right-padding">
       <select class="form-control input-sm"
               ng-model="selectedDimRedMethod"
+              ng-change="changeDimRedMethod(selectedDimRedMethod)"
               ng-options="method.name for method in dimRedMethods">
       </select>
     </div>

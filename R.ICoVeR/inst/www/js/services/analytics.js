@@ -27,8 +27,7 @@ angular.module('contigBinningApp.services')
     'use strict';
 
     var d = {
-      clusterMethods: [],
-      dimRedMethods: []
+      clusterMethods: []
     };
 
     /*jslint unparam: true */
@@ -38,24 +37,12 @@ angular.module('contigBinningApp.services')
         return methods;
       }, []);
       $rootScope.$broadcast("Analytics::clusterMethodsAvailable", d.clusterMethods);
-
-      d.dimRedMethods = _.reduce(_.keys(appConfig.dimred), function (methods, method) {
-        var cfg = appConfig.dimred[method];
-        cfg.name = method;
-        methods.push(cfg);
-        return methods;
-      }, []);
-      $rootScope.$broadcast("Analytics::dimRedMethodsAvailable", d.dimRedMethods);
     });
     /*jslint unparam: false */
 
     return {
       clusterMethods: function () {
         return d.clusterMethods;
-      },
-
-      dimRedMethods: function () {
-        return d.dimRedMethods;
       },
 
       cluster: function (method, variables, args, id) {
@@ -72,19 +59,6 @@ angular.module('contigBinningApp.services')
 
         ocpu.call("cluster." + method, fnArgs, function () {
           $rootScope.$broadcast("Analytics::dataUpdated", id);
-        });
-      },
-
-      reduce: function (method, variables) {
-        var fnArgs = {
-          vars: variables
-        };
-        if (DataSet.rows()) {
-          fnArgs.rows = DataSet.rows();
-        }
-
-        ocpu.call("dimred." + method, fnArgs, function (session) {
-          $rootScope.$broadcast("Analytics::dimensionalityReduced", method, session);
         });
       }
     };

@@ -22,7 +22,7 @@
 */
 
 angular.module('contigBinningApp.controllers')
-  .controller('DimRedCtrl', function ($scope, $modal, Analytics, R, DimRedPlot, DataSet) {
+  .controller('DimRedCtrl', function ($scope, $modal, R, DimRedPlot, DataSet) {
 
     'use strict';
 
@@ -105,10 +105,15 @@ angular.module('contigBinningApp.controllers')
     $scope.selectedDimRedMethod = $scope.dimRedMethods[0];
     $scope.selectedVariables = [];
 
-    $scope.$watch('selectedDimRedMethod', function (newMethod) {
+    $scope.changeDimRedMethod = function (newMethod) {
+      // Somehow, if I do not do this, selectedDimRedMethod won't be updated until after the function has finished
+      $scope.selectedDimRedMethod = newMethod;
+
       if (newMethod === undefined) { return; }
       setVariables();
-    });
+      $scope.selectedVariables = [];
+      updateSelectedVariables([]);
+    };
 
     $scope.$on('DimRedPlot::variablesSelected', function (e, dimRedMethod) {
       /*jslint unparam: true*/
@@ -139,17 +144,6 @@ angular.module('contigBinningApp.controllers')
       updateSelectedVariables(variables);
     });
 
-    function updateCaOnTnf() {
-      $scope.selectedVariables = _.filter($scope.variables, function (variable) {
-        return variable.group === "Tetra nucleotide frequencies";
-      });
-
-      updateSelectedVariables($scope.selectedVariables);
-      if ($scope.selectedVariables.length > 2) {
-        $scope.reduceDimensionality();
-      }
-    }
-
     /*jslint unparam: true */
     $scope.$on('DataSet::schemaLoaded', function (e, schema) {
       $scope.dataAvailable = true;
@@ -158,19 +152,17 @@ angular.module('contigBinningApp.controllers')
     });
     /*jslint unparam: false */
 
-    $scope.$on('DataSet::filtered', updateCaOnTnf);
-
     /*jslint unparam: true */
-    $scope.$on('Analytics::dimRedMethodsAvailable', function (e, methods) {
+    $scope.$on('DimRedPlot::dimRedMethodsAvailable', function (e, methods) {
       // ICoVeR: For now we only suppor CA on (T|P)NF, so we filter out all
       //          other dim. red. methods.
-      $scope.dimRedMethods = _.filter(methods, function (m) { return m.name === "ca"; });
+      $scope.dimRedMethods = _.filter(methods, function (m) { return m.name === "ca" || m.name === "pca"; });
       $scope.selectedDimRedMethod = $scope.dimRedMethods[0];
       setVariables();
     });
     /*jslint unparam: false */
 
-    $scope.$on('Analytics::dimensionalityReduced', function () {
+    $scope.$on('DimRedPlot::dimensionalityReduced', function () {
       $scope.configurationInvalid =
         $scope.selectedVariables.length === 0
         || $scope.selectedDimRedMethod === undefined;
@@ -202,6 +194,6 @@ angular.module('contigBinningApp.controllers')
       DataSet.get(vars, function () { return; });
 
       $scope.configurationInvalid = true;
-      Analytics.reduce(drMethod, vars);
+      DimRedPlot.reduce(drMethod, vars);
     };
   });

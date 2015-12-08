@@ -42,8 +42,8 @@ angular.module('contigBinningApp.controllers')
     }
 
     /*jslint unparam: true */
-    $scope.$on("Analytics::dimensionalityReduced", function (ev, method, session) {
-      session.getObject(updateState);
+    $scope.$on("DimRedPlot::dimensionalityReduced", function (ev, data) {
+      updateState(data);
     });
     /*jslint unparam: false */
 
