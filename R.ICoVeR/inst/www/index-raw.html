@@ -21,9 +21,9 @@
         </div>
 
         <form class="navbar-form navbar-right form-inline">
-          <div class="btn-group" ng-controller="ManualColoringCtrl" ng-show="manualColoringEnabled" dropdown>
+          <div class="btn-group" ng-controller="ManualColoringCtrl" ng-show="manualColoringEnabled" dropdown="true">
             <button type="button" class="btn btn-default" ng-disabled="!itemsBrushed" ng-style="{'background-color': colors[0]}">Apply color to selection</button>
-            <button type="button" class="btn btn-default dropdown-toggle" ng-disabled="!itemsBrushed" dropdown-toggle>
+            <button type="button" class="btn btn-default dropdown-toggle" ng-disabled="!itemsBrushed" dropdown-toggle="true">
               <span class="caret"></span>
               <span class="sr-only">Toggle Dropdown</span>
             </button>
