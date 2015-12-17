@@ -8,5 +8,4 @@ For more details visit [the website](http://bbroeksema.github.io/ICoVeR/)
 
 A paper is currently being written. Until publication of this paper, please cite ICoVeR as:
 
-Broeksema, Bertjan; Calusinka, Magdalena; McGee, Fintan; Winter, Klaas; Ghoniem, Mohammad; Delfosse, Philippe (2015): ICoVeR. figshare.
-http://dx.doi.org/10.6084/m9.figshare.1603508
+Broeksema, Bertjan; Calusinka, Magdalena; McGee, Fintan; Goux, Xavier; Winter, Klaas; Ghoniem, Mohammad; Delfosse, Philippe (2015): ICoVeR. figshare. http://dx.doi.org/10.6084/m9.figshare.1603508 Retrieved 19:16, Nov 19, 2015 (GMT)
