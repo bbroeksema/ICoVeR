@@ -93,11 +93,15 @@ The `PrepareDataForInteractiveBinning` function performs the following steps:
 1. Reads optional binning results from automated methods
 1. Combines extracted information with sample abundance levels into the files which are expected by ICoVeR.
 
-**NOTE:** The ids in the fasta file must match the names in the abundance file.
+**NOTE 1:** The ids in the fasta file must match the names in the abundance file.
 Thus, if a contig in the fasta file starts with a line `>contig_123`, there must
 be a line in the abundance file as where the name column has value `contig_123`.
 Some error checking is done, but you should not rely on this and make sure that
 the fasta file and the abundance file are prepared properly.
+
+**NOTE 2:** Although we got good results with tetra nucleotide frequencies, it is
+also possible to generate penta nucleotide frequencies. To this end you have to
+change the [PrepareDataForInteractiveBinning](https://github.com/bbroeksema/ICoVeR/blob/master/R.preprocessing/PrepareDataForInteractiveBinning.R#L28) script.
 
 Start R studio and type the following commands.
 
