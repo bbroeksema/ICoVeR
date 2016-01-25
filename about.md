@@ -4,7 +4,8 @@ title: About
 permalink: /about/
 ---
 
-ICoVeR is the result of collaborative work of members from the e-Science research unit and the plants for biomass unit in the [environmental department (ERIN)](http://www.list.lu/en/erin/) of [Luxembourg Institute of Science and Technology (LIST)](http://www.list.lu/).
+ICoVeR is the result of collaborative work of members from the e-Science research unit and the Bioengineering Group of the 
+Plant Science and Biotechnologies unit from the [environmental department (ERIN)](http://www.list.lu/en/erin/) of [Luxembourg Institute of Science and Technology (LIST)](http://www.list.lu/).
 
 <div style="width: 230px; display:block; margin: 0 auto;">
   <a href="http://www.list.lu/">
